@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>貿易業務知識資料庫</title>
+
+  <!--
+    Google Fonts
+    若需離線使用，可下載字型並改為本地路徑
+  -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!--
+    編譯後的 CSS
+    開發時執行：sass scss/main.scss css/main.css --watch
+    若未安裝 sass，可直接使用 css/main.css（手動複製編譯結果）
+  -->
+  <link rel="stylesheet" href="css/main.css">
+  <!-- Google Material Icons Round -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    .mi {
+      font-family : 'Material Icons Round';
+      font-size   : max(1em, 20px);
+      line-height : 1;
+      font-style  : normal;
+      font-weight : normal;
+      display     : inline-flex;
+      align-items : center;
+      justify-content: center;
+      min-width   : 20px;
+      min-height  : 20px;
+      vertical-align: middle;
+      user-select : none;
+    }
+  </style>
+  <!-- Flatpickr 日期範圍選擇器 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    /* 覆寫 Flatpickr 主題色以符合系統設計 */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+      background: #0F3F85; border-color: #0F3F85;
+    }
+    .flatpickr-day.inRange {
+      background: #EEF4FB; border-color: #EEF4FB; box-shadow: -5px 0 0 #EEF4FB, 5px 0 0 #EEF4FB;
+    }
+    .flatpickr-day.today { border-color: #2C8085; }
+    .flatpickr-months .flatpickr-month,
+    .flatpickr-current-month,
+    .flatpickr-monthDropdown-months { color: #0F3F85; }
+    .flatpickr-calendar { font-family: 'Noto Sans TC', sans-serif; border-radius: 10px; box-shadow: 0 10px 36px rgba(44,63,90,0.20); border: 1px solid #D8E2EE; z-index: 9999 !important; }
+    .flatpickr-calendar.hasTime.noCalendar { width: auto; }
+    #date-picker-input { cursor: pointer; caret-color: transparent; }
+    #date-picker-input:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">跳至主要內容</a>
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  BLOCK 1 ／ 入口                                         ║
+     ║  #home — 首頁（貿易業務知識資料庫）                       ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="home" class="scr on">
+
+  <!-- 左欄 -->
+  <div class="h-left">
+
+    <!-- Logo -->
+    <div class="logo">
+      <img class="logo-ico" src="img/logo.png" style="height:48px;width:auto;object-fit:contain">
+    </div>
+
+    <h1 class="h-title">貿易業務知識資料庫</h1>
+
+    <!-- 功能卡片格線 -->
+    <div class="home-grid">
+
+      <!-- 卡片 1：處分案範例（featured） -->
+      <div class="card" onclick="KM.goApp()">
+        <div class="card-ico">
+          <img src="img/pending_actions.svg" alt="處分案範例">
+        </div>
+        <div class="card-arrow">→</div>
+        <div class="card-title">處分案範例</div>
+        <div class="card-sub">違規產地標示不實</div>
+      </div>
+
+      <!-- 卡片 2：海關答聯單處理 -->
+      <div class="card" onclick="KM.goCustoms()">
+        <div class="card-ico">
+          <img src="img/anchor.svg" alt="海關答聯單處理">
+        </div>
+        <div class="card-title">海關答聯單處理</div>
+        <div class="card-sub">通關疑義公文與白聯單查詢</div>
+      </div>
+
+      <!-- 卡片 3：聲明異議 -->
+      <div class="card" onclick="KM.toast()">
+        <div class="card-ico">
+          <img src="img/record_voice_over.svg" alt="聲明異議">
+        </div>
+        <div class="card-title">聲明異議、訴願、行政訴訟案例查詢</div>
+      </div>
+
+      <!-- 卡片 4：立法/監察院相關 -->
+      <div class="card" onclick="KM.toast()">
+        <div class="card-ico">
+          <img src="img/balance.svg" alt="立法/監察院相關">
+        </div>
+        <div class="card-title">立法/監察院相關</div>
+        <div class="card-sub">書面報告、立法院QA、監察院回應</div>
+      </div>
+
+    </div><!-- /.home-grid -->
+  </div><!-- /.h-left -->
+
+  <!-- 右欄：最新異動 + 常用連結 -->
+  <div class="h-right">
+
+    <!-- 最新異動 -->
+    <div style="margin-bottom:22px">
+      <div class="panel-heading">最新異動</div>
+
+      <div class="news-card">
+        <div class="news-row">
+          <span class="news-tag">文件異動</span>
+          <span class="news-date">昨天</span>
+        </div>
+        <div class="news-title">「進出口作業流程」被標記為過時</div>
+        <div class="news-body">預計將於下週由管理員更新為 v3.2 版本。</div>
+      </div>
+
+      <div class="news-card">
+        <div class="news-row">
+          <span class="news-tag">系統通知</span>
+          <span class="news-date">2026/01/20</span>
+        </div>
+        <div class="news-title">修正「瀕臨絕種動植物之物種」附表三，並自即日生效。</div>
+        <div class="news-body">請各單位依循新版指南進行預算申報作業。</div>
+      </div>
+
+      <div class="news-card">
+        <div class="news-row">
+          <span class="news-tag">系統通知</span>
+          <span class="news-date">2025/11/10</span>
+        </div>
+        <div class="news-title">修正「限制輸出貨品表」，我國產製之158項鋼鐵貨品輸往歐盟…</div>
+        <div class="news-body">請各單位依循新版指南進行預算申報作業。</div>
+      </div>
+    </div>
+
+    <!-- 常用連結 -->
+    <div>
+      <div class="panel-heading">常用連結</div>
+      <div class="quick-box">
+        <div class="quick-item">
+          <img src="img/link.png" alt="">
+          農業部檢疫局
+        </div>
+        <div class="quick-item">
+          <img src="img/link.png" alt="">
+          海關稅則查詢
+        </div>
+        <div class="quick-item">
+          <img src="img/link.png" alt="">
+          國貿署外網
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.h-right -->
+</div><!-- /#home -->
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  BLOCK 2 ／ 處分案例                                     ║
+     ║  #app — 列表頁                                           ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="app" class="scr">
+
+  <!-- ── Sidebar（全高左欄）────────────────────────────── -->
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="width:100%;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+
+    <!-- Active item：漸層底色 -->
+    <div class="sidebar-item is-active">
+      <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/>
+      </svg>
+      處分案範例
+    </div>
+
+    <div class="sidebar-item" onclick="KM.goCustoms()">
+      <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/>
+      </svg>
+      海關答聯單處理
+    </div>
+
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/>
+      </svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/>
+      </svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+
+  <!-- ── 右側（Topbar + Main）────────────────────────── -->
+  <div class="app-right">
+
+  <!-- Topbar（漸層 #2C8085 → #3145A5） -->
+  <nav class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+    </div>
+    <nav class="topbar-nav">
+      <a>知識管理</a>
+      <a>系統設定</a>
+      <a><span class="mi">person</span> 管理模式(科長)</a>
+      <a>登出</a>
+    </nav>
+  </nav>
+
+    <!-- ── Main ────────────────────────────────────────── -->
+    <main class="main" id="main-content">
+      <!-- 麵包屑 -->
+        <div class="breadcrumb">
+          <a onclick="KM.goHome()">首頁</a>
+          <span>›</span>
+          <span>處分案範例</span>
+        </div>
+      <!-- Sub-header -->
+      <div class="sub-header">
+
+        <!-- 搜尋列 -->
+        <div class="search-row">
+
+          <!-- 頁面標題（含搜尋欄） -->
+          <div class="page-title">
+            <svg class="page-title-icon" width="28" height="28" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="pageIconGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#2C8085"/>
+                  <stop offset="100%" stop-color="#3145A5"/>
+                </linearGradient>
+              </defs>
+              <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="url(#pageIconGrad)"/>
+            </svg>
+            處分案範例
+          </div>
+
+
+
+          <!-- 搜尋輸入 + 結果摘要 -->
+          <div class="search-wrap">
+            <div class="search-input-box">
+              <img src="img/s_1.png" class="search-ico-left" alt="搜尋">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="搜尋關鍵字"
+                oninput="KM.onSearch(this.value)"
+              >
+              <button
+                class="search-clear-btn"
+                id="search-clear-btn"
+                onclick="KM.clearSearch()"
+                aria-label="清除搜尋"
+              ><span class="mi">close</span></button>
+              <span class="search-divider"></span>
+              <button class="filter-btn" id="filter-btn" onclick="KM.openModal('modal-adv')" aria-label="篩選">
+                <img src="img/s_2.png" alt="篩選">
+              </button>
+            </div>
+            <!-- 搜尋結果摘要（輸入框正下方）-->
+            <div class="result-info" id="result-info"></div>
+          </div>
+        </div><!-- /.search-row -->
+
+      </div><!-- /.sub-header -->
+
+      <!-- Main inner -->
+      <div class="main-inner">
+
+        <!-- ── Tree Panel ──────────────────────────────── -->
+        <div class="tree-panel">
+          <div class="tree-heading">
+            <i><img src="img/si_l.png" alt=""></i>
+            <span>處分案樣態</span>
+            <i><img src="img/si_r.png" alt=""></i>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tree-tabs">
+            <button
+              class="tree-tab is-active"
+              id="tab-export"
+              onclick="KM.switchTab('ex')"
+            >出口（11）</button>
+            <button
+              class="tree-tab is-inactive"
+              id="tab-import"
+              onclick="KM.switchTab('im')"
+            >進口（9）</button>
+          </div>
+
+          <!-- 出口清單 -->
+          <div id="tree-export">
+            <div class="tree-item is-active" data-cat="ex-1" onclick="KM.selectTree(this,'未依規定標示產地：未見標示')">
+              <span class="tree-folder"></span>
+              <span>未依規定標示產地：未見標示</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-2" onclick="KM.selectTree(this,'產地標示不實(1)：他國產製或國貨標成他國')">
+              <span class="tree-folder"></span>
+              <span>產地標示不實(1)：他國產製或國貨標成他國</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-3" onclick="KM.selectTree(this,'產地標示不實(2)：他國產製標成臺灣(加強管理貨品、輸美案)')">
+              <span class="tree-folder"></span>
+              <span>產地標示不實(2)：他國產製標成臺灣(加強管理貨品、輸美案)</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-4" onclick="KM.selectTree(this,'產地標示不實(3)：他國產製標成臺灣(其他)')">
+              <span class="tree-folder"></span>
+              <span>產地標示不實(3)：他國產製標成臺灣(其他)</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-5" onclick="KM.selectTree(this,'足以使人誤認產地：有標示但產生錯誤認知')">
+              <span class="tree-folder"></span>
+              <span>足以使人誤認產地：有標示但產生錯誤認知</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-6" onclick="KM.selectTree(this,'CITES')">
+              <span class="tree-folder"></span>
+              <span>CITES</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-7" onclick="KM.selectTree(this,'商標/仿冒(侵權)')">
+              <span class="tree-folder"></span>
+              <span>商標/仿冒(侵權)</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-8" onclick="KM.selectTree(this,'管制貨品(111)')">
+              <span class="tree-folder"></span>
+              <span>管制貨品(111)</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="ex-9" onclick="KM.selectTree(this,'其他：如複合型態(含111+MWO併處)等')">
+              <span class="tree-folder"></span>
+              <span>其他：如複合型態(含111+MWO併處)等</span>
+              <span class="tree-count">0</span>
+            </div>
+          </div>
+
+          <!-- 進口清單 -->
+          <div id="tree-import" style="display:none">
+            <div class="tree-item is-active" data-cat="im-1" onclick="KM.selectTree(this,'進口-未依規定標示產地')">
+              <span class="tree-folder"></span>
+              <span>未依規定標示產地：未見標示</span>
+              <span class="tree-count">0</span>
+            </div>
+            <div class="tree-item" data-cat="im-2" onclick="KM.selectTree(this,'進口-產地標示不實')">
+              <span class="tree-folder"></span>
+              <span>產地標示不實</span>
+              <span class="tree-count">0</span>
+            </div>
+          </div>
+
+        </div><!-- /.tree-panel -->
+
+        <!-- ── Cases Panel ─────────────────────────────── -->
+        <div class="cases-panel">
+
+          <!-- Header -->
+          <div class="cases-header">
+            <div class="cases-title">
+              <span class="mi">folder_open</span>
+              <span id="section-title">未依規定標示產地：未見標示</span>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn--blue-fill" onclick="KM.goFlowList()">
+                <span class="mi">account_tree</span>
+                處理流程
+              </button>
+              <button class="btn btn--gradient" onclick="KM.goNewCase()">
+                <span class="mi">add</span>
+                新增範本/案例
+              </button>
+              <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
+                <span class="mi">download</span>
+                一鍵下載
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Case Card 1（從輕）───────────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="出口 食品 產地標示不實 出口貿易限制 OOO食品公司 貿易法 從輕 12萬 高頻治具線 泰國" data-category="ex-1">
+            <div class="tag-row">
+              <span class="tag tag--new">近期更新</span>
+              <span class="tag tag--lt">從輕</span>
+              <span class="tag tag--pe">處以罰緩 12 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704321號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月25日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO食品公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">食品</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口高頻治具線等貨品1批至泰國，產地標示不實，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）12萬元罰鍰，請查照。</div>
+            <!-- Snippet（搜尋時顯示） -->
+            <div class="snippet-block" id="snippet-1">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …於本季監測報告中發現，部分報關行針對<mark id="kw-mark-1">出口貿易限制</mark>之產地標示存在模糊地帶，導致通關延宕。建議各分關加強查驗…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOO聲明書</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOOOO調查資料</span>
+            </div>
+            <div class="link-row">
+              <span class="row-label">關聯案例：</span>
+              <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 2（從重）───────────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="出口 服飾紡織品 實質轉型 產地標示 輸美 貿易法 從重 60萬 MADE IN CHINA MADE IN TAIWAN" data-category="ex-3">
+            <div class="tag-row">
+              <span class="tag tag--hv">從重</span>
+              <span class="tag tag--hpe">依項次3，各裁處60萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704321號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月25日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO食品公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">食品</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">輸美貨品2批第1批貨品本身均車縫 Made in Taiwan 標籤，內包裝及外箱亦有 Made in Taiwan 字樣，但未達實質轉型第2批貨品之外箱標示 MADE IN TAIWAN，惟比對進口資料，貴公司自承貨品實為 MADE IN CHINA貨品本身、內包裝、外箱標示不實，有檢附輸美國貨品原產地聲明書。</div>
+            <div class="snippet-block" id="snippet-2">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …貨品外箱標示<mark id="kw-mark-2">出口貿易限制</mark>相關規定，惟實際原產地為 MADE IN CHINA，違反產地標示規定…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOO聲明書</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOOOO調查資料</span>
+            </div>
+            <div class="link-row">
+              <span class="row-label">關聯案例：</span>
+              <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 3（進口／從輕）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="進口 電子產品 印刷電路板 產地標示不實 從輕 3萬 ABC科技 越南 貿易法" data-category="im-2">
+            <div class="tag-row">
+              <span class="tag tag--lt">從輕</span>
+              <span class="tag tag--pe">處以罰緩 3 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114703105號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年09月12日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">ABC科技股份有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">電子產品（印刷電路板）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司報運進口印刷電路板1批，申報產地為越南，惟查驗結果產地標示不實，實際製造地為中國大陸，違反產地標示規定，依貿易法第28條第1項第6款規定處以新臺幣3萬元罰鍰。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …進口電子產品<mark class="kw-mark">產地標示不實</mark>之案例日趨增加，業者應確實申報實際製造地…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 進口報單影本</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 產地證明文件</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 4（出口／從重）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="出口 農產品 茶葉 出口貿易限制 從重 30萬 XYZ農業 日本 貿易法 管制" data-category="ex-8">
+            <div class="tag-row">
+              <span class="tag tag--hv">從重</span>
+              <span class="tag tag--hpe">處以罰緩 30 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114706788號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年10月03日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">XYZ農業出口有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反出口貿易限制規定，貿易法第13條、第28條第1項第3款</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">農產品（高山茶葉）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司報運出口高山茶葉至日本，涉及出口貿易限制管制貨品，未依規定申請出口許可，違反貿易法第13條規定，依同法第28條第1項第3款從重裁處新臺幣30萬元罰鍰，並限制出口資格6個月。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …違反<mark class="kw-mark">出口貿易限制</mark>相關規定，未取得出口許可即報運出口，情節較重…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 出口許可申請文件</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 行政裁量基準表</span>
+            </div>
+            <div class="link-row">
+              <span class="row-label">關聯案例：</span>
+              <span class="link-pill"><span class="mi">link</span> 相關管制貨品裁罰案</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 5（進口／從輕）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="進口 醫療器材 出口貿易限制 從輕 9萬 全康醫療 德國 貿易法 許可" data-category="im-1">
+            <div class="tag-row">
+              <span class="tag tag--new">近期更新</span>
+              <span class="tag tag--lt">從輕</span>
+              <span class="tag tag--pe">處以罰緩 9 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114708234號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年12月01日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">全康醫療器材股份有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">涉及出口貿易限制，貿易法第13條、第28條第1項第3款</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">醫療器材（手術設備零件）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司自德國進口手術設備零件，其中部分品項涉及出口貿易限制管制清單，未依規定申請進口許可，惟事後主動補辦相關手續，依從輕原則裁處新臺幣9萬元罰鍰。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …涉及<mark class="kw-mark">出口貿易限制</mark>管制清單品項，業者事後主動補辦，依從輕原則處理…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 進口許可補辦資料</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 6（出口／從重）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="出口 紡織品 成衣 實質轉型 產地標示 從重 45萬 美洲服飾 美國 貿易法 MADE IN TAIWAN" data-category="ex-3">
+            <div class="tag-row">
+              <span class="tag tag--hv">從重</span>
+              <span class="tag tag--hpe">依項次2，各裁處45萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114705512號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年10月28日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">美洲服飾貿易有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款及實質轉型規定，第28條第1項第6款</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">紡織品（針織成衣）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司報運出口針織成衣2批至美國，外箱及標籤標示 MADE IN TAIWAN，惟實際未達實質轉型，產地標示不實，且屬加強管理貨品，依法從重裁處每批新臺幣45萬元罰鍰。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …紡織品<mark class="kw-mark">實質轉型</mark>認定標準，需符合稅則號別改變或加工程序等要件之一…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 實質轉型認定書</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 產地查核報告</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 7（進口／從輕）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="進口 化學品 原料 產地標示不實 出口貿易限制 從輕 6萬 永達化工 馬來西亞 貿易法" data-category="im-2">
+            <div class="tag-row">
+              <span class="tag tag--lt">從輕</span>
+              <span class="tag tag--pe">處以罰緩 6 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114702987號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年08月15日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">永達化工原料股份有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">化學品（工業用溶劑）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司報運進口工業用溶劑，申報產地為馬來西亞，惟經查核產地標示不實，係由他國轉口，違反貿易法第17條第2款，因屬首次違規，依從輕原則裁處新臺幣6萬元罰鍰。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …進口化學品<mark class="kw-mark">產地標示</mark>不實，轉口貨品應確實申報實際產地，不得以中間國為產地…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 原產地聲明書</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 轉口證明文件</span>
+            </div>
+          </div><!-- /.case-card -->
+
+          <!-- ── Case Card 8（出口／從重）──────────────── -->
+          <div class="case-card" onclick="KM.openPanel()" data-text="出口 鋼鐵製品 實質轉型 從重 90萬 宏鋼鐵業 歐盟 貿易法 加強管理 反規避" data-category="ex-2">
+            <div class="tag-row">
+              <span class="tag tag--hv">從重</span>
+              <span class="tag tag--hpe">處以罰緩 90 萬</span>
+            </div>
+            <div class="case-meta">
+              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114701456號</span></div>
+              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年07月22日</span></div>
+              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">宏鋼鐵業股份有限公司</span></div>
+              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款及加強管理規定，第28條第1項第6款</span></div>
+              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">鋼鐵製品（熱軋鋼捲）</span></div>
+            </div>
+            <hr class="meta-divider">
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">貴公司報運出口熱軋鋼捲至歐盟，涉及反規避調查，產品未達實質轉型標準，且屬158項加強管理鋼鐵貨品，違反貿易法第17條第2款規定，依加重條款裁處新臺幣90萬元罰鍰，情節重大。</div>
+            <div class="snippet-block">
+              <div class="snippet-block-label">符合搜尋結果內文</div>
+              …鋼鐵製品<mark class="kw-mark">實質轉型</mark>認定需符合製程要件，反規避調查案件依加重條款處理…
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 歐盟反規避調查文件</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> 鋼鐵加強管理清單</span>
+            </div>
+            <div class="link-row">
+              <span class="row-label">關聯案例：</span>
+              <span class="link-pill"><span class="mi">link</span> 鋼鐵類加強管理歷史案例</span>
+            </div>
+          </div><!-- /.case-card -->
+
+        </div><!-- /.cases-panel -->
+      </div><!-- /.main-inner -->
+    </main>
+
+  </div><!-- /.app-right -->
+</div><!-- /#app -->
+
+
+<!-- ── BLOCK 2 ／ 處分案例 — 案例完整詳情（滿版）────────── -->
+<div id="app-case-detail" class="scr">
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="height:36px;width:100%;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain;display:none">
+    </div>
+    <div class="sidebar-item is-active">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/></svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item" onclick="KM.goCustoms()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/></svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/></svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/></svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav"><a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+    </nav>
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <a onclick="KM.goApp()">處分案件</a><span>›</span>
+        <span>未依規定標示產地：未見標示</span>
+      </div>
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C8085"/><stop offset="100%" stop-color="#3145A5"/></linearGradient></defs>
+              <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="url(#g1)"/>
+            </svg>
+            貿管理字第114704321號 — 案例完整詳情
+          </div>
+          <button class="back-btn-lg" onclick="KM.goApp()">＜ 返回列表</button>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <!-- 基本資料 -->
+        <div class="doc-meta-bar" style="margin-bottom:20px">
+          <div class="dmb-item"><span class="dmb-key">發文字號：</span><span class="dmb-val">貿管理字第114704321號</span></div>
+          <div class="dmb-sep"></div>
+          <div class="dmb-item"><span class="dmb-key">處分日期：</span><span class="dmb-val">中華民國114年11月25日</span></div>
+          <div class="dmb-sep"></div>
+          <div class="dmb-item"><span class="dmb-key">處分對象：</span><span class="dmb-val">OOO食品公司</span></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:4fr 1fr;gap:20px;align-items:start">
+
+          <!-- 左（8）：主要公文 -->
+          <div class="doc-card">
+            <div class="doc-section-hd">主旨</div>
+            <div class="doc-body-text">
+              <p>**貴公司（統一編號：____________，代表人：________）報運出口高頻治具線等貨品1批至泰國，產地標示不實，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）12萬元罰鍰，請查照。</p>
+            </div>
+            <div class="doc-section-hd" style="margin-top:20px">說明</div>
+            <div class="doc-body-text">
+              <ol style="padding-left:18px;line-height:2.1">
+                <li>依據財政部關務署基隆關114年10月基普五字第11410（略）號函及貴公司114年10月說明函辦理。</li>
+                <li>貴公司114年1月3日向基隆關報運出口高頻治具線等貨品1批（第AW/14/345/MA083號出口報單），外箱標示「MADE IN TAIWAN」字樣，貨品本體或內包裝皆未見產地標示，貴公司自承前揭項次貨物產地為CHINA，違反貿易法，移請本署核處。</li>
+                <li>依貿易法第17條第2款規定，出進口人不得有產地標示不實之行為。依第28條規定，本署得予警告、處新臺幣6萬元以上300萬元以下罰鍰。</li>
+                <li>貴公司說明案貨原始部分包裝同時包含國貨及洋貨，實際產地為MADE IN TAIWAN/CHINA；因承辦人員首次辦理出口報關，經驗不足，致部分外貨包裝漏標示「MADE IN CHINA」。</li>
+                <li>
+本案貨品產地為中國大陸，外箱標示「MADE IN TAIWAN」，產地標示不實。貴公司為經營貿易業務之出進口廠商，對於輸出法規之遵循應負相當之注意義務而未注意，違反貿易法規定不得有產地標示不實之行為屬實，依據「輸出貨品未依規定標示產地或產地標示不實處分原則」項次4規定，處以新臺幣12萬元罰鍰。
+本處分所裁決之罰鍰，請於文到次日起30日內匯入本署中央銀行國庫局(0000022)「經濟部國際貿易署罰金罰鍰戶」（帳號04262001016005），匯款時請註明貴公司名稱，並於備註欄內註明本署發文日期及字號。請依規定期限內繳納，逾限期未繳者，將依規定移送行政執行署強制執行。
+貴公司對本處分如有異議，得於收受本處分書之次日起30日內，以工商憑證登入本署建置之線上聲明異議系統，並以數位簽章簽署，或以紙本向本署聲明異議。異議書應載明：（一）異議人及代表人之姓名、住所；（二）本處分書文號；（三）異議之事實及理由；（四）有關證件或證據；（五）年、月、日（如附件1）。
+檢附貿易法第17條及第28條規定、輸出貨品未依規定標示產地或產地標示不實處分原則、輸出貨品未依規定標示產地或產地標示不實案件處理原則（如附件2），請參。
+為保障貴公司出口權益及避免再次觸法，請指派相關業務管理階層人員參加本署辦理之輸出入管理說明會，相關資訊將於活動辦理前公布於本署經貿資訊網（路徑：新聞與公告/本署活動訊息/活動訊息）；或透過加入本署臉書、Line取得說明會資訊，本署屆時亦將發函通知。本案貨品產地為中國大陸，外箱標示「MADE IN TAIWAN」，產地標示不實。貴公司為經營貿易業務之出進口廠商，對於輸出法規之遵循應負相當之注意義務而未注意，違反貿易法規定不得有產地標示不實之行為屬實，依據「輸出貨品未依規定標示產地或產地標示不實處分原則」項次4規定，處以新臺幣12萬元罰鍰。
+本處分所裁決之罰鍰，請於文到次日起30日內匯入本署中央銀行國庫局(0000022)「經濟部國際貿易署罰金罰鍰戶」（帳號04262001016005），匯款時請註明貴公司名稱，並於備註欄內註明本署發文日期及字號。請依規定期限內繳納，逾限期未繳者，將依規定移送行政執行署強制執行。
+貴公司對本處分如有異議，得於收受本處分書之次日起30日內，以工商憑證登入本署建置之線上聲明異議系統，並以數位簽章簽署，或以紙本向本署聲明異議。異議書應載明：（一）異議人及代表人之姓名、住所；（二）本處分書文號；（三）異議之事實及理由；（四）有關證件或證據；（五）年、月、日（如附件1）。
+檢附貿易法第17條及第28條規定、輸出貨品未依規定標示產地或產地標示不實處分原則、輸出貨品未依規定標示產地或產地標示不實案件處理原則（如附件2），請參。
+為保障貴公司出口權益及避免再次觸法，請指派相關業務管理階層人員參加本署辦理之輸出入管理說明會，相關資訊將於活動辦理前公布於本署經貿資訊網（路徑：新聞與公告/本署活動訊息/活動訊息）；或透過加入本署臉書、Line取得說明會資訊，本署屆時亦將發函通知。</li>
+              </ol>
+            </div>
+            <div class="doc-section-hd" style="margin-top:20px">附記</div>
+            <div class="doc-body-text">
+              <p>如有不服本處分，依訴願法第14條規定，得於本處分書送達之次日起30日內，繕具訴願書，向本部提起訴願。</p>
+            </div>
+          </div>
+
+          <!-- 右（2）：細節資訊（sticky）-->
+          <div style="position:sticky;top:16px;display:flex;flex-direction:column;gap:14px">
+            <div class="doc-card" style="padding:16px">
+              <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">案件資訊</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+                <div style="color:#8898AA;font-weight:600">處分對象</div>
+                <div style="color:#2F3D50">OOO食品公司</div>
+                <div style="color:#8898AA;font-weight:600;margin-top:4px">涉及法規</div>
+                <div style="color:#2F3D50;line-height:1.5">違反貿易法第17條第2款，第28條第1項第6款</div>
+                <div style="color:#8898AA;font-weight:600;margin-top:4px">關鍵貨品</div>
+                <div style="color:#2F3D50">食品</div>
+                <div style="color:#8898AA;font-weight:600;margin-top:4px">進出口別</div>
+                <div style="color:#2F3D50">出口</div>
+              </div>
+              <div class="tag-row" style="margin-top:12px;padding-top:10px;border-top:1px solid #EEE;margin-bottom:0;flex-wrap:wrap;gap:5px">
+                <span class="tag tag--new">近期更新</span>
+                <span class="tag tag--lt">從輕</span>
+                <span class="tag tag--pe">罰緩 12 萬</span>
+              </div>
+            </div>
+            <div class="doc-card" style="padding:16px">
+              <div class="doc-badge doc-badge--customs" style="margin-bottom:10px">相關附件</div>
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
+                <span class="attach-pill"><span class="mi">attach_file</span> OOO聲明書.pdf</span>
+                <span class="attach-pill"><span class="mi">attach_file</span> OOOOO調查資料.pdf</span>
+                <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ── BLOCK 2 ／ 處分案例 — 流程清單 ──────────────────────── -->
+<div id="app-flow-list" class="scr">
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="height:36px;width:auto;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+    <div class="sidebar-item is-active">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/></svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item" onclick="KM.goCustoms()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/></svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/></svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/></svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav"><a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+    </nav>
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <a onclick="KM.goApp()">處分案件</a><span>›</span>
+        <span>未依規定標示產地</span>
+      </div>
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C8085"/><stop offset="100%" stop-color="#3145A5"/></linearGradient></defs>
+              <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="url(#g2)"/>
+            </svg>
+            未依規定標示產地、輸美、一般產地標示不實
+          </div>
+          <button class="back-btn-lg" onclick="KM.goApp()">返回</button>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="flow-list-hd">
+          <h3>流程清單</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--gray-outline" onclick="KM.flowCopy()">複製流程</button>
+            <button class="btn btn--gradient" onclick="KM.goFlowEdit()">＋ 新增流程</button>
+          </div>
+        </div>
+
+        <div id="flow-group-list">
+
+        <!-- 流程 1 -->
+        <div class="flow-group" id="flow-group-1">
+          <div class="flow-row flow-row--active" onclick="KM.flowSelectRow(this)">
+            <span class="flow-date">2025/12/08</span>
+            <span class="flow-name">一般處理流程</span>
+            <span class="flow-version" id="flow-1-version">v3.0</span>
+            <div class="flow-row-btns">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" id="flow-1-edit-btn" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <div class="toggle-track is-on" id="toggle-1" onclick="event.stopPropagation();KM.flowSetDefault(1)"></div>
+              <span style="font-size:12px;color:#566578">預設</span>
+            </div>
+          </div>
+          <!-- 草稿列（儲存後顯示） -->
+          <div class="flow-row flow-row--draft" id="flow-draft-row" style="display:none" onclick="KM.flowSelectRow(this)">
+            <span class="flow-draft-badge">草稿</span>
+            <span class="flow-date">2025/12/08</span>
+            <span class="flow-name">一般處理流程</span>
+            <span class="flow-version">v3.1</span>
+            <div class="flow-row-btns">
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+            </div>
+            <div class="flow-publish-wrap">
+              <button class="btn btn--gradient" style="padding:4px 16px;font-size:12px" onclick="event.stopPropagation();KM.flowPublish()">發佈</button>
+              <div class="flow-tooltip">新增完草稿會下方不會直接替換</div>
+            </div>
+          </div>
+          <!-- 舊版本列（發佈後顯示） -->
+          <div class="flow-row flow-row--archive" id="flow-1-archive" style="display:none">
+            <span class="flow-date" style="color:#B0BECA">2025/12/08</span>
+            <span class="flow-name" style="color:#B0BECA">一般處理流程</span>
+            <span class="flow-version" style="color:#B0BECA">v3.0</span>
+            <button class="btn-edit-flow" onclick="KM.flowView()">檢視</button>
+          </div>
+        </div>
+
+        <!-- 流程 2 -->
+        <div class="flow-group" id="flow-group-2">
+          <div class="flow-row" onclick="KM.flowSelectRow(this)">
+            <span class="flow-date">2025/12/03</span>
+            <span class="flow-name">特殊處理流程</span>
+            <span class="flow-version">v2.0</span>
+            <div class="flow-row-btns">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <div class="toggle-track" id="toggle-2" onclick="event.stopPropagation();KM.flowSetDefault(2)"></div>
+              <span style="font-size:12px;color:#566578">預設</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 流程 3 -->
+        <div class="flow-group" id="flow-group-3">
+          <div class="flow-row" onclick="KM.flowSelectRow(this)">
+            <span class="flow-date">2025/12/03</span>
+            <span class="flow-name">鞋類處理流程</span>
+            <span class="flow-version">v1.0</span>
+            <div class="flow-row-btns">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <div class="toggle-track" id="toggle-3" onclick="event.stopPropagation();KM.flowSetDefault(3)"></div>
+              <span style="font-size:12px;color:#566578">預設</span>
+            </div>
+          </div>
+        </div>
+
+        </div><!-- /#flow-group-list -->
+
+      </div><!-- /.detail-body -->
+    </main>
+  </div><!-- /.app-right -->
+</div><!-- /#app-flow-list -->
+
+
+<!-- ── BLOCK 2 ／ 處分案例 — 流程編輯 ──────────────────────── -->
+<div id="app-flow-edit" class="scr">
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="height:36px;width:auto;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+    <div class="sidebar-item is-active">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/></svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item" onclick="KM.goCustoms()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/></svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/></svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/></svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav"><a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+    </nav>
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <a onclick="KM.goApp()">處分案件</a><span>›</span>
+        <a onclick="KM.goFlowList()">未依規定標示產地</a>
+      </div>
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C8085"/><stop offset="100%" stop-color="#3145A5"/></linearGradient></defs>
+              <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9379 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="url(#g3)"/>
+            </svg>
+            未依規定標示產地、輸美、一般產地標示不實
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--clear" onclick="KM.toast('確認刪除此流程？')">刪除</button>
+            <button class="btn btn--search" onclick="KM.flowSave()">儲存</button>
+          </div>
+        </div>
+        <!-- 檢視模式提示（編輯模式下隱藏） -->
+        <div id="flow-view-banner" style="display:none;background:#EEF4FB;border:1px solid #C2D5EE;border-radius:4px;padding:8px 16px;margin-bottom:10px;font-size:12px;color:#2457A7;align-items:center;gap:6px">
+          <span class="mi" style="font-size:16px">visibility</span>
+          <span style="flex:1">檢視模式 — 此流程為唯讀，無法編輯或拖移步驟</span>
+          <button class="back-btn-lg" onclick="KM.goFlowList()" style="font-size:12px;padding:4px 14px">
+            <span class="mi" style="font-size:14px">arrow_back</span> 返回列表
+          </button>
+        </div>
+        <div class="flow-title-field">
+          <label>樣稿標題</label>
+          <input type="text" value="一般處理流程" id="flow-draft-title" placeholder="輸入流程名稱">
+        </div>
+      </div>
+
+      <!-- 編輯區（左步驟 + 右編輯器）-->
+      <div class="flow-edit-layout">
+
+        <!-- 左：步驟清單 -->
+        <div class="flow-steps-panel">
+          <button class="flow-add-btn" onclick="KM.flowAddStep()">＋ 新增步驟</button>
+          <div id="flow-step-list">
+            <div class="step-card is-active" draggable="true" data-step="1">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step1</div>
+                <div class="step-title-sm">接收海關發《違章案件移送書》</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="2">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step2</div>
+                <div class="step-title-sm">確認管轄權與違規事實</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="3">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step3</div>
+                <div class="step-title-sm">發函通知廠商暨回收廠商回覆</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="4">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step4</div>
+                <div class="step-title-sm">核相關資料</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="5">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step5</div>
+                <div class="step-title-sm">初步處分決策</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="6">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step6</div>
+                <div class="step-title-sm">送簽審與最終處分決定</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="7">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step7</div>
+                <div class="step-title-sm">發出處分書與結案</div>
+              </div>
+            </div>
+            <div class="step-sep">↓</div>
+            <div class="step-card" draggable="true" data-step="8">
+              <div class="step-drag">⠿</div>
+              <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+                <div class="step-num">Step8</div>
+                <div class="step-title-sm">追蹤後續結果</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /.flow-steps-panel -->
+
+        <!-- 右：編輯器 -->
+        <div class="flow-editor-panel">
+          <div class="flow-step-title-bar">
+            <span class="step-big-num" id="flow-right-num">Step1</span>
+            <input type="text" class="step-title-input" id="flow-right-title"
+              value="接收海關發《違章案件移送書》"
+              oninput="KM.flowUpdateTitle(this.value)">
+          </div>
+          <div class="rich-toolbar">
+            <button title="粗體"><b>B</b></button>
+            <button title="斜體"><i>I</i></button>
+            <button title="底線"><u>U</u></button>
+            <button title="刪除線"><s>S</s></button>
+            <div class="tb-sep"></div>
+            <button title="字色">A</button>
+            <button title="標亮">◈</button>
+            <div class="tb-sep"></div>
+            <button title="靠左">⬛</button>
+            <button title="置中">⬛</button>
+            <button title="靠右">⬛</button>
+            <button title="兩端">⬛</button>
+            <div class="tb-sep"></div>
+            <button title="項目清單">≡</button>
+            <button title="數字清單">≔</button>
+            <button title="縮排+">→</button>
+            <button title="縮排-">←</button>
+            <div class="tb-sep"></div>
+            <button title="連結"><span class="mi">link</span></button>
+            <button title="表格">⊞</button>
+            <button title="圖片"><span class="mi">image</span></button>
+            <button title="程式碼">&lt;&gt;</button>
+          </div>
+          <div class="rich-body" id="flow-rich-body" contenteditable="true">
+            <p>接收海關發來之違章案件移送書及相關證明文件，確認案件基本資料是否完整，包括進出口報單號碼、違章事實說明、當事人資料等必要資訊。</p>
+            <p>核對移送書所附文件是否齊全，如有缺漏應即通知海關補件，並於系統中建立案件基本檔案。</p>
+          </div>
+          <!-- 檢視模式唯讀提示層（編輯模式下不顯示） -->
+
+        </div><!-- /.flow-editor-panel -->
+
+      </div><!-- /.flow-edit-layout -->
+    </main>
+  </div><!-- /.app-right -->
+</div><!-- /#app-flow-edit -->
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  BLOCK ／ 新增範本案例                                    ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="app-new-case" class="scr">
+
+  <!-- Sidebar -->
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="height:36px;width:100%;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+    <div class="sidebar-item is-active" onclick="KM.goApp()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/>
+      </svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item" onclick="KM.goCustoms()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/>
+      </svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/>
+      </svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/>
+      </svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav"><a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+    </nav>
+
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <a onclick="KM.goApp()">處分案例</a><span>›</span>
+        <span>新增範本案例</span>
+      </div>
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085">edit_document</span>
+            新增範本案例
+          </div>
+          <button class="back-btn-lg" onclick="KM.goApp()">＜ 返回</button>
+        </div>
+      </div>
+
+      <div class="nc-body">
+
+        <!-- 分類選擇列（固定在表單頂部） -->
+        <div class="nc-classify-bar">
+          <div class="nc-classify-tabs">
+            <button class="nc-type-btn is-active" id="nc-tab-ex" onclick="KM.ncSwitchType('ex')">出口</button>
+            <button class="nc-type-btn" id="nc-tab-im" onclick="KM.ncSwitchType('im')">進口</button>
+          </div>
+          <div class="nc-classify-sep"></div>
+          <div class="nc-classify-cat">
+            <label class="filter-label" style="white-space:nowrap">處分案樣態</label>
+            <select class="filter-select" id="nc-category">
+              <option value="">請選擇樣態</option>
+              <option>未依規定標示產地：未見標示</option>
+              <option>產地標示不實(1)：他國產製或國貨標成他國</option>
+              <option>產地標示不實(2)：他國產製標成臺灣（加強管理）</option>
+              <option>產地標示不實(3)：他國產製標成臺灣（其他）</option>
+              <option>足以使人誤認產地</option>
+              <option>CITES</option>
+              <option>商標/仿冒(侵權)</option>
+              <option>管制貨品(111)</option>
+              <option>其他</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 主表單卡片（單一容器，內部用分隔線分區） -->
+        <div class="nc-form-card">
+
+          <!-- 基本資料 -->
+          <div class="nc-form-hd">基本資料</div>
+          <div class="nc-fields-grid">
+            <div class="nc-field">
+              <label class="nc-label">發文字號</label>
+              <input type="text" class="nc-input" placeholder="例：貿管理字第114000000號">
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">案件日期</label>
+              <input type="text" id="nc-case-date" class="nc-input" placeholder="YYYY/MM/DD" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label is-required">裁決結果</label>
+              <div class="nc-radio-row">
+                <label class="nc-radio-label">
+                  <input type="radio" name="nc-severity" value="lt"> 從輕
+                </label>
+                <label class="nc-radio-label">
+                  <input type="radio" name="nc-severity" value="hv"> 從重
+                </label>
+              </div>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">裁罰金額（元）</label>
+              <input type="text" class="nc-input" placeholder="例：120000">
+            </div>
+            <div class="nc-field nc-field--wide">
+              <label class="nc-label">處分對象（廠商全名）</label>
+              <input type="text" class="nc-input" placeholder="例：OOO股份有限公司">
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">統一編號</label>
+              <input type="text" class="nc-input" placeholder="例：12345678">
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">涉案商品類別</label>
+              <input type="text" class="nc-input" placeholder="例：食品、紡織品">
+            </div>
+          </div>
+
+          <!-- 涉及法規 -->
+          <div class="nc-field" style="margin-top:16px">
+            <label class="nc-label">涉及法規</label>
+            <div class="tag-area" id="nc-law-area" onclick="KM.openLawModal('nc-law-area', null)" style="cursor:pointer;margin-top:5px">
+              <span class="law-ph" style="color:#B0BECA;font-size:12.5px;pointer-events:none">點擊選擇涉及法規...</span>
+            </div>
+          </div>
+
+          <hr class="meta-divider" style="margin:20px 0">
+
+          <!-- 案情摘要 -->
+          <div class="nc-form-hd">案情摘要</div>
+          <textarea class="nc-textarea" placeholder="請輸入案情摘要，可貼上段落文字…" rows="4"></textarea>
+
+          <hr class="meta-divider" style="margin:20px 0">
+
+          <!-- 完整內容 -->
+          <div class="nc-form-hd">完整內容</div>
+          <div class="nc-editor-wrap">
+            <div class="rich-toolbar">
+              <button title="粗體"><b>B</b></button>
+              <button title="斜體"><i>I</i></button>
+              <button title="底線"><u>U</u></button>
+              <button title="刪除線"><s>S</s></button>
+              <div class="tb-sep"></div>
+              <button title="項目清單">≡</button>
+              <button title="數字清單">≔</button>
+              <div class="tb-sep"></div>
+              <button title="連結"><span class="mi">link</span></button>
+              <button title="圖片"><span class="mi">image</span></button>
+            </div>
+            <div class="rich-body" contenteditable="true" style="min-height:180px"></div>
+          </div>
+
+          <hr class="meta-divider" style="margin:20px 0">
+
+          <!-- 附件上傳 -->
+          <div class="nc-form-hd">上傳附件</div>
+          <label class="nc-upload-zone">
+            <input type="file" multiple style="display:none" onchange="KM.ncHandleFiles(this)">
+            <span class="mi nc-upload-icon">upload_file</span>
+            <span class="nc-upload-text">拖曳或點擊選擇附件</span>
+            <span class="nc-upload-hint">支援 PDF、Word、Excel、圖片（每檔上限 20MB）</span>
+          </label>
+          <div id="nc-file-list" class="nc-file-list">
+            <span class="nc-empty-hint">尚未選擇任何附件</span>
+          </div>
+
+          <hr class="meta-divider" style="margin:20px 0">
+
+          <!-- 關聯案例 -->
+          <div class="nc-form-hd">關聯案例</div>
+          <div class="tag-area" id="nc-related-tags" onclick="KM.ncOpenRelated()" style="cursor:pointer;min-height:42px">
+            <span style="color:#B0BECA;font-size:12.5px;pointer-events:none">點擊選擇關聯案例...</span>
+          </div>
+
+        </div><!-- /.nc-form-card -->
+
+        <!-- 底部操作 -->
+        <div class="nc-footer">
+          <button class="btn btn--clear" onclick="KM.goApp()">取消</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--gray-outline" onclick="KM.ncSave(false)">儲存草稿</button>
+            <button class="btn btn--search" onclick="KM.ncSave(true)">
+              <span class="mi">check</span> 發布案例
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /.nc-body -->
+    </main>
+  </div><!-- /.app-right -->
+</div><!-- /#app-new-case -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — 關聯案例選擇
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal-related" onclick="if(event.target===this)KM.closeModal('modal-related')">
+  <div class="modal modal--sm">
+    <div class="modal-header">
+      <span class="modal-title">選擇關聯案例</span>
+      <button class="modal-close" onclick="KM.closeModal('modal-related')"><span class="mi">close</span></button>
+    </div>
+    <div class="modal-search">
+      <span class="mi" style="color:#8898AA">search</span>
+      <input type="text" placeholder="搜尋案例名稱…" oninput="KM.ncFilterRelated?.(this.value)">
+    </div>
+    <div class="law-list" id="nc-related-list">
+      <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+        <input type="checkbox"><label class="nc-related-label">貿管理字第114704321號 · OOO食品公司（從輕）</label>
+      </div>
+      <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+        <input type="checkbox"><label class="nc-related-label">貿管理字第114703105號 · ABC科技（從輕）</label>
+      </div>
+      <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+        <input type="checkbox"><label class="nc-related-label">貿管理字第114706788號 · XYZ農業（從重）</label>
+      </div>
+      <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+        <input type="checkbox"><label class="nc-related-label">貿管理字第114705412號 · 全康醫療（從輕）</label>
+      </div>
+      <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+        <input type="checkbox"><label class="nc-related-label">貿管理字第114701834號 · 美洲服飾（從重）</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--clear" onclick="KM.closeModal('modal-related')">取消</button>
+      <button class="btn btn--search" onclick="KM.ncConfirmRelated()">確認</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  BLOCK 3 ／ 海關答聯單                                   ║
+     ║  #app-customs        — 列表頁                            ║
+     ║  #app-customs-detail — 詳細頁（Step 切換）               ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="app-customs" class="scr">
+
+  <!-- Sidebar -->
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="height:36px;width:auto;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+    <div class="sidebar-item" onclick="KM.goApp()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/>
+      </svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item is-active">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/>
+      </svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/>
+      </svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/>
+      </svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+
+  <!-- 右側 -->
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav">
+        <a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
+      </nav>
+    </nav>
+
+    <main class="main">
+      <div class="breadcrumb">
+          <a onclick="KM.goHome()">首頁</a><span>›</span><span>海關答聯單處理</span>
+      </div>
+      <div class="sub-header">
+        <div class="search-row">
+          <div class="page-title">
+            <svg width="28" height="28" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C8085"/><stop offset="100%" stop-color="#3145A5"/></linearGradient></defs>
+              <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="url(#g4)"/>
+            </svg>
+            海關答聯單處理
+          </div>
+          <div class="search-wrap">
+            <div class="search-input-box">
+              <img src="img/s_1.png" class="search-ico-left" alt="搜尋">
+              <input type="text" id="customs-search" placeholder="搜尋關鍵字" oninput="KM.customsSearch(this.value)">
+              <button class="search-clear-btn" id="customs-clear" onclick="KM.customsClear()" aria-label="清除"><span class="mi">close</span></button>
+              <span class="search-divider"></span>
+              <button class="filter-btn" onclick="KM.openModal('modal-adv')" aria-label="篩選">
+                <img src="img/s_2.png" alt="篩選">
+              </button>
+            </div>
+            <div class="result-info" id="customs-result-info"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-inner">
+        <!-- Tree -->
+        <div class="tree-panel">
+          <div class="tree-heading">
+            <i><img src="img/si_l.png" alt=""></i>
+            <span>答聯單態樣</span>
+            <i><img src="img/si_r.png" alt=""></i>
+          </div>
+
+          <div class="tree-item is-active" onclick="KM.selectCustomsTree(this,'專案(擋關)')">
+            <span class="tree-folder"></span>
+            <span>專案(擋關)</span>
+            <span class="tree-count">1</span>
+          </div>
+          <div class="tree-item" onclick="KM.selectCustomsTree(this,'CITES')">
+            <span class="tree-folder"></span>
+            <span>CITES</span>
+            <span class="tree-count">0</span>
+          </div>
+          <div class="tree-item" onclick="KM.selectCustomsTree(this,'實質轉型')">
+            <span class="tree-folder"></span>
+            <span>實質轉型</span>
+            <span class="tree-count">1</span>
+          </div>
+          <div class="tree-item" onclick="KM.selectCustomsTree(this,'產地標示')">
+            <span class="tree-folder"></span>
+            <span>產地標示</span>
+            <span class="tree-count">0</span>
+          </div>
+          <div class="tree-item" onclick="KM.selectCustomsTree(this,'其他')">
+            <span class="tree-folder"></span>
+            <span>其他</span>
+            <span class="tree-count">0</span>
+          </div>
+        </div>
+
+        <!-- Cases -->
+        <div class="cases-panel">
+          <div class="cases-header">
+            <div class="cases-title">
+              <span class="mi">folder_open</span>
+              <span id="customs-section-title">專案(擋關)</span>
+            </div>
+            <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
+              <span class="mi">download</span>
+              一鍵下載
+            </button>
+          </div>
+
+          <!-- Customs Case Card 1 -->
+          <div class="customs-card" onclick="KM.goCustomsDetail()" data-text="ATEG1140027 海關來文 基隆關桃園分關南崁業務課 專業檢測儀器 OOO股份有限公司 實質轉型 原產地證明書 加工證明書">
+            <div class="cmeta">
+              <span class="cm-key">發文文號：</span><span class="cm-val">ATEG1140027</span>
+              <span class="cm-key">發文日期：</span><span class="cm-val">114/10/14</span>
+              <span class="cm-key">發文機關：</span><span class="cm-val">基隆關桃園分關南崁業務課</span>
+              <span class="cm-key">關鍵貨品：</span><span class="cm-val">專業檢測儀器</span>
+              <span class="cm-key">處分對象：</span><span class="cm-val">OOO股份有限公司</span>
+              <span class="cm-key">涉及法規：</span><span class="cm-val">原產地證明書及加工證明書管理辦法第5條第3項（實質轉型）</span>
+            </div>
+            <div class="section-label">案情摘要</div>
+            <div class="case-summary">某股份有限公司（出口人）報運出口貨物乙批至美國（出口報單第AT/BC/14/^^^^^^號）。依出口人說明，案貨為出口人設計並持有模具及核心技術之專業檢測儀器。出口人於中國廣東珠海地區設有台灣投資設立之關係企業，負責執行產品之部分組裝及焊接程序。</div>
+            <div class="ocr-block">
+              <div class="ocr-filename">OOO文件.pdf 附件內文</div>
+              …海關對輸出貨品是否符合「<mark class="kw-mark">實質轉型</mark>」標準產生疑義，愛函請貴署認定。」…
+              <div class="ocr-note"><span class="mi">warning_amber</span> 此段落由 OCR 自動辨識，建議開啟原稿核對.</div>
+            </div>
+            <div class="attach-row">
+              <span class="row-label">相關附件：</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOO文件</span>
+              <span class="attach-pill"><span class="mi">attach_file</span> OOOOO法規</span>
+            </div>
+            <div class="link-row">
+              <span class="row-label">關聯案例：</span>
+              <span class="link-pill"><span class="mi">link</span> OOO處分案例</span>
+            </div>
+          </div>
+
+          <!-- 無搜尋結果 -->
+          <div class="cases-empty cases-empty--hidden" id="customs-no-result">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+            <p>沒有符合的搜尋結果</p>
+            <p style="font-size:12px;color:#B0BECA">請嘗試其他關鍵字</p>
+          </div>
+
+        </div><!-- /.cases-panel -->
+      </div><!-- /.main-inner -->
+    </main>
+  </div><!-- /.app-right -->
+</div><!-- /#app-customs -->
+
+
+<!-- ── BLOCK 3 ／ 海關答聯單 — 詳細頁 ────────────────────── -->
+<div id="app-customs-detail" class="scr">
+
+  <!-- Sidebar -->
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png" style="width:100%;object-fit:contain">
+      <img class="logo-mini" src="img/logo2.png" style="width:36px;height:36px;object-fit:contain">
+    </div>
+    <div class="sidebar-item" onclick="KM.goApp()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="currentColor"/>
+      </svg>
+      處分案範例
+    </div>
+    <div class="sidebar-item is-active">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="currentColor"/>
+      </svg>
+      海關答聯單處理
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.2508 16.875C14.0133 16.875 16.2508 14.6375 16.2508 11.875C16.2508 9.1125 14.0133 6.875 11.2508 6.875C8.48828 6.875 6.25078 9.1125 6.25078 11.875C6.25078 14.6375 8.48828 16.875 11.2508 16.875ZM11.2508 9.375C12.6258 9.375 13.7508 10.5 13.7508 11.875C13.7508 13.25 12.6258 14.375 11.2508 14.375C9.87578 14.375 8.75078 13.25 8.75078 11.875C8.75078 10.5 9.87578 9.375 11.2508 9.375ZM11.2508 19.375C7.91328 19.375 1.25078 21.05 1.25078 24.375V26.875H21.2508V24.375C21.2508 21.05 14.5883 19.375 11.2508 19.375ZM3.75078 24.375C4.02578 23.475 7.88828 21.875 11.2508 21.875C14.6258 21.875 18.5008 23.4875 18.7508 24.375H3.75078ZM18.8508 9.4375C19.9008 10.9125 19.9008 12.825 18.8508 14.3L20.9508 16.4125C23.4758 13.8875 23.4758 10.075 20.9508 7.325L18.8508 9.4375ZM25.0883 3.125L23.0508 5.1625C26.5133 8.9375 26.5133 14.6125 23.0508 18.5875L25.0883 20.625C29.9633 15.7625 29.9758 8.1875 25.0883 3.125Z" fill="currentColor"/>
+      </svg>
+      聲明異議、訴願、行政訴訟案例查詢
+    </div>
+    <div class="sidebar-item" onclick="KM.toast()">
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z" fill="currentColor"/>
+      </svg>
+      立法/監察院相關
+    </div>
+  </aside>
+  </div>
+
+  <!-- 右側 -->
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+      </div>
+      <nav class="topbar-nav">
+        <a>知識管理</a><a>系統設定</a><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
+      </nav>
+    </nav>
+
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
+        <span>專案(擋關)</span>
+      </div>
+      <!-- Sub-header -->
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C8085"/><stop offset="100%" stop-color="#3145A5"/></linearGradient></defs>
+              <path d="M21.25 18.75L23.1875 20.6875C21.9875 22.8 19.025 24.4875 16.25 24.9V13.75H20V11.25H16.25V9.775C17.7 9.25 18.75 7.875 18.75 6.25C18.75 4.1875 17.0625 2.5 15 2.5C12.9375 2.5 11.25 4.1875 11.25 6.25C11.25 7.875 12.3 9.25 13.75 9.775V11.25H10V13.75H13.75V24.9C10.975 24.4875 8.0125 22.8 6.8125 20.6875L8.75 18.75L3.75 15V18.75C3.75 23.6 9.9 27.5 15 27.5C20.1 27.5 26.25 23.6 26.25 18.75V15L21.25 18.75ZM15 5C15.6875 5 16.25 5.5625 16.25 6.25C16.25 6.9375 15.6875 7.5 15 7.5C14.3125 7.5 13.75 6.9375 13.75 6.25C13.75 5.5625 14.3125 5 15 5Z" fill="url(#g5)"/>
+            </svg>
+            海關答聯單處理-專案(擋關)
+          </div>
+          <button class="back-btn-lg" onclick="KM.goCustoms()">＜ 返回</button>
+        </div>
+      </div>
+
+      <!-- Detail Body -->
+      <div class="detail-body">
+
+        <!-- Step Bar -->
+        <div class="step-bar">
+          <div class="step-item is-active" id="step-btn-1" onclick="KM.switchStep(1)">
+            <div class="step-label">Step1.</div>
+            <div class="step-title">海關來文</div>
+            <div class="step-date">2025/10/14</div>
+          </div>
+          <div class="step-conn">→</div>
+          <div class="step-item" id="step-btn-2" onclick="KM.switchStep(2)">
+            <div class="step-label">Step2.</div>
+            <div class="step-title">產發署研議</div>
+            <div class="step-date">2025/10/25</div>
+          </div>
+          <div class="step-conn">→</div>
+          <div class="step-item" id="step-btn-3" onclick="KM.switchStep(3)">
+            <div class="step-label">Step3.</div>
+            <div class="step-title">本署回復</div>
+            <div class="step-date">2025/10/28</div>
+          </div>
+        </div>
+
+        <!-- 附件 & 關聯案例 -->
+        <div class="detail-attach-bar">
+          <span>相關附件：</span>
+          <span class="attach-pill"><span class="mi">attach_file</span> OOO文件</span>
+          <span class="attach-pill"><span class="mi">attach_file</span> OOOOO法規</span>
+          <span class="attach-sep"></span>
+          <span>關聯案例：</span>
+          <span class="link-pill" onclick="KM.openPanel()" style="cursor:pointer"><span class="mi">link</span> OOO處分案例</span>
+        </div>
+
+        <!-- ── Step 1：海關來文（單欄）────────────────────── -->
+        <div class="step-content" id="step-c-1">
+          <div class="doc-meta-bar">
+            <div class="dmb-item"><span class="dmb-key">發文文號：</span><span class="dmb-val">ATEG1140027</span></div>
+            <div class="dmb-sep"></div>
+            <div class="dmb-item"><span class="dmb-key">發文日期：</span><span class="dmb-val">114/10/14</span></div>
+          </div>
+          <div class="doc-card">
+            <div class="doc-head">
+              <div class="doc-badge doc-badge--customs">海關來文</div>
+              <div class="doc-org">基隆關桃園分關南崁業務課</div>
+            </div>
+            <div class="doc-contacts">
+              <div class="dc-row">
+                <span class="dc-key">聯絡人：</span><span class="dc-val">郭俊男</span>
+                <span class="dc-key">電話號碼：</span><span class="dc-val">03-3558584</span>
+              </div>
+              <div class="dc-row">
+                <span class="dc-key">承辦人：</span><span class="dc-val">吳佩儒</span>
+                <span class="dc-key">電話號碼：</span><span class="dc-val">03-3558220 分機316</span>
+                <span class="dc-key">電傳號碼：</span><span class="dc-val">03-3255480</span>
+              </div>
+            </div>
+            <div class="doc-section-hd">案情摘要及疑問</div>
+            <div class="doc-body-text">
+              <p>一、________股份有限公司（統一編號：________，下稱出口人）報運出口貨物1批（出口報單AT/BC/14/________號）至美國，依出口人說明案貨為出口人設計並持有模具及核心技術之專業檢測儀器，出口人於中國廣東珠海地區設有台灣投資設立之關係企業，負責執行產品之部分組裝及焊接程序。該廠之生產作業依出口人提供之設計圖面、製成規範及品質標準執行，並由台灣總公司派員監督及驗證。案貨之重要原件閃光燈管由出口人向________股份有限公司採購（料號：173.012），提供給中國合作工廠進行組裝後進口至台灣，並於台灣完成功能檢測與最終包裝作業後再出口。</p>
+              <p>二、本案出口貨品與原進口貨品之稅則號別前6位碼相異；惟其加工製程作業是否符合貴管原產地證明書及加工證明書管理辦法第5條第3項規定，屬簡易加工，視為非實質轉型？</p>
+              <p>三、檢附本案出口報單、進口報單、型錄、說明書及貨品之生產加工流程相關資料影本各1份（計36頁），請依關稅法第12條規定嚴守秘密。</p>
+              <p>四、本案貨物尚未放行，因事涉貴管規定及商民權益，請儘速惠復，俾憑辦理。</p>
+              <p style="color:#8898AA;font-size:11.5px">以下空白　本答聯單將以電子傳輸至受文單位</p>
+            </div>
+          </div>
+        </div><!-- /#step-c-1 -->
+
+        <!-- ── Step 2：產發署研議（雙欄：發文＋回文）──────── -->
+        <div class="step-content" id="step-c-2" style="display:none">
+          <div class="doc-meta-bar">
+            <div class="dmb-item"><span class="dmb-key">發文文號：</span><span class="dmb-val">1140681763</span></div>
+            <div class="dmb-sep"></div>
+            <div class="dmb-item"><span class="dmb-key">發文日期：</span><span class="dmb-val">114/10/25</span></div>
+          </div>
+          <div class="doc-grid">
+            <div class="doc-card">
+              <div class="doc-head">
+                <div class="doc-badge doc-badge--customs">發文</div>
+                <div class="doc-org">經濟部國際貿易署</div>
+              </div>
+              <div class="doc-contacts">
+                <div class="dc-row">
+                  <span class="dc-key">發文單位：</span><span class="dc-val">國際貿易署（相關文號：1140681763）</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">聯絡人：</span><span class="dc-val">余副組長明芳</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">(02)2397-7502</span>
+                  <span class="dc-key">電傳號碼：</span><span class="dc-val">(02)2397 0522</span>
+                </div>
+              </div>
+              <div class="doc-section-hd">案情摘要及疑問</div>
+              <div class="doc-body-text">
+                <p>一、________股份有限公司（下稱出口人）於114年10月7日向財政部關務署基隆關桃園分關報運出口貨品1批至美國（第AT/BC/1號出口報單），對輸出貨品是否屬原產地證明書及加工證明書管理辦法第5條第3項所稱「實質轉型」，有疑義。</p>
+                <p>二、出口人說明案貨為出口人設計並持有有模具及核心技術之專業檢測儀器，出口人於中國廣東珠海地區設有台灣投資設立之關係企業，負責執行產品之部分組裝及焊接程序。該廠之生產作業依出口人提供之設計圖面、製成規範及品質標準執行，並由台灣總公司派員監督及驗證。案貨之重要原件閃光燈管由出口人向________股份有限公司購買，提供給中國合作工廠進行組裝後進口至台灣，並於台灣完成功能檢測與最終包裝作業後再出口。</p>
+                <p>三、本案出口貨品與原進口貨品之稅則號別前6位碼相異；惟檢本案是否符合實質轉型之相關規定，仍請貴署依權責核復，俾憑辦理。</p>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="doc-head">
+                <div class="doc-badge doc-badge--response">回文</div>
+                <div class="doc-org">經濟部產業發展署</div>
+              </div>
+              <div class="doc-contacts">
+                <div class="dc-row">
+                  <span class="dc-key">回文單位：</span><span class="dc-val">電子資訊產業組蔡忠平副組長</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">聯絡人：</span><span class="dc-val">蔡忠平副組長</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">(02)2754-1255#202</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">(02)2704-9128</span>
+                </div>
+              </div>
+              <div class="doc-section-hd">權責機關答復</div>
+              <div class="doc-body-text">
+                <p>1. 依據________股份有限公司所提供之資料，本案出口貨品加工流程說明如下：一、由________股份有限公司板橋廠提供外殼模具、電路圖及PC板佈線圖，主零件氙氣燈管等關鍵組件至該公司位於中國廣東之關係企業________電器有限公司進行電路板插件加工、鎖PC板螺絲及測試。</p>
+                <p>2. 有限公司將測試後之半成品運回________技股份有限公司板橋廠進行精密調測、組立、鎖本體螺絲、複測及包裝出貨。</p>
+                <p>3. 綜上，因本案出口產品於國內僅進行測試及組立，係屬「原產地證明書及加工證明書管理辦法」第5條第3項（簡易加工）範疇，以上意見，請卓參。至於是否符合實質轉型之相關規定，仍請貴署依權責卓處。</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- /#step-c-2 -->
+
+        <!-- ── Step 3：本署回復（雙欄：海關來文＋本署）──────── -->
+        <div class="step-content" id="step-c-3" style="display:none">
+          <div class="doc-meta-bar">
+            <div class="dmb-item"><span class="dmb-key">發文文號：</span><span class="dmb-val">ATEG1140027</span></div>
+            <div class="dmb-sep"></div>
+            <div class="dmb-item"><span class="dmb-key">發文日期：</span><span class="dmb-val">114/10/14</span></div>
+            <div class="dmb-sep"></div>
+            <div class="dmb-item"><span class="dmb-key">答復日期：</span><span class="dmb-val">114/10/28</span></div>
+          </div>
+          <div class="doc-grid">
+            <div class="doc-card">
+              <div class="doc-badge doc-badge--customs">海關來文</div>
+              <div class="doc-org">基隆關桃園分關南崁業務課</div>
+              <div class="doc-contacts">
+                <div class="dc-row">
+                  <span class="dc-key">聯絡人：</span><span class="dc-val">郭俊男</span>
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">03-3558584</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">承辦人：</span><span class="dc-val">吳佩儒</span>
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">03-3558220 分機316</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">電傳號碼：</span><span class="dc-val">03-3255480</span>
+                </div>
+              </div>
+              <div class="doc-section-hd">案情摘要及疑問</div>
+              <div class="doc-body-text">
+                <p>一、________股份有限公司（統一編號：________，下稱出口人）報運出口貨物1批（出口報單AT/BC/14/________號）至美國，依出口人說明案貨為出口人設計並持有模具及核心技術之專業檢測儀器，出口人於中國廣東珠海地區設有台灣投資設立之關係企業，負責執行產品之部分組裝及焊接程序。</p>
+                <p>二、本案出口貨品與原進口貨品之稅則號別前6位碼相異；惟其加工製程作業是否符合貴管原產地證明書及加工證明書管理辦法第5條第3項規定，屬簡易加工，視為非實質轉型？</p>
+                <p>三、本案貨物尚未放行，因事涉貴管規定及商民權益，請儘速惠復，俾憑辦理。</p>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="doc-head">
+                <div class="doc-badge doc-badge--response">本署回復</div>
+                <div class="doc-org">經濟部國際貿易署貿易管理組</div>
+              </div>
+              <div class="doc-contacts">
+                <div class="dc-row">
+                  <span class="dc-key">聯絡人：</span><span class="dc-val">余副組長明芳</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">02-23977502</span>
+                  <span class="dc-key">電傳號碼：</span><span class="dc-val">02-23970522</span>
+                </div>
+                <div class="dc-row">
+                  <span class="dc-key">承辦人：</span><span class="dc-val">彭瑜</span>
+                  <span class="dc-key">電話號碼：</span><span class="dc-val">02-23510271#529</span>
+                </div>
+              </div>
+              <div class="doc-section-hd">權責機關答復</div>
+              <div class="doc-body-text">
+                <p>1. 本案經洽本部產業發展署表示，依據________股份有限公司所提供之資料，本案出口貨品由位於________股份有限公司板橋廠提供外殼模具、電路圖及PC板佈線圖，主零件氙氣燈管等關鍵組件至該公司位於中國廣東之關係企業________電器有限公司進行電路板插件加工、鎖PC板螺絲及測試。________有限公司將測試後之半成品運回________技股份有限公司板橋廠進行精密調測、組立、鎖本體螺絲、複測及包裝出貨。</p>
+                <p>2. 綜上，因本案出口產品於國內僅進行測試及組立，係屬原產地證明書及加工證明書管理辦法第5條第3項之簡易加工範疇。</p>
+                <p>3. 至於是否符合實質轉型之相關規定，仍請貴署依權責卓處。</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- /#step-c-3 -->
+
+      </div><!-- /.detail-body -->
+    </main>
+  </div><!-- /.app-right -->
+</div><!-- /#app-customs-detail -->
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  共用元件 — Dimmer ／ Side Panel ／ Modals               ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div class="dim" id="dim" onclick="KM.closePanel()"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SIDE PANEL — 案例詳情側滑
+═══════════════════════════════════════════════════════ -->
+<div class="side-panel" id="side-panel">
+
+  <!-- 頂部漸層欄 -->
+  <div class="side-panel-top">
+    <button class="side-panel-close" onclick="KM.closePanel()" aria-label="關閉">←</button>
+    <span class="side-panel-label">案例詳情</span>
+    <button class="side-panel-detail-btn" onclick="KM.goCaseDetail()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+      展開
+    </button>
+  </div>
+
+  <div class="side-panel-body">
+    <div class="side-title">未依規定標示產地：未見標示</div>
+
+    <div class="tag-row" style="margin-bottom:12px">
+      <span class="tag tag--new">近期更新</span>
+      <span class="tag tag--lt">從輕</span>
+      <span class="tag tag--pe">處以罰緩 12 萬</span>
+    </div>
+
+    <div class="case-meta" style="font-size:12.5px;margin-bottom:14px">
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">發文字號：</span><span class="meta-val">貿管理字第114704321號</span></div>
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">處分日期：</span><span class="meta-val">中華民國114年11月25日</span></div>
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">處分對象：</span><span class="meta-val">OOO食品公司</span></div>
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">關鍵貨品：</span><span class="meta-val">食品</span></div>
+      <div class="meta-row"><span class="meta-key" style="min-width:72px">其他備註：</span><span class="meta-val">出口</span></div>
+    </div>
+
+    <div class="attach-row" style="margin-bottom:6px">
+      <span class="row-label">相關附件：</span>
+      <span class="attach-pill"><span class="mi">attach_file</span> OOO聲明書</span>
+      <span class="attach-pill"><span class="mi">attach_file</span> OOOOO調查資料</span>
+    </div>
+    <div class="link-row" style="margin-bottom:14px">
+      <span class="row-label">關聯案例：</span>
+      <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
+    </div>
+
+    <hr class="side-divider">
+
+    <div style="margin-bottom:16px">
+      <div class="side-section-title">主旨：</div>
+      <div class="side-text">**貴公司（統一編號：____________，代表人：________）報運出口高頻治具線等貨品1批至泰國，產地標示不實，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）12萬元罰鍰，請查照。</div>
+    </div>
+
+    <div>
+      <div class="side-section-title">說明：</div>
+      <ol class="side-list">
+        <li>依據財政部關務署基隆關114年10月（略）日基普五字第11410（略）號函、114年11月7日基普五字第11410（略）號函及貴公司114年10月（略）日說明函辦理。</li>
+        <li>貴公司114年1月3日向財政部關務署基隆關報運出口高頻治具線等貨品1批（第AW/14/345/MA083號出口報單），統計方式為81（已完稅進口之外貨轉售出口），經查驗結果，外箱標示「MADE IN TAIWAN」字樣，貨品本體或內包裝皆未見產地標示，據貴公司說明，自承前揭項次貨物產地為CHINA，違反貿易法，移請本署核處。</li>
+        <li>依據貿易法第17條第2款規定，出進口人不得有產地標示不實之行為。依貿易法第28條規定，本署得予警告、處新臺幣6萬元以上300萬元以下罰鍰或停止其1個月以上1年以下出輸、輸入或輸出入貨品；其情節重大者，本署並得廢止其出進廠商登記。</li>
+        <li>四、貴公司前揭函以，案貨原始部分包裝同時包含國貨及洋貨，實際產地為MADE IN TAIWAN/CHINA，故報單以G5/02與G3/81之統計方式作區分；因承辦人員首次辦理出口報關，經驗不足，致部分外貨包裝漏標示「MADE IN CHINA」。</li>
+      </ol>
+    </div>
+  </div><!-- /.side-panel-body -->
+</div><!-- /.side-panel -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — 進階搜尋
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal-adv" onclick="KM.overlayClick(event,'modal-adv')">
+  <div class="modal">
+
+    <div class="modal-header">
+      <span class="modal-title">進階搜尋</span>
+      <button class="modal-close" onclick="KM.closeModal('modal-adv')"><span class="mi">close</span></button>
+    </div>
+
+    <!-- 搜尋模式 Tabs -->
+    <div class="modal-tabs">
+      <button class="modal-tab is-active" onclick="KM.setSearchMode(this)">全文檢索</button>
+      <button class="modal-tab" onclick="KM.setSearchMode(this)">僅限摘要</button>
+      <button class="modal-tab" onclick="KM.setSearchMode(this)">僅限內文(OCR)</button>
+    </div>
+
+    <!-- 關鍵字輸入 -->
+    <div class="modal-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="adv-keyword" placeholder="輸入關鍵字，可透過分號多筆篩選" value="3123213213,不實,轉型">
+    </div>
+
+    <!-- 日期範圍 -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">日期範圍</div>
+        <select class="filter-select" id="date-range-select" onchange="KM.handleDateRange(this)">
+          <option value="全部">全部</option>
+          <option value="近一個月">近一個月</option>
+          <option value="近三個月">近三個月</option>
+          <option value="近半年">近半年</option>
+          <option value="近一年" selected>近一年 (2026)</option>
+          <option value="近兩年">近兩年</option>
+          <option value="近三年">近三年</option>
+          <option value="自訂區間">自訂區間</option>
+        </select>
+      </div>
+      <div class="filter-group" id="date-custom-row">
+        <div class="filter-label">自訂起訖日</div>
+        <input type="text" id="date-picker-input" class="filter-select"
+               placeholder="選擇日期區間" readonly disabled
+               style="width:100%;cursor:pointer">
+      </div>
+    </div>
+
+    <!-- 機關 / 對象 -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label is-required">機關</div>
+        <select class="filter-select">
+          <option>全部</option>
+          <option selected>海關</option>
+          <option>國際貿易署</option>
+          <option>財政部</option>
+          <option>農業部動植物防疫檢疫署</option>
+          <option>衛生福利部食品藥物管理署</option>
+          <option>經濟部標準檢驗局</option>
+          <option>環境部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">對象（報關行 / 廠商）</div>
+        <select class="filter-select">
+          <option>全部</option>
+          <option selected>OOO食品股份有限公司</option>
+          <option>ABC國際貿易有限公司</option>
+          <option>XYZ進出口企業社</option>
+          <option>台灣製造股份有限公司</option>
+          <option>全球物流有限公司</option>
+          <option>遠東報關行</option>
+          <option>太平洋通關服務</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 涉及法規 -->
+    <div style="margin-bottom:14px">
+      <div class="filter-label" style="margin-bottom:5px">涉及法規</div>
+      <div class="tag-area" id="law-tags" onclick="KM.openLawModal('law-tags', 'modal-adv')">
+        <span class="law-ph" style="color:#B0BECA;font-size:12.5px;pointer-events:none">點擊選擇涉及法規...</span>
+      </div>
+    </div>
+
+    <!-- 貨品類別 / 裁罰金額 -->
+    <div class="filter-row filter-row--align-end">
+      <div class="filter-group">
+        <div class="filter-label">貨品類別</div>
+        <select class="filter-select">
+          <option value="" selected disabled>請選擇</option>
+          <option>農產品及食品</option>
+          <option>紡織品及成衣</option>
+          <option>電子及電機產品</option>
+          <option>機械設備</option>
+          <option>化學品及塑橡膠</option>
+          <option>金屬及鋼鐵製品</option>
+          <option>木材及紙製品</option>
+          <option>汽車及零配件</option>
+          <option>醫療器材及藥品</option>
+          <option>其他製造業產品</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">裁罰金額</div>
+        <div class="penalty-row">
+          <label><input type="checkbox" id="penalty-all"> 全部</label>
+          <label><input type="checkbox" id="penalty-1" checked> 3萬~6萬</label>
+          <label><input type="checkbox" id="penalty-2"> 9萬~15萬</label>
+          <label><input type="checkbox" id="penalty-3" checked> 15萬以上</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn--clear" onclick="KM.clearAdvanced()">清除</button>
+      <button class="btn btn--search" onclick="KM.submitSearch()">搜尋</button>
+    </div>
+
+  </div><!-- /.modal -->
+</div><!-- /#modal-adv -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — 選擇涉及法規
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal-law" onclick="KM.overlayClick(event,'modal-law')">
+  <div class="modal modal--sm">
+
+    <div class="modal-header">
+      <span class="modal-title">選擇涉及法規</span>
+      <button class="modal-close" onclick="KM.closeLawModal()"><span class="mi">close</span></button>
+    </div>
+
+    <div class="modal-search" style="margin-bottom:10px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="搜尋關鍵字..." oninput="KM.filterLawList(this.value)">
+    </div>
+
+    <div class="law-list" id="law-list">
+      <div class="law-item is-checked" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox" checked>
+        <label>實質轉型</label>
+      </div>
+      <div class="law-item is-checked" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox" checked>
+        <label>產地標示不實(1)：他國產製或國貨標成他國</label>
+      </div>
+      <div class="law-item" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox">
+        <label>產地標示不實(2)：他國產製標成臺灣(加強管理貨品、輸美案)</label>
+      </div>
+      <div class="law-item" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox">
+        <label>產地標示不實(3)：他國產製標成臺灣(其他)</label>
+      </div>
+      <div class="law-item" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox">
+        <label>足以使人誤認產地：有標示但產生錯誤認知</label>
+      </div>
+      <div class="law-item" onclick="KM.toggleLawItem(this)">
+        <input type="checkbox">
+        <label>商標/仿冒(侵權)</label>
+      </div>
+    </div>
+
+    <div class="law-footer">
+      <span class="law-count">已選擇 <strong id="law-count">2</strong> 個單位</span>
+      <button class="btn btn--search" onclick="KM.confirmLaws()">確認</button>
+    </div>
+
+  </div><!-- /.modal -->
+</div><!-- /#modal-law -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — 一鍵下載
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal-download" onclick="KM.overlayClick(event,'modal-download')">
+  <div class="modal modal--download">
+
+    <div class="modal-header">
+      <span class="modal-title">一鍵下載</span>
+      <button class="modal-close" onclick="KM.closeModal('modal-download')"><span class="mi">close</span></button>
+    </div>
+
+    <div class="dl-summary">
+      <span>共 <strong id="dl-total-count">13</strong> 個項目，約 <strong>28.4 MB</strong></span>
+      <label class="dl-select-all">
+        <input type="checkbox" id="dl-check-all" checked onchange="KM.dlToggleAll(this.checked)">
+        全選 / 取消全選
+      </label>
+    </div>
+
+    <div class="dl-list">
+
+      <!-- 案件 1 -->
+      <div class="dl-group">
+        <div class="dl-group-hd" onclick="KM.dlToggleGroup(this)">
+          <input type="checkbox" class="dl-grp-cb" checked onclick="event.stopPropagation();KM.dlGroupCb(this)">
+          <span class="dl-group-label">貿管理字第114704321號 · OOO食品公司</span>
+          <span class="dl-badge dl-badge--lt">從輕</span>
+          <span class="dl-count">3 個</span>
+          <span class="dl-checked-badge" style="display:none"></span>
+          <span class="mi dl-chevron">expand_more</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">picture_as_pdf</span> 案件資訊摘要.pdf</span>
+          <span class="dl-type">案件資訊</span>
+          <span class="dl-size">85 KB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> OOO聲明書.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">2.1 MB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> OOOOO調查資料.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">5.6 MB</span>
+        </div>
+      </div>
+
+      <!-- 案件 2 -->
+      <div class="dl-group">
+        <div class="dl-group-hd" onclick="KM.dlToggleGroup(this)">
+          <input type="checkbox" class="dl-grp-cb" checked onclick="event.stopPropagation();KM.dlGroupCb(this)">
+          <span class="dl-group-label">貿管理字第114704321號 · OOO食品公司</span>
+          <span class="dl-badge dl-badge--hv">從重</span>
+          <span class="dl-count">3 個</span>
+          <span class="dl-checked-badge" style="display:none"></span>
+          <span class="mi dl-chevron">expand_more</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">picture_as_pdf</span> 案件資訊摘要.pdf</span>
+          <span class="dl-type">案件資訊</span>
+          <span class="dl-size">92 KB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> OOO聲明書.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">1.8 MB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> OOOOO調查資料.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">4.3 MB</span>
+        </div>
+      </div>
+
+      <!-- 案件 3 -->
+      <div class="dl-group">
+        <div class="dl-group-hd" onclick="KM.dlToggleGroup(this)">
+          <input type="checkbox" class="dl-grp-cb" checked onclick="event.stopPropagation();KM.dlGroupCb(this)">
+          <span class="dl-group-label">貿管理字第114703105號 · ABC科技股份有限公司</span>
+          <span class="dl-badge dl-badge--lt">從輕</span>
+          <span class="dl-count">3 個</span>
+          <span class="dl-checked-badge" style="display:none"></span>
+          <span class="mi dl-chevron">expand_more</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">picture_as_pdf</span> 案件資訊摘要.pdf</span>
+          <span class="dl-type">案件資訊</span>
+          <span class="dl-size">78 KB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> 進口報單影本.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">3.2 MB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> 產地證明文件.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">1.4 MB</span>
+        </div>
+      </div>
+
+      <!-- 案件 4 -->
+      <div class="dl-group">
+        <div class="dl-group-hd" onclick="KM.dlToggleGroup(this)">
+          <input type="checkbox" class="dl-grp-cb" checked onclick="event.stopPropagation();KM.dlGroupCb(this)">
+          <span class="dl-group-label">貿管理字第114706788號 · XYZ農業出口有限公司</span>
+          <span class="dl-badge dl-badge--hv">從重</span>
+          <span class="dl-count">3 個</span>
+          <span class="dl-checked-badge" style="display:none"></span>
+          <span class="mi dl-chevron">expand_more</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">picture_as_pdf</span> 案件資訊摘要.pdf</span>
+          <span class="dl-type">案件資訊</span>
+          <span class="dl-size">95 KB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> 出口許可申請文件.pdf</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">4.8 MB</span>
+        </div>
+        <div class="dl-item">
+          <input type="checkbox" class="dl-item-cb" checked onchange="KM.dlItemChange()">
+          <span class="dl-name"><span class="mi">attach_file</span> 行政裁量基準表.xlsx</span>
+          <span class="dl-type">附件</span>
+          <span class="dl-size">520 KB</span>
+        </div>
+      </div>
+
+    </div><!-- /.dl-list -->
+
+    <div class="modal-footer" style="justify-content:space-between">
+      <span style="font-size:12px;color:#8898AA">已選 <strong id="dl-selected-count">13</strong> 個項目</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn--clear" onclick="KM.closeModal('modal-download')">取消</button>
+        <button class="btn btn--search" onclick="KM.dlDownload()">↓ 打包下載</button>
+      </div>
+    </div>
+
+  </div><!-- /.modal -->
+</div><!-- /#modal-download -->
+
+
+<!-- JS -->
+<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
+<script>
+  // 案件日期 — 單日選取
+  flatpickr('#nc-case-date', {
+    mode         : 'single',
+    showMonths   : 1,
+    dateFormat   : 'Y/m/d',
+    locale       : 'zh_tw',
+    disableMobile: true,
+    appendTo     : document.body,
+    onReady(_, __, fp) {
+      fp.calendarContainer.style.zIndex = '9999';
+    }
+  });
+
+  // Flatpickr 雙月曆日期範圍選擇器
+  window._datePicker = flatpickr('#date-picker-input', {
+    mode         : 'range',
+    showMonths   : 2,
+    dateFormat   : 'Y/m/d',
+    locale       : 'zh_tw',
+    disableMobile: true,
+    appendTo     : document.body,   // 掛到 body，避免被 modal z-index 蓋住
+    position     : 'auto',
+    onReady(_, __, fp) {
+      fp.calendarContainer.style.zIndex = '9999';
+    },
+    onChange(dates, dateStr) {
+      const input = document.getElementById('date-picker-input');
+      if (input) input.value = dateStr;
+    }
+  });
+</script>
+</body>
+</html>

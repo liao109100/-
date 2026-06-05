@@ -1,0 +1,14 @@
+// ============================================================
+//  main.scss
+//  Entry Point — @forward all partials
+//
+//  編譯指令（需安裝 sass）：
+//    sass scss/main.scss css/main.css --style=compressed
+//    sass --watch scss/main.scss css/main.css
+// ============================================================
+
+@use 'variables';   // Design tokens（SCSS 變數）
+@use 'base';        // Reset + :root CSS vars + 動畫
+@use 'home';        // 首頁（Home Dashboard）
+@use 'layout';      // App 佈局（Topbar / Sidebar / Main / Search）
+@use 'components';  // Tree / Cards / Side Panel / Modals / Buttons

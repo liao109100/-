@@ -1,0 +1,2017 @@
+// ============================================================
+//  _components.scss
+//  Tree Panel、Case Cards、Side Panel、Modals、Buttons
+// ============================================================
+
+@use 'variables' as *;
+
+// ══════════════════════════════════════════════════════════
+//  Tree Panel（Figma: bg-[#ebf1f7] rounded-[10px] w-[300px]）
+// ══════════════════════════════════════════════════════════
+.tree-panel {
+  width        : $tree-w;    // 300px
+  flex-shrink  : 0;
+  background   : #EBF1F7;   // Figma: #ebf1f7
+  border       : none;       // 去除 border-right
+  border-radius: 10px;       // Figma: rounded-[10px]
+  padding      : 20px;       // Figma: p-[20px]
+  overflow-y   : auto;
+}
+
+.tree-heading {
+  text-align   : center;
+  font-size    : 18px;
+  font-weight  : 700;
+  color        : $tx-main;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Tabs（Figma: 並排不留間距，active = #0f3f85）
+.tree-tabs {
+  display      : flex;
+  gap          : 0;
+  margin-bottom: 14px;
+  border-radius: 6px;
+  overflow     : hidden;
+  background   : rgba(226, 232, 240, 0.5);
+}
+
+.tree-tab {
+  flex       : 1;
+  height     : 50px;         // Figma: h-[50px]
+  font-size  : 16px;
+  font-weight: 400;
+  cursor     : pointer;
+  border     : none;
+  font-family: inherit;
+  transition : all $ease-fast;
+  text-align : center;
+
+  &.is-active {
+    background   : $primary;  // Figma: #0f3f85
+    color        : white;
+    border-radius: 6px 0 0 6px;
+    font-weight: 700;
+  }
+
+  &.is-inactive {
+    background   : $bg-white;
+    color        : #64748B;
+    border-radius: 0 6px 6px 0;
+
+    &:hover {
+      background: #F8F9FA;
+      color     : $tx-main;
+    }
+  }
+}
+
+.tree-item {
+  display      : flex;
+  align-items  : center;
+  gap          : 10px;       // Figma: gap-[10px]
+  padding      : 14px 10px;  // Figma: px-[10px] py-[16px]
+  border-radius: 5px;
+  cursor       : pointer;
+  font-size    : 15px;
+  color        : $tx-main;
+  transition   : all $ease-fast;
+  line-height  : 1.4;
+  margin-bottom: 2px;
+  border       : 1px solid transparent;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.65);
+    color     : $tx-main;
+  }
+
+  // Active（Figma: bg-white + border-[#0f3f85] + blue text）
+  &.is-active {
+    background  : $bg-white;
+    color       : $primary;
+    border-color: $primary;
+    font-weight: bold;
+
+    .tree-count {
+      background: $primary;
+      color     : white;
+    }
+
+  }
+}
+
+.tree-folder {
+  font-size  : 0;
+  flex-shrink: 0;
+  color      : inherit;
+
+  &::before {
+    font-family : 'Material Icons Round';
+    font-size   : 20px;
+    line-height : 1;
+    content     : 'folder_open';
+    display     : block;
+  }
+}
+
+.tree-icon,
+.tree-item i {
+  flex-shrink    : 0;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+
+  img {
+    width     : 18px;
+    height    : 18px;
+    object-fit: contain;
+    display   : block;
+  }
+}
+
+// Count badge（Figma: 22px circle）
+.tree-count {
+  margin-left    : auto;
+  flex-shrink    : 0;
+  background     : #E1E1E1;  // Figma: inactive = #e1e1e1
+  color          : $tx-main;
+  font-size      : 11px;
+  font-weight    : 700;
+  border-radius  : 50%;
+  width          : 22px;
+  height         : 22px;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Cases Panel（Figma: bg-white）
+// ══════════════════════════════════════════════════════════
+.cases-panel {
+  flex          : 1;
+  overflow-y    : auto;
+  padding       : 0;
+  background    : $bg-white;  // Figma: white
+  display       : flex;
+  flex-direction: column;
+}
+
+.cases-header {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  margin-bottom  : 10px;
+  flex-wrap      : wrap;
+  gap            : 8px;
+  position       : sticky;
+  top            : 0;
+  background     : $bg-white;
+  padding-bottom : 4px;
+  z-index        : 10;
+}
+
+// Section title（Figma: #0f3f85 bold 24px）
+.cases-title {
+  font-size  : 22px;
+  font-weight: 700;
+  color      : $primary;   // Figma: #0f3f85
+  display    : flex;
+  align-items: center;
+  gap        : 7px;
+
+  svg { color: $primary; }
+}
+
+.btn-group { display: flex; gap: 8px; }
+
+// ── Buttons ──────────────────────────────────────────────
+.btn {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 5px;
+  padding      : 10px 14px;
+  border-radius: $r-sm;
+  font-size    : 12px;
+  font-weight  : 600;
+  cursor       : pointer;
+  border       : none;
+  font-family  : inherit;
+  transition   : all 0.13s ease;
+
+  // 處理流程 — 填充藍（Figma: bg-[#0f3f85]）
+  &--blue-outline,
+  &--blue-fill {
+    background: $primary;
+    color     : white;
+    border    : none;
+
+    &:hover { background: #082d63; }
+  }
+
+  // + 新增範本/案例 — 填充 teal（Figma: bg-[#2c8086]）
+  &--gradient {
+    background: #2C8086;
+    color     : white;
+    border    : none;
+
+    &:hover { opacity: 0.88; }
+  }
+
+  // 一鍵下載 — 深色外框（Figma: border-[#2f3d50]）
+  &--gray-outline {
+    background: $bg-white;
+    color     : $tx-main;
+    border    : 1px solid $tx-main;
+
+    &:hover {
+      background  : #F5F5F5;
+    }
+  }
+
+  // Modal 清除
+  &--clear {
+    background   : $bg-white;
+    color        : $tx-mid;
+    border       : 1.5px solid $bdr;
+    padding      : 8px 20px;
+    border-radius: $r-sm;
+    font-size    : 13px;
+
+    &:hover {
+      border-color: $teal;
+      color       : $teal;
+    }
+  }
+
+  // Modal 搜尋
+  &--search {
+    background   : $grad-h;
+    color        : white;
+    border       : none;
+    padding      : 8px 24px;
+    border-radius: $r-sm;
+    font-size    : 13px;
+    font-weight  : 700;
+
+    &:hover { opacity: 0.9; }
+  }
+}
+
+// ── Case Card（Figma: border-[#cbcbcb] px-[30px] py-[20px] rounded-[5px]）
+.case-card {
+  background   : $bg-white;
+  border-radius: 5px;
+  padding      : 20px 30px;
+  margin-bottom: 12px;
+  box-shadow   : none;
+  cursor       : pointer;
+  border       : 1px solid #CBCBCB;
+  transition   : box-shadow 0.17s ease, border-color 0.17s ease,
+                 opacity 0.18s ease, transform 0.18s ease;
+
+  &:hover {
+    box-shadow  : $sh2;
+    border :2px solid;
+    border-color: $grad-start  ;
+  }
+
+  &.is-filtered-out {
+    display: none;
+  }
+}
+
+// Tags
+.tag-row {
+  display      : flex;
+  flex-wrap    : wrap;
+  align-items  : center;
+  gap          : 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  display      : inline-flex;
+  align-items  : center;
+  padding      : 4px 10px;
+  border-radius: $r-pill;
+  font-size    : 12px;
+  font-weight  : 700;
+  white-space  : nowrap;
+
+  // 近期更新（Figma: bg-[#edf7f6] text-[#16806d] rounded-[2px] 矩形）
+  &--new  {
+    background   : $tag-new-bg;   // #EDF7F6
+    color        : $green;         // #16806D
+    border-radius: 2px;
+    padding      : 4px 8px;
+    font-weight  : 700;
+    font-size    : 12px;
+  }
+
+  // 從輕（Figma: bg-[#16806d] white filled pill）
+  &--lt   {
+    background: $green;    // #16806D filled
+    color     : white;
+  }
+
+  // 從重（Figma: bg-[#ff4d4d] white filled pill）
+  &--hv   {
+    background: $red;      // #FF4D4D filled
+    color     : white;
+    border    : none;
+  }
+
+  // 處以罰緩（Figma: bold green text, same line as 從輕）
+  &--pe   {
+    background: none;
+    padding   : 0;
+    color     : $green;    // #16806D
+    font-weight: 700;
+    font-size : 13px;
+  }
+
+  // 依項次（Figma: bold red text, same line as 從重）
+  &--hpe  {
+    background: none;
+    padding   : 0;
+    color     : $red;      // #FF4D4D
+    font-weight: 700;
+    font-size : 13px;
+  }
+}
+
+// Meta 資料（Figma: 14px gap-[8px]）
+.case-meta {
+  display       : flex;
+  flex-direction: column;
+  gap           : 8px;     // Figma: gap-[8px]
+  font-size     : 14px;    // Figma: text-[14px]
+}
+
+.meta-row { display: flex; gap: 4px; }
+.meta-key { font-weight: 700; color: $tx-main; white-space: nowrap; flex-shrink: 0; font-size: 14px; }
+.meta-val { color: $tx-main; font-size: 14px; }
+
+// 分隔線（Figma: divider between meta and summary）
+.meta-divider {
+  border    : none;
+  border-top: 1px solid $bdr;
+  margin    : 12px 0;
+}
+
+.section-label {
+  font-size    : 14px;     // Figma: 14px
+  font-weight  : 700;
+  color        : $tx-main;
+  margin       : 0 0 6px;
+}
+
+.case-summary {
+  font-size  : 14px;       // Figma: 14px
+  color      : $tx-mid;
+  line-height: 1.72;
+}
+
+// 搜尋結果 snippet（Figma: bg-[#f5f9ff] border-l-4 border-[#0f3f85] pl-[24px]）
+.snippet-block {
+  background   : #F5F9FF;              // Figma: #f5f9ff
+  border-left  : 4px solid $primary;   // Figma: border-l-4 #0f3f85
+  border-radius: 4px;                  // Figma: rounded-[4px]
+  padding      : 12px 20px 12px 24px;  // Figma: pl-[24px] pr-[20px] py-[12px]
+  margin       : 12px 0;
+  font-size    : 14px;
+  color        : $tx-main;
+  line-height  : 1.63;
+  display      : none;
+
+  &.is-visible { display: block; }
+
+  &-label {
+    font-size    : 12px;
+    font-weight  : 700;
+    color        : $tx-main;   // Figma: dark text（不是 teal）
+    margin-bottom: 8px;
+  }
+
+  mark {
+    background   : $hl;        // Figma: #fef08a
+    color        : $tx-main;
+    padding      : 0 2px;
+    border-radius: 2px;
+    font-weight  : 600;
+  }
+}
+
+// 附件 & 關聯案例列
+.attach-row,
+.link-row {
+  display    : flex;
+  align-items: center;
+  gap        : 10px;
+  flex-wrap  : wrap;
+  margin-top : 12px;
+  font-size  : 13px;
+}
+
+.row-label { color: $tx-main; font-weight: 700; flex-shrink: 0; }
+
+// 附件 pill（Figma: bg-white border-[#cbcbcb] px-[16px] py-[8px] rounded-[5px]）
+.attach-pill {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 6px;
+  background   : $bg-white;
+  border       : 1px solid #CBCBCB;
+  border-radius: 5px;
+  padding      : 8px 16px;
+  color        : $tx-main;
+  font-size    : 12px;
+  cursor       : pointer;
+  transition   : all $ease-fast;
+
+  &:hover {
+    background  : #F5F9FF;
+    border-color: $primary;
+    color       : $primary;
+  }
+}
+
+// 關聯案例 pill（Figma: bg-[#f5f9ff] border-l-3 border-[#0f3f85] px-[16px] py-[8px]）
+.link-pill {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 4px;
+  background   : #F5F9FF;
+  border-left  : 3px solid $primary;
+  border-radius: 4px;
+  padding      : 8px 16px;
+  color        : $tx-main;
+  font-size    : 12px;
+  cursor       : pointer;
+  transition   : opacity $ease-fast;
+
+  &:hover { opacity: 0.75; }
+}
+
+// ══════════════════════════════════════════════════════════
+//  Side Panel
+// ══════════════════════════════════════════════════════════
+.dim {
+  position: fixed;
+  inset   : 0;
+  background: rgba(000, 000, 000, 0.4);
+  z-index : 299;
+  display : none;
+
+  &.is-open { display: block; }
+}
+
+.side-panel {
+  position    : fixed;
+  top         : $topbar-h;
+  right       : 0;
+  width       : 0;
+  height      : calc(100vh - #{$topbar-h});
+  background  : $bg-white;
+  z-index     : 300;
+  box-shadow  : -4px 0 28px rgba(44, 63, 90, 0.18);
+  border-left : 1px solid $bdr;
+  display     : flex;
+  flex-direction: column;
+  overflow    : hidden;
+  transition  : width $ease-panel;
+
+  &.is-open { width: $side-panel-w; }
+}
+
+// Panel 頂部（漸層）
+.side-panel-top {
+  display        : flex;
+  align-items    : center;
+  gap            : 10px;
+  background     : $grad-end;
+  height         : 50px;
+  flex-shrink    : 0;
+  padding        : 0 16px;
+}
+
+.side-panel-close {
+  background    : none;
+  border        : none;
+  cursor        : pointer;
+  color         : white;
+  font-size     : 18px;
+  display       : flex;
+  align-items   : center;
+  justify-content: center;
+  width         : 30px;
+  height        : 30px;
+  border-radius : 50%;
+  transition    : background $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.2); }
+}
+
+.side-panel-label { font-size: 16px; font-weight: 600; color: rgba(255, 255, 255, 0.88); flex: 1; }
+
+.side-panel-detail-btn {
+  display      : flex;
+  align-items  : center;
+  gap          : 5px;
+  padding      : 5px 12px;
+  background   : rgba(255, 255, 255, 0.18);
+  border       : 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: $r-sm;
+  color        : white;
+  font-size    : 12px;
+  font-family  : inherit;
+  cursor       : pointer;
+  white-space  : nowrap;
+  transition   : background $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.30); }
+}
+
+.cases-empty {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  gap            : 10px;
+  padding        : 60px 20px;
+  color          : $tx-light;
+  font-size      : 13px;
+
+  svg  { width: 44px; height: 44px; opacity: 0.35; }
+  p    { margin: 0; }
+  &--hidden { display: none; }
+}
+
+.side-panel-body {
+  padding   : 20px 22px 30px;
+  overflow-y: auto;
+  flex      : 1;
+}
+
+.side-title { font-size: 16px; font-weight: 700; color: $tx-main; margin-bottom: 9px; }
+
+.side-divider { border: none; border-top: 1px solid $bdr; margin: 14px 0; }
+
+.side-section-title { font-size: 13px; font-weight: 700; color: $tx-main; margin-bottom: 7px; }
+
+.side-text { font-size: 12.5px; color: $tx-mid; line-height: 1.72; }
+
+.side-list {
+  padding-left  : 18px;
+  display       : flex;
+  flex-direction: column;
+  gap           : 9px;
+
+  li { font-size: 12px; color: $tx-mid; line-height: 1.72; }
+}
+
+// ══════════════════════════════════════════════════════════
+//  Modals
+// ══════════════════════════════════════════════════════════
+.overlay {
+  position       : fixed;
+  inset          : 0;
+  background     : rgba(44, 63, 90, 0.42);
+  display        : none;
+  align-items    : center;
+  justify-content: center;
+  z-index        : 500;
+  backdrop-filter: blur(3px);
+
+  &.is-open { display: flex; }
+}
+
+.modal {
+  background   : $bg-white;
+  border-radius: $r-xl;
+  box-shadow   : $sh3;
+  width        : 100%;
+  max-width    : 820px;
+  padding      : 30px 36px 28px;
+  animation    : slideUp 0.2s cubic-bezier(0, 0, 0.2, 1);
+  max-height   : 90vh;
+  overflow-y   : auto;
+
+  &--sm { max-width: 468px; }
+}
+
+.modal-header {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  margin-bottom  : 18px;
+}
+
+// 標題 — teal 色
+.modal-title { font-size: 17px; font-weight: 700; color: $teal; }
+
+.modal-close {
+  background    : none;
+  border        : none;
+  cursor        : pointer;
+  width         : 30px;
+  height        : 30px;
+  border-radius : 50%;
+  display       : flex;
+  align-items   : center;
+  justify-content: center;
+  color         : $tx-light;
+  font-size     : 16px;
+  transition    : all $ease-fast;
+
+  &:hover { background: $bg-page; color: $tx-main; }
+}
+
+// Mode tabs（border 切割）
+.modal-tabs {
+  display      : flex;
+  gap          : 0;
+  border       : 1.5px solid #CDD8E8;
+  border-radius: $r-sm;
+  overflow     : hidden;
+  margin-bottom: 18px;
+  width        : fit-content;
+}
+
+.modal-tab {
+  padding      : 7px 18px;
+  font-size    : 12.5px;
+  font-weight  : 500;
+  cursor       : pointer;
+  border       : none;
+  background   : $bg-white;
+  font-family  : inherit;
+  color        : $tx-mid;
+  transition   : all $ease-fast;
+  border-right : 1px solid #CDD8E8;
+
+  &:last-child { border-right: none; }
+
+  &.is-active {
+    background : $grad-h;
+    color      : white;
+    font-weight: 700;
+  }
+}
+
+// 搜尋框（modal 內）
+.modal-search {
+  display      : flex;
+  align-items  : center;
+  gap          : 8px;
+  border       : 1.5px solid #CDD8E8;
+  border-radius: $r-sm;
+  padding      : 10px 14px;
+  margin-bottom: 15px;
+  transition   : border-color 0.13s ease;
+
+  &:focus-within { border-color: $blue; }
+
+  svg   { color: $tx-light; flex-shrink: 0; }
+
+  input {
+    border    : none;
+    outline   : none;
+    background: transparent;
+    font-size : 13px;
+    font-family: inherit;
+    color     : $tx-main;
+    flex      : 1;
+
+    &::placeholder { color: #B0BECA; }
+  }
+}
+
+// Filter 欄位
+.filter-row {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  gap                  : 12px;
+  margin-bottom        : 14px;
+
+  &--align-end { align-items: end; }
+}
+
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+
+.filter-label {
+  font-size  : 12px;
+  font-weight: 700;
+  color      : $tx-main;
+
+  &.is-required::before { content: '* '; color: $red; }
+}
+
+input[type="date"].filter-select {
+  cursor     : pointer;
+  font-family: inherit;
+  min-width  : 0;
+}
+
+.filter-select,
+.filter-date {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  border         : 1.5px solid #CDD8E8;
+  border-radius  : $r-sm;
+  padding        : 8px 12px;
+  cursor         : pointer;
+  font-size      : 12.5px;
+  color          : $tx-main;
+  transition     : border-color 0.13s ease;
+  gap            : 8px;
+  background     : $bg-white;
+
+  &:hover { border-color: $blue; }
+
+  span { flex: 1; }
+}
+
+select.filter-select {
+  appearance     : none;
+  -webkit-appearance: none;
+  width          : 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23566578' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat  : no-repeat;
+  background-position: right 12px center;
+  padding-right  : 32px;
+  font-family    : inherit;
+  outline        : none;
+
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(15,63,133,0.08); }
+}
+
+// 涉及法規 tag 區域
+.tag-area {
+  border       : 1.5px solid #CDD8E8;
+  border-radius: $r-sm;
+  padding      : 8px 12px;
+  min-height   : 42px;
+  display      : flex;
+  flex-wrap    : wrap;
+  gap          : 6px;
+  align-items  : center;
+  cursor       : pointer;
+  background   : #FAFBFD;
+  transition   : border-color 0.13s ease;
+
+  &:hover { border-color: $blue; }
+}
+
+// 法規 tag pill（漸層）
+.filter-tag {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 4px;
+  background   : $teal;
+  color        : white;
+  border-radius: $r-pill;
+  padding      : 3px 8px 3px 11px;
+  font-size    : 11.5px;
+  font-weight  : 500;
+}
+
+.filter-tag-remove {
+  background    : rgba(255, 255, 255, 0.3);
+  border        : none;
+  cursor        : pointer;
+  border-radius : 50%;
+  width         : 15px;
+  height        : 15px;
+  display       : flex;
+  align-items   : center;
+  justify-content: center;
+  color         : white;
+  font-size     : 11px;
+  padding       : 0;
+  transition    : background $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.5); }
+}
+
+// 裁罰金額 checkboxes
+.penalty-row {
+  display    : flex;
+  align-items: center;
+  gap        : 14px;
+  flex-wrap  : wrap;
+
+  label {
+    display    : flex;
+    align-items: center;
+    gap        : 5px;
+    font-size  : 12.5px;
+    color      : $tx-main;
+    cursor     : pointer;
+    user-select: none;
+  }
+
+}
+
+.modal-footer {
+  display        : flex;
+  justify-content: flex-end;
+  gap            : 10px;
+  margin-top     : 20px;
+  padding-top    : 15px;
+  border-top     : 1px solid $bdr;
+}
+
+// ── 法規選擇列表 ──────────────────────────────────────────
+.law-list {
+  display       : flex;
+  flex-direction: column;
+  gap           : 2px;
+  max-height    : 270px;
+  overflow-y    : auto;
+}
+
+.law-item {
+  display      : flex;
+  align-items  : center;
+  gap          : 9px;
+  padding      : 9px 11px;
+  border-radius: $r-sm;
+  cursor       : pointer;
+  transition   : background 0.1s ease;
+
+  &:hover      { background: #F5F8FD; }
+  &.is-checked { background: #EBF2FF; }
+
+  label {
+    font-size  : 12.5px;
+    color      : $tx-main;
+    cursor     : pointer;
+    flex       : 1;
+    line-height: 1.4;
+  }
+
+  &.is-checked label { color: $blue; font-weight: 600; }
+}
+
+.law-footer {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  padding-top    : 13px;
+  margin-top     : 8px;
+  border-top     : 1px solid $bdr;
+}
+
+.law-count      { font-size: 12.5px; color: $tx-mid; }
+
+// ============================================================
+//  一鍵下載 Modal
+// ============================================================
+
+.modal--download { max-width: 620px; }
+
+.dl-summary {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  background     : #F0F5FC;
+  border-radius  : $r-sm;
+  padding        : 8px 14px;
+  font-size      : 12.5px;
+  color          : $tx-mid;
+  margin-bottom  : 16px;
+
+  strong { color: $primary; }
+}
+
+.dl-list {
+  display       : flex;
+  flex-direction: column;
+  gap           : 8px;
+  max-height    : 420px;
+  overflow-y    : auto;
+  margin-bottom : 16px;
+  padding-right : 2px;
+}
+
+.dl-group {
+  border       : 1px solid $bdr;
+  border-radius: $r-sm;
+
+  // 縮合：隱藏 dl-item，移除下邊框
+  &.is-collapsed {
+    .dl-item         { display: none; }
+    .dl-group-hd     { border-bottom: none; }
+  }
+}
+
+.dl-group-hd {
+  display      : flex;
+  align-items  : center;
+  gap          : 8px;
+  padding      : 9px 14px;
+  background   : #F4F7FC;
+  font-size    : 12.5px;
+  font-weight  : 700;
+  color        : $tx-main;
+  border-bottom: 1px solid $bdr;
+  cursor       : pointer;
+  user-select  : none;
+  transition   : background $ease-fast;
+
+  &:hover { background: #EBF0F9; }
+
+  .dl-group-label { flex: 1; }
+
+  .dl-badge {
+    font-size    : 11px;
+    font-weight  : 500;
+    padding      : 2px 8px;
+    border-radius: 10px;
+    white-space  : nowrap;
+
+    &--lt { background: #EDF7F6; color: $green; }
+    &--hv { background: #FFEAEA; color: $red; }
+  }
+
+  .dl-count {
+    font-size    : 11px;
+    font-weight  : 500;
+    color        : $tx-light;
+    background   : $bg-page;
+    padding      : 2px 8px;
+    border-radius: 10px;
+    white-space  : nowrap;
+  }
+
+  // 縮合時顯示已勾選數量
+  .dl-checked-badge {
+    font-size    : 11px;
+    font-weight  : 500;
+    color        : $bg-white;
+    background   : $teal;
+    padding      : 2px 8px;
+    border-radius: 10px;
+    white-space  : nowrap;
+  }
+
+  // 展開/縮合 chevron
+  .dl-chevron {
+    font-size  : 18px;
+    color      : $tx-light;
+    transition : transform $ease-mid;
+    flex-shrink: 0;
+  }
+}
+
+// 縮合時 chevron 旋轉
+.dl-group.is-collapsed .dl-chevron {
+  transform: rotate(-90deg);
+}
+
+.dl-item {
+  display    : flex;
+  align-items: center;
+  gap        : 8px;
+  padding    : 8px 14px 8px 32px;
+  font-size  : 12.5px;
+  color      : $tx-main;
+  border-bottom: 1px solid #F0F0F0;
+  transition : background $ease-fast;
+
+  &:last-child { border-bottom: none; }
+  &:hover      { background: $bg-page; }
+
+  .dl-name { flex: 1; }
+
+  .dl-type {
+    font-size    : 11px;
+    color        : $tx-light;
+    background   : $bg-page;
+    padding      : 1px 6px;
+    border-radius: 3px;
+    white-space  : nowrap;
+  }
+
+  .dl-size {
+    font-size : 11px;
+    color     : $tx-light;
+    white-space: nowrap;
+    min-width : 46px;
+    text-align: right;
+  }
+}
+
+.dl-select-all {
+  display    : flex;
+  align-items: center;
+  gap        : 6px;
+  font-size  : 12px;
+  color      : $tx-mid;
+  cursor     : pointer;
+  user-select: none;
+}
+
+// ============================================================
+//  海關答聯單處理 — 新元件
+// ============================================================
+
+// ── Step Bar ────────────────────────────────────────────────
+.step-bar {
+  display   : flex;
+  align-items: stretch;
+  gap       : 0;
+  position  : sticky;
+  top       : 0;
+  z-index   : 10;
+  background: $bg-white;
+  padding   : 0px 16px 12px;
+  margin-bottom: 0;
+}
+
+.step-item {
+  flex         : 1;
+  padding      : 20px;
+  border       : 2px solid $bdr;
+  border-radius: $r-sm;
+  background   : $bg-white;
+  cursor       : pointer;
+  transition   : all $ease-fast;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  gap: 4px;
+
+  .step-label { font-size: 16px; font-weight: 700; font-style: italic; color: $tx-main; }
+  .step-title { font-size: 16px; font-weight: 700;  color: $tx-main; }
+  .step-date  { font-size: 14px; color: $tx-light; margin-top: 3px; }
+
+  &.is-active {
+    background  : #EEF0FA;
+    border-color: $primary;
+    .step-label { color: $tx-main; }
+    .step-date  { color:$tx-main; }
+  }
+
+  &:hover:not(.is-active) { border-color: $blue; }
+}
+
+.step-conn {
+  width          : 36px;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  color          : $tx-light;
+  font-size      : 18px;
+  flex-shrink    : 0;
+}
+
+// ── Detail Layout ────────────────────────────────────────────
+.detail-body {
+  flex      : 1;
+  overflow-y: auto;
+  padding   : 0px 30px 28px;
+  background-color: #fff;
+}
+
+.detail-title-row {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  padding        : 8px 0 12px;
+}
+
+.back-btn-lg {
+  padding      : 6px 20px;
+  border       : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  background   : $bg-white;
+  cursor       : pointer;
+  font-size    : 12.5px;
+  font-family  : inherit;
+  color        : $tx-mid;
+  transition   : all $ease-fast;
+  white-space  : nowrap;
+
+  &:hover { border-color: $primary; color: $primary; }
+}
+
+.detail-attach-bar {
+  display    : flex;
+  align-items: center;
+  gap        : 8px;
+  padding    : 14px 16px 14px;
+  flex-wrap  : wrap;
+  font-size  : 12.5px;
+  font-weight: 600;
+  color      : $tx-mid;
+}
+
+.attach-sep {
+  width     : 1px;
+  height    : 16px;
+  background: $bdr;
+  flex-shrink: 0;
+  margin    : 0 2px;
+}
+
+// ── Document Cards ────────────────────────────────────────────
+.doc-meta-bar {
+  display      : flex;
+  align-items  : center;
+  gap          : 0;
+  font-size    : 14px;
+  border-radius: $r-sm;
+  padding      : 0px 16px;
+  margin-bottom: 16px;
+
+  .dmb-item { display: flex; align-items: center; gap: 6px; }
+  .dmb-sep  { width: 1px; height: 14px; background: $bdr; margin: 0 16px; }
+  .dmb-key  { color: $tx-mid; }
+  .dmb-val  { font-weight: 600; color: $tx-main; }
+}
+
+.doc-grid {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  gap                  : 16px;
+  align-items          : start;
+}
+
+.doc-card {
+  background   : $bg-white;
+  border       : 1px solid $bdr;
+  border-radius: $r-md;
+  padding      : 20px 22px;
+}
+
+.doc-badge {
+  display      : inline-flex;
+  align-items  : center;
+  padding      : 3px 12px;
+  border-radius: $r-pill;
+  font-size    : 12px;
+  font-weight  : 700;
+  margin-bottom: 8px;
+
+  &--customs  { background: $primary;   color: white; }
+  &--response { background: $teal; color: white; }
+  &--sent     { background: $teal;    color: white; }
+  &--reply    { background: #2A8060;  color: white; }
+}
+
+.doc-head {
+  display    : flex;
+  align-items: center;
+  gap        : 10px;
+  margin-bottom: 12px;
+
+  .doc-badge { margin-bottom: 0; }
+  .doc-org   { margin-bottom: 0; }
+}
+
+.doc-org {
+  font-size    : 20px;
+  font-weight  : 700;
+  color        : $tx-main;
+  margin-bottom: 12px;
+}
+
+.doc-contacts {
+  display              : grid;
+  grid-template-columns: max-content 1fr;
+  gap                  : 5px 14px;
+  margin-bottom        : 14px;
+  font-size            : 12.5px;
+  padding-bottom       : 14px;
+  border-bottom        : 1px solid $bdr;
+
+  .dc-row { display: contents; }   // 展開至 grid，讓 key-val 各自對齊
+  .dc-key { color: $tx-mid; white-space: nowrap; align-self: center; }
+  .dc-val { color: $tx-main; font-weight: 500; }
+}
+
+// Step Content 淺色容器
+.step-content {
+  background   : $bg-page;
+  border-radius: $r-md;
+  padding      : 20px;
+  margin-top   : 4px;
+}
+
+// Step 3 海關來文左欄（左＋上淺色底）
+#step-c-3 .doc-card:first-child {
+  background  : #E1E1E1;
+  border-color: #C2D5EE;
+}
+
+.doc-section-hd {
+  font-size    : 13px;
+  font-weight  : 700;
+  color        : $teal;
+  margin-bottom: 10px;
+}
+
+.doc-body-text {
+  font-size  : 12.5px;
+  line-height: 1.85;
+  color      : $tx-main;
+
+  p { margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+}
+
+// ── Customs List Card ─────────────────────────────────────────
+.customs-card {
+  background   : $bg-white;
+  border       : 1px solid #CBCBCB;
+  border-radius: 5px;
+  padding      : 18px 24px;
+  margin-bottom: 12px;
+  cursor       : pointer;
+  transition   : box-shadow 0.17s ease, border-color 0.17s ease;
+
+  &:hover { box-shadow: $sh2; border-color: #A0B5D8; }
+}
+
+.cmeta {
+  display              : grid;
+  grid-template-columns: 72px 1fr 72px 1fr;
+  gap                  : 5px 10px;
+  margin-bottom        : 12px;
+  font-size            : 12.5px;
+
+  .cm-key { color: $tx-mid; font-weight: 600; white-space: nowrap; }
+  .cm-val { color: $tx-main; }
+
+  &--wide {
+    grid-template-columns: 72px 1fr;
+  }
+}
+
+.ocr-block {
+  display      : none;
+  &.is-visible { display: block; }
+  background   : #F5F9FF;
+  border-left  : 3px solid $primary;
+  border-radius: 4px;
+  padding      : 10px 14px;
+  margin-bottom: 12px;
+  font-size    : 12.5px;
+  color        : $tx-main;
+  line-height  : 1.75;
+
+  .ocr-filename {
+    font-size    : 11.5px;
+    font-weight  : 700;
+    color        : $tx-mid;
+    margin-bottom: 6px;
+  }
+
+  .ocr-note {
+    font-size  : 11px;
+    color      : $amber;
+    margin-top : 6px;
+    display    : flex;
+    align-items: center;
+    gap        : 4px;
+  }
+}
+
+// ── Customs tree header ───────────────────────────────────────
+.tree-section-hd {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 6px;
+  padding        : 8px 10px 12px;
+  font-size      : 13px;
+  font-weight    : 700;
+  color          : $navy;
+  border-bottom  : 1px solid $bdr;
+  margin-bottom  : 6px;
+}
+
+// ── Cases panel (customs variant) ────────────────────────────
+.cases-panel--customs {
+  .cases-title { font-size: 16px; color: $tx-main; }
+}
+.law-count strong { color: $tx-main; }
+
+// ============================================================
+//  處理流程 — Toggle Switch / Flow List / Flow Edit
+// ============================================================
+
+// ── Flow Edit Button（灰框）────────────────────────────────────
+.btn-edit-flow {
+  padding      : 4px 16px;
+  font-size    : 12px;
+  font-family  : inherit;
+  font-weight  : 500;
+  color        : #566578;
+  border       : 1.5px solid #C8D0DC;
+  border-radius: $r-sm;
+  background   : $bg-white;
+  cursor       : pointer;
+  white-space  : nowrap;
+  transition   : all $ease-fast;
+
+  &:hover { border-color: $blue; color: $blue; }
+
+  // 編輯按鈕：主色調
+  &--primary {
+    background  : $primary;
+    color       : white;
+    border-color: $primary;
+    &:hover { background: #082d63; border-color: #082d63; color: white; }
+  }
+}
+
+// 按鈕群組（檢視 + 編輯）
+.flow-row-btns {
+  display    : flex;
+  gap        : 6px;
+  flex-shrink: 0;
+}
+
+// ── Toggle Switch ─────────────────────────────────────────────
+.toggle-track {
+  position     : relative;
+  width        : 44px;
+  height       : 24px;
+  background   : #CBD5E0;
+  border-radius: 24px;
+  flex-shrink  : 0;
+  cursor       : pointer;
+  transition   : background 0.2s;
+
+  &::after {
+    content      : '';
+    position     : absolute;
+    width        : 18px;
+    height       : 18px;
+    background   : white;
+    border-radius: 50%;
+    top          : 3px;
+    left         : 3px;
+    transition   : transform 0.2s;
+    box-shadow   : 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  &.is-on {
+    background: $teal;
+    &::after { transform: translateX(20px); }
+  }
+}
+
+// ── Flow List ─────────────────────────────────────────────────
+.flow-list-hd {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  margin-bottom  : 16px;
+
+  h3 { font-size: 16px; font-weight: 700; color: $tx-main; }
+}
+
+.flow-group {
+  border       : 1.5px solid $bdr;
+  margin-bottom: 12px;
+  overflow     : hidden;
+}
+
+.flow-row {
+  display    : flex;
+  align-items: center;
+  gap        : 12px;
+  padding    : 14px 20px;
+  font-size  : 13px;
+  cursor     : pointer;
+  transition : background $ease-fast;
+
+  &:hover:not(.flow-row--archive) { background: #F0F5FC; }
+
+  &.is-selected {
+    background   : #EEF4FB;
+    outline      : 2px solid $primary;
+    outline-offset: -2px;
+  }
+
+  &--active  { background: #EEF3FB; }
+  &--draft   { background: #FAFBFF; border-top: 1px solid $bdr; }
+  &--archive { border-top: 1px solid $bdr; opacity: 0.7; cursor: default; }
+
+  .flow-date    { color: $tx-light; white-space: nowrap; }
+  .flow-name    { font-weight: 600; color: $tx-main; flex: 1; }
+  .flow-version { color: $primary; font-weight: 600; white-space: nowrap; }
+}
+
+.flow-draft-badge {
+  font-size    : 11px;
+  font-weight  : 700;
+  padding      : 2px 8px;
+  border-radius: 4px;
+  background   : #FFF3E0;
+  color        : $amber;
+  border       : 1px solid #FFE0B2;
+  white-space  : nowrap;
+}
+
+.flow-publish-wrap {
+  position: relative;
+
+  .flow-tooltip {
+    position     : absolute;
+    bottom       : calc(100% + 6px);
+    right        : 0;
+    background   : #3A4A6B;
+    color        : white;
+    font-size    : 11px;
+    padding      : 4px 10px;
+    border-radius: 4px;
+    white-space  : nowrap;
+    pointer-events: none;
+    opacity      : 0;
+    transition   : opacity $ease-fast;
+    z-index      : 10;
+
+    &::after {
+      content         : '';
+      position        : absolute;
+      top             : 100%;
+      right           : 14px;
+      border          : 4px solid transparent;
+      border-top-color: #3A4A6B;
+    }
+  }
+
+  &:hover .flow-tooltip { opacity: 1; }
+}
+
+// ── Flow Edit ─────────────────────────────────────────────────
+.flow-title-field {
+  display    : flex;
+  align-items: center;
+  gap        : 12px;
+  padding    : 6px 0 12px;
+
+  label {
+    font-size  : 13px;
+    font-weight: 600;
+    color      : $tx-mid;
+    white-space: nowrap;
+  }
+
+  input {
+    flex         : 1;
+    border       : 1.5px solid $bdr;
+    border-radius: $r-sm;
+    padding      : 7px 14px;
+    font-size    : 13.5px;
+    font-family  : inherit;
+    color        : $tx-main;
+    background   : $bg-page;
+    outline      : none;
+
+    &:focus { border-color: $primary; background: white; }
+  }
+}
+
+.flow-edit-layout {
+  display : flex;
+  flex    : 1;
+  overflow: hidden;
+  gap     : 0px;
+  background-color: #fff;
+  padding: 0 30px;
+}
+
+// ── Steps Panel (left) ────────────────────────────────────────
+.flow-steps-panel {
+  width         : 240px;
+  flex-shrink   : 0;
+  background    : #fff;
+  border-right  : 2px solid $bdr;
+  display       : flex;
+  flex-direction: column;
+  overflow-y    : auto;
+  padding       : 20px 10px;
+  gap           : 0;
+}
+
+.flow-add-btn {
+  width        : 100%;
+  padding      : 9px;
+  background   : $grad-h;
+  color        : white;
+  border       : none;
+  border-radius: $r-sm;
+  font-size    : 13px;
+  font-weight  : 700;
+  cursor       : pointer;
+  font-family  : inherit;
+  margin-bottom: 12px;
+
+  &:hover { opacity: 0.88; }
+}
+
+.step-card {
+  background   : white;
+  border       : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  padding      : 16px 12px;
+  cursor       : pointer;
+  display      : flex;
+  align-items  : center;
+  gap          : 5px;
+  transition   : all $ease-fast;
+
+  &:hover     { border-color: $blue; }
+  &.is-active { border-color: $primary; background: #EEF3FB; }
+  &.drag-over { border-color: $teal; background: #EDF7F6; transform: scale(1.02); }
+}
+
+.step-drag {
+  color      : $tx-light;
+  font-size  : 16px;
+  cursor     : grab;
+  flex-shrink: 0;
+  padding    : 0 2px;
+  line-height: 0.8;
+
+  &:active { cursor: grabbing; }
+}
+
+.step-info      { flex: 1; min-width: 0; }
+.step-num       { font-size: 16px; font-weight: 700; color: $primary; margin-bottom: 2px; }
+.step-title-sm  { font-size: 14px; color: $tx-main; line-height: 1.3; }
+
+.step-sep {
+  text-align    : center;
+  color         : $tx-light;
+  font-size     : 14px;
+  padding       : 4px 0;
+  user-select   : none;
+  pointer-events: none;
+  line-height   : 1;
+}
+
+// 新增步驟 — 獨特樣式
+// ── 檢視模式 ──────────────────────────────────────────────────
+.is-view-mode {
+  // 左欄：隱藏新增按鈕與拖移把手
+  .flow-add-btn { display: none !important; }
+  .step-card    { cursor: pointer !important; }
+  .step-drag    { display: none; }
+
+  // 右欄：編輯器轉為唯讀展示
+  .rich-toolbar { display: none; }
+
+  .step-title-input {
+    border           : none;
+    background       : transparent;
+    pointer-events   : none;
+    font-size        : 18px;
+    font-weight      : 700;
+    color            : $tx-main;
+    padding          : 0;
+    box-shadow       : none !important;
+  }
+
+  .rich-body {
+    pointer-events   : none;
+    background       : $bg-page;
+    border-radius    : $r-md;
+    padding          : 20px 24px;
+    line-height      : 1.9;
+    color            : $tx-main;
+  }
+}
+
+.step-card--new {
+  border-color : $teal;
+  border-style : dashed;
+  background   : #F0FAF9;
+
+  .step-num { color: $teal; }
+
+  &.is-active {
+    border-color : $teal;
+    background   : #E6F6F5;
+  }
+}
+
+// ── Editor Panel (right) ──────────────────────────────────────
+.flow-editor-panel {
+  flex           : 1;
+  display        : flex;
+  flex-direction : column;
+  overflow       : hidden;
+  background     : #F5FBF9;
+  border         : 1px solid #E1E1E1;
+  margin-left    : 0;
+  padding-left   : 0;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.flow-step-title-bar {
+  display    : flex;
+  align-items: center;
+  gap        : 12px;
+  padding    : 14px 20px 12px;
+  border-bottom: 1px solid $bdr;
+
+  .step-big-num {
+    font-size  : 18px;
+    font-weight: 700;
+    color      : $primary;
+    white-space: nowrap;
+  }
+
+  .step-title-input {
+    flex         : 1;
+    border       : 1.5px solid $bdr;
+    border-radius: $r-sm;
+    padding      : 7px 12px;
+    font-size    : 14px;
+    font-family  : inherit;
+    color        : $tx-main;
+    outline      : none;
+
+    &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(15,63,133,0.08); }
+  }
+}
+
+.rich-toolbar {
+  display    : flex;
+  align-items: center;
+  gap        : 1px;
+  padding    : 6px 14px;
+  border-bottom: 1px solid $bdr;
+  flex-wrap  : wrap;
+  background : #F8FAFD;
+
+  button {
+    width        : 28px;
+    height       : 26px;
+    border       : none;
+    background   : none;
+    border-radius: 4px;
+    cursor       : pointer;
+    font-size    : 12px;
+    color        : $tx-mid;
+    display      : flex;
+    align-items  : center;
+    justify-content: center;
+    font-family  : inherit;
+    padding      : 0;
+
+    &:hover { background: #E5EDF6; color: $tx-main; }
+  }
+
+  .tb-sep { width: 1px; height: 18px; background: $bdr; margin: 0 3px; }
+}
+
+.rich-body {
+  flex      : 1;
+  padding   : 20px 24px;
+  overflow-y: auto;
+  font-size : 13.5px;
+  line-height: 1.9;
+  color     : $tx-main;
+  outline   : none;
+
+  &:empty::before {
+    content: '在此輸入步驟說明內容…';
+    color  : #B0BECA;
+  }
+
+  p { margin-bottom: 10px; }
+}
+
+// ============================================================
+//  Typography System — 統一字型規範
+// ============================================================
+
+// ── 大標題 24px（頁面層級）──────────────────────────────────
+// 已在 _layout.scss .page-title 設定
+
+// ── 標題 20px（區塊/面板層級）──────────────────────────────
+.cases-title     { font-size: 20px; }
+.side-title      { font-size: 20px; }
+.modal-title     { font-size: 20px; }
+.flow-list-hd h3 { font-size: 20px; }
+
+// ── 小標題 14px（卡片內、區段標題）─────────────────────────
+.doc-section-hd,
+.side-section-title { font-size: 14px; }
+
+// ── 內文 16px（文件主體公文）────────────────────────────────
+.doc-body-text,
+.doc-body-text p,
+.doc-body-text li { font-size: 16px; line-height: 1.9; }
+.side-text        { font-size: 16px; line-height: 1.85; }
+.side-list li     { font-size: 16px; line-height: 1.85; }
+
+// ── 卡片內文字 14px ──────────────────────────────────────────
+.case-card,
+.customs-card { font-size: 14px; }
+
+.case-summary { font-size: 14px; }
+.section-label { font-size: 14px; }
+
+.case-meta,
+.meta-key,
+.meta-val     { font-size: 14px; }
+
+.doc-contacts,
+.dc-key,
+.dc-val       { font-size: 14px; }
+
+.cmeta { font-size: 14px; }
+
+// ── 標註樣式 12px（標籤/徽章/輔助文字）──────────────────────
+.tag          { font-size: 12px; }
+.attach-pill,
+.link-pill    { font-size: 12px; }
+.tree-count   { font-size: 12px; }
+.flow-draft-badge,
+.preset-chip  { font-size: 12px; }
+
+// ── 按鈕 14px ────────────────────────────────────────────────
+.btn,
+.btn-edit-flow,
+.back-btn-lg,
+.flow-add-btn  { font-size: 14px; }
+
+// ── 所有填寫欄位統一 16px ──────────────────────────────────────
+.search-input-box input,
+.modal-search input,
+.step-title-input,
+.flow-title-field input,
+.adv-keyword,
+input[type="text"],
+input[type="date"],
+input[type="search"],
+textarea,
+select,
+select.filter-select { font-size: 16px; }
+
+// contenteditable 編輯區（flow-edit + new case）
+.rich-body { font-size: 16px; }
+
+// ============================================================
+//  新增範本案例（#app-new-case）
+// ============================================================
+
+// ── 頁面容器 ────────────────────────────────────────────────
+.nc-body {
+  padding        : 20px 30px 40px;
+  overflow-y     : auto;
+  flex           : 1;
+  display        : flex;
+  flex-direction : column;
+  gap            : 16px;
+}
+
+// ── 分類選擇列 ──────────────────────────────────────────────
+.nc-classify-bar {
+  display     : flex;
+  align-items : center;
+  gap         : 16px;
+  background  : $bg-page;
+  border      : 1px solid $bdr;
+  border-radius: $r-md;
+  padding     : 12px 18px;
+  flex-wrap   : wrap;
+}
+
+.nc-classify-tabs {
+  display     : flex;
+  border      : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  overflow    : hidden;
+  flex-shrink : 0;
+}
+
+.nc-type-btn {
+  padding     : 6px 20px;
+  font-size   : 13px;
+  font-weight : 600;
+  font-family : inherit;
+  border      : none;
+  cursor      : pointer;
+  background  : $bg-white;
+  color       : $tx-mid;
+  transition  : all $ease-fast;
+  border-right: 1px solid $bdr;
+
+  &:last-child { border-right: none; }
+
+  &.is-active {
+    background  : $primary;
+    color       : white;
+  }
+
+  &:not(.is-active):hover {
+    background  : $bg-page;
+    color       : $tx-main;
+  }
+}
+
+.nc-classify-sep {
+  width       : 1px;
+  height      : 28px;
+  background  : $bdr;
+  flex-shrink : 0;
+}
+
+.nc-classify-cat {
+  display     : flex;
+  align-items : center;
+  gap         : 10px;
+  flex        : 1;
+  min-width   : 0;
+
+  .filter-label { flex-shrink: 0; font-size: 12px; }
+
+  select.filter-select {
+    flex       : 1;
+    max-width  : 420px;
+    font-size  : 16px;
+  }
+}
+
+// ── 主表單卡片（單一容器）──────────────────────────────────
+.nc-form-card {
+  background   : $bg-white;
+  border       : 1px solid $bdr;
+  border-radius: $r-md;
+  padding      : 24px 28px;
+}
+
+// 區段標題（取代裝飾性步驟徽章）
+.nc-form-hd {
+  font-size    : 13px;
+  font-weight  : 700;
+  color        : $tx-main;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+}
+
+// ── 欄位 ────────────────────────────────────────────────────
+.nc-fields-grid {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  gap                  : 14px 24px;
+  margin-bottom        : 4px;
+}
+
+.nc-field {
+  display       : flex;
+  flex-direction: column;
+  gap           : 5px;
+
+  &--wide { grid-column: 1 / -1; }
+}
+
+.nc-label {
+  font-size  : 12px;
+  font-weight: 700;
+  color      : $tx-mid;
+
+  &.is-required::before { content: '* '; color: $red; }
+}
+
+.nc-input {
+  border       : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  padding      : 8px 12px;
+  font-size    : 16px;
+  font-family  : inherit;
+  color        : $tx-main;
+  background   : $bg-white;
+  transition   : border-color $ease-fast;
+  width        : 100%;
+  box-sizing   : border-box;
+
+  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(36,87,167,0.12); }
+  &::placeholder { color: #B0BECA; }
+}
+
+.nc-radio-row {
+  display    : flex;
+  gap        : 20px;
+  padding-top: 6px;
+}
+
+.nc-radio-label {
+  display    : flex;
+  align-items: center;
+  gap        : 8px;
+  cursor     : pointer;
+  font-size  : 16px;
+  color      : $tx-main;
+  user-select: none;
+}
+
+.nc-textarea {
+  border      : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  padding     : 10px 12px;
+  font-size   : 16px;
+  font-family : inherit;
+  color       : $tx-main;
+  background  : $bg-white;
+  resize      : vertical;
+  width       : 100%;
+  box-sizing  : border-box;
+  line-height : 1.72;
+  transition  : border-color $ease-fast;
+
+  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(36,87,167,0.12); }
+  &::placeholder { color: #B0BECA; }
+}
+
+// ── 編輯器 ──────────────────────────────────────────────────
+.nc-editor-wrap {
+  border       : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  overflow     : hidden;
+  transition   : border-color $ease-fast;
+
+  &:focus-within { border-color: $blue; }
+
+  .rich-toolbar { background: #F8FAFD; border-bottom: 1px solid $bdr; }
+  .rich-body    { min-height: 180px; padding: 16px 18px; }
+}
+
+// ── 上傳附件 ────────────────────────────────────────────────
+.nc-upload-zone {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  gap            : 4px;
+  border         : 1.5px dashed $bdr;
+  border-radius  : $r-sm;
+  padding        : 24px 20px;
+  cursor         : pointer;
+  transition     : border-color $ease-fast, background $ease-fast;
+  text-align     : center;
+  background     : $bg-page;
+
+  &:hover { border-color: $blue; background: #EFF3FB; }
+}
+
+.nc-upload-icon { font-size: 28px; color: $tx-light; }
+.nc-upload-text { font-size: 16px; color: $tx-mid; margin-top: 4px; }
+.nc-upload-hint { font-size: 12px; color: $tx-light; }
+
+.nc-file-list   { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.nc-empty-hint  { font-size: 12px; color: $tx-light; }
+
+.nc-file-item {
+  display      : flex;
+  align-items  : center;
+  gap          : 8px;
+  padding      : 7px 10px;
+  border-radius: $r-sm;
+  border       : 1px solid $bdr;
+  background   : $bg-white;
+  font-size    : 12.5px;
+  transition   : background $ease-fast;
+
+  &:hover { background: $bg-page; }
+}
+
+.nc-file-name   { flex: 1; color: $tx-main; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc-file-size   { color: $tx-light; white-space: nowrap; font-size: 11px; }
+.nc-file-remove {
+  background: none; border: none; cursor: pointer; color: $tx-light;
+  display: flex; padding: 2px; border-radius: 3px; transition: color $ease-fast;
+  &:hover { color: $red; }
+}
+
+// ── 底部操作 ────────────────────────────────────────────────
+.nc-footer {
+  display        : flex;
+  justify-content: space-between;
+  align-items    : center;
+  padding        : 14px 0 0;
+  border-top     : 1px solid $bdr;
+}
+
+// ── 關聯案例 modal ──────────────────────────────────────────
+.nc-related-item {
+  &.is-checked { background: #EBF2FF; }
+  label        { cursor: pointer; }
+}

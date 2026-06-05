@@ -1,0 +1,231 @@
+// ============================================================
+//  _home.scss
+//  首頁（Home Dashboard）
+// ============================================================
+
+@use 'variables' as *;
+
+#home {
+  background    : $grad-diag;
+  flex-direction: row;
+  align-items   : flex-start;
+  justify-content: center;
+  padding       : 56px 40px;
+  gap           : 40px;
+  flex-wrap     : wrap;
+
+  // ── 左欄 ──────────────────────────────────────────────
+  .h-left {
+    flex     : 1;
+    min-width: 320px;
+    max-width: 780px;
+  }
+
+  // ── 右欄（資訊面板）────────────────────────────────────
+  .h-right {
+    width     : 316px;
+    flex-shrink: 0;
+  }
+}
+
+// Logo（首頁用）
+.logo {
+  display      : flex;
+  align-items  : center;
+  gap          : 12px;
+  margin-bottom: 30px;
+
+  &-ico {
+    width     : 50px;
+    height    : 38px;
+    flex-shrink: 0;
+  }
+
+  &-tx {
+    .zh { font-size: 15px; font-weight: 700; color: $navy; }
+    .en { font-size: 11px; color: $tx-mid; }
+  }
+}
+
+.h-title {
+  font-size    : 32px;
+  font-weight  : 700;
+  color        : $blue;
+  margin-bottom: 22px;
+  padding-left: 10px;
+}
+
+// ── 功能卡片格線 ────────────────────────────────────────
+.home-grid {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  gap                  : 20px;
+}
+
+.card {
+  background    : $bg-white;
+  border-radius : $r-lg;
+  padding       : 20px 20px 20px;
+  cursor        : pointer;
+  transition    : box-shadow $ease-mid, transform 0.17s ease;
+  position      : relative;
+  box-shadow    : $sh1;
+  border        : 2px solid transparent;
+
+  // 漸層外框：hover 時以 background-clip 技術顯示漸層邊
+  &:hover {
+    transform : translateY(-2px);
+    box-shadow: $sh2;
+    background:
+      linear-gradient(#{$bg-white}, #{$bg-white}) padding-box,
+      #{$grad-h} border-box;
+  }
+
+  // featured 卡片：預設有藍框，hover 時換成漸層
+  &.feat {
+    border-color: $blue;
+    &:hover {
+      background:
+        linear-gradient(#{$bg-white}, #{$bg-white}) padding-box,
+        #{$grad-h} border-box;
+      border-color: transparent;
+    }
+  }
+
+  // Icon 容器
+  &-ico {
+    width        : 52px;
+    height       : 52px;
+    border-radius: 13px;
+    display      : flex;
+    align-items  : center;
+    justify-content: center;
+    margin-bottom: 14px;
+    background   : $grad-h;  // 漸層 icon 底色
+
+    svg {
+      width : 26px;
+      height: 26px;
+      color : white;
+    }
+
+    img {
+      width     : 26px;
+      height    : 26px;
+      object-fit: contain;
+      filter    : brightness(0) invert(1); // 轉成白色
+    }
+  }
+
+  // 右上角箭頭
+  &-arrow {
+    position      : absolute;
+    top           : 16px;
+    right         : 16px;
+    width         : 28px;
+    height        : 28px;
+    border-radius : 50%;
+    background    : #F0F5FC;
+    display       : flex;
+    align-items   : center;
+    justify-content: center;
+    font-size     : 13px;
+    color         : $tx-mid;
+    transition    : all $ease-fast;
+  }
+
+  &:hover .card-arrow {
+    background: $blue;
+    color     : white;
+  }
+
+  &-title {
+    font-size    : 20px;
+    font-weight  : 700;
+    color        : $tx-main;
+    margin-bottom: 3px;
+    line-height  : 1.4;
+  }
+
+  &-sub {
+    font-size: 16px;
+    color    : $tx-mid;
+  }
+}
+
+// ── 右側面板 ────────────────────────────────────────────
+.panel-heading {
+  font-size    : 16px;
+  font-weight  : 700;
+  color        : $teal;
+  margin-bottom: 11px;
+}
+
+// 新聞卡片
+.news-card {
+  background   : $bg-white;
+  border-radius: $r-sm;
+  padding      : 16px 16px;
+  margin-bottom: 8px;
+  box-shadow   : $sh1;
+  cursor       : pointer;
+  transition   : box-shadow $ease-fast;
+  border-left:$primary  4px solid;
+
+  &:hover { 
+    box-shadow: $sh2;
+    border: 2px solid $primary ; 
+    border-left:$primary  4px solid;
+  }
+}
+
+.news-row {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  margin-bottom  : 5px;
+}
+
+.news-tag {
+  font-size    : 10px;
+  font-weight  : 700;
+  padding      : 2px 7px;
+  border-radius: $r-pill;
+  background   : #EEF2FA;
+  color        : $tx-mid;
+}
+
+.news-date  { font-size: 12px; color: $tx-light; }
+.news-title { font-size: 14px; font-weight: 600; color: $tx-main; margin-bottom: 3px; line-height: 1.4; }
+.news-body  { font-size: 12px; color: $tx-light; line-height: 1.4; }
+
+// 常用連結
+.quick-box {
+  display: flex;
+  flex-flow: column;
+  gap: 10px;
+}
+
+.quick-item {
+  background   : $bg-white;
+  border-radius: $r-md;
+  box-shadow   : $sh1;
+  display      : flex;
+  align-items  : center;
+  gap          : 10px;
+  padding      : 16px;
+  font-size    : 16px;
+  font-weight  : 500;
+  color        : $tx-main;
+  cursor       : pointer;
+  transition   : background $ease-fast;
+  border: 1px solid $bdr;
+
+  &:last-child { border-bottom: none; }
+  &:hover      { 
+    background: #F5F8FD; 
+    border: 2px solid $teal;
+  }
+
+  svg { color: $blue; flex-shrink: 0; }
+}

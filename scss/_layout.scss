@@ -1,0 +1,445 @@
+// ============================================================
+//  _layout.scss
+//  App 整體佈局：Topbar、Sidebar、Main、Sub-header
+// ============================================================
+
+@use 'variables' as *;
+
+// ── App 容器 ────────────────────────────────────────────
+#app {
+  flex-direction: row;
+  background    : $bg-app;
+}
+
+// ── Topbar（漸層）───────────────────────────────────────
+.topbar {
+  background     : $grad-h;
+  height         : $topbar-h;
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  padding        : 0 20px 0 0;
+  flex-shrink    : 0;
+  z-index        : 100;
+}
+
+.topbar-left {
+  display    : flex;
+  align-items: center;
+}
+
+.back-btn {
+  width          : 36px;
+  height         : 36px;
+  border-radius  : 50%;
+  border         : none;
+  background     : rgba(255, 255, 255, 0.18);
+  color          : white;
+  cursor         : pointer;
+  font-size      : 17px;
+  margin-right   : 10px;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  transition     : background $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.30); }
+}
+
+// 小房子 icon 按鈕（取代 back-btn + topbar-logo）
+.home-btn {
+  width          : 34px;
+  height         : 34px;
+  border-radius  : 50%;
+  border         : none;
+  background     : rgba(255, 255, 255, 0.18);
+  color          : white;
+  cursor         : pointer;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  transition     : background $ease-fast;
+
+  svg { width: 18px; height: 18px; flex-shrink: 0; }
+  &:hover { background: rgba(255, 255, 255, 0.30); }
+}
+
+.topbar-logo {
+  display    : flex;
+  align-items: center;
+  gap        : 9px;
+  cursor     : pointer;
+
+  .zh { font-size: 14px; font-weight: 700; color: white; }
+  .en { font-size: 11px; color: rgba(255, 255, 255, 0.7); }
+}
+
+.topbar-nav {
+  display    : flex;
+  align-items: center;
+  gap        : 22px;
+
+  a {
+    font-size     : 12.5px;
+    color         : rgba(255, 255, 255, 0.88);
+    cursor        : pointer;
+    text-decoration: none;
+    white-space   : nowrap;
+    transition    : color $ease-fast;
+
+    &:hover { color: white; }
+  }
+}
+
+// ── 右側容器（Topbar + Main）────────────────────────────
+.app-right {
+  display       : flex;
+  flex-direction: column;
+  flex          : 1;
+  height        : 100vh;
+  overflow      : hidden;
+}
+
+// ── Sidebar Wrapper（定位錨點）────────────────────────────
+.sidebar-wrap {
+  position   : relative;
+  flex-shrink: 0;
+  height     : 100vh;
+
+  // ── 縮合狀態（由 JS toggle 在此元素上）──────────────
+  &.is-collapsed {
+    .sidebar-toggle svg { transform: rotate(180deg); }
+
+    .sidebar {
+      width  : 56px;
+      padding: 12px 4px;
+
+      .sidebar-logo {
+        justify-content: center;
+        padding        : 8px 0 12px;
+
+        .logo-full { display: none; }
+        .logo-mini { display: block; }
+      }
+
+      .sidebar-item {
+        padding        : 10px 0;
+        justify-content: center;
+        gap            : 0;
+        font-size      : 0;       // 隱藏裸文字節點
+        letter-spacing : 0;
+
+        svg { width: 18px; height: 18px; flex-shrink: 0; }
+      }
+    }
+  }
+}
+
+// ── Sidebar（全高左欄）──────────────────────────────────
+.sidebar {
+  width         : $sidebar-w;
+  height        : 100%;
+  background    : $bg-white;
+  border-right  : 1px solid $bdr;
+  padding       : 12px 10px;
+  display       : flex;
+  flex-direction: column;
+  gap           : 3px;
+  overflow-y    : auto;
+  overflow-x    : hidden;
+  transition    : width $ease-panel;
+}
+
+// ── 縮合切換按鈕（topbar 最左側）─────────────────────────
+.sidebar-toggle {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 40px;
+  height         : 56px;
+  background     : $primary ;
+  color          : white;
+  border         : none;
+  border-radius  : 0 4px 20px 0px;
+  cursor         : pointer;
+  flex-shrink    : 0;
+  margin-right   : 6px;
+  transition     : background $ease-fast;
+
+  svg { transition: transform $ease-mid; flex-shrink: 0; }
+
+  &:hover { background: $green; }
+}
+
+// 縮合時：teal 底色 + 箭頭反向（class 直接在按鈕本身）
+.sidebar-toggle.is-collapsed {
+  background: $green ;
+
+  svg { transform: rotate(180deg); }
+  &:hover { background: $primary ; }
+}
+
+.sidebar-logo {
+  display      : flex;
+  align-items  : center;
+  gap          : 9px;
+  padding      : 10px 8px 16px;
+  border-bottom: 1px solid $bdr;
+  margin-bottom: 8px;
+
+  svg          { width: 36px; height: 28px; flex-shrink: 0; }
+  .zh          { font-size: 12px; font-weight: 700; color: $navy; }
+  .en          { font-size: 11px; color: $tx-mid; }
+
+  .logo-mini   { display: none; }
+}
+
+.sidebar-item {
+  display      : flex;
+  align-items  : center;
+  gap          : 10px;
+  padding      : 12px 16px;
+  border-radius: $r-sm;
+  cursor       : pointer;
+  font-size    : 14px;
+  font-weight  : 500;
+  color        : $tx-mid;
+  transition   : all $ease-fast;
+  line-height  : 1.4;
+
+  &:hover {
+    background: #F0F5FC;
+    color     : $tx-main;
+  }
+
+  &.is-active {
+    background: $grad-h ;
+    color     : white;
+
+    svg { opacity: 1; }
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin-top : 1px;
+    opacity    : 0.7;
+  }
+}
+
+// ── Main 容器 ────────────────────────────────────────────
+.main {
+  flex           : 1;
+  display        : flex;
+  flex-direction : column;
+  overflow       : hidden;
+}
+
+// ── Sub-header（麵包屑 + 搜尋列）────────────────────────
+.sub-header {
+  background   : $bg-white;
+  padding      : 0 30px;
+  flex-shrink  : 0;
+}
+
+.breadcrumb {
+  padding    : 8px 24px ;
+  font-size  : 12px;
+  color      : $tx-mid;
+  display    : flex;
+  align-items: center;
+  gap        : 5px;
+
+  a {
+    color          : $tx-mid;
+    cursor         : pointer;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.page-title {
+  display    : flex;
+  align-items: center;
+  gap        : 10px;
+  font-size  : 24px;           // Figma: 24px（漸層文字）
+  font-weight: 700;
+  color      : $teal;          // SVG currentColor fallback
+  background : $grad-h;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding    : 12px 0 10px;
+
+  svg {
+    color                  : $teal;
+    -webkit-text-fill-color: initial; // 讓 SVG 不受 transparent 影響
+    flex-shrink            : 0;
+  }
+
+  .page-title-icon {
+    flex-shrink            : 0;
+    -webkit-text-fill-color: initial;
+  }
+}
+
+// ── 搜尋列 ──────────────────────────────────────────────
+.search-row {
+  display    : flex;
+  align-items: center;
+  justify-content: space-between;
+  gap        : 10px;
+  padding    : 20px 0 10px;
+  position   : relative;
+}
+
+// "預設全文檢索" chip
+.preset-chip {
+  font-size   : 11px;
+  font-weight : 600;
+  padding     : 3px 9px;
+  border-radius: 4px;
+  background  : #3A4A6B;
+  color       : white;
+  white-space : nowrap;
+  flex-shrink : 0;
+  display     : inline-flex;
+  align-items : center;
+  gap         : 4px;
+
+  &.is-hidden { display: none; }
+}
+
+// 搜尋輸入框 + 結果摘要的容器
+.search-wrap {
+  width         : 33%;
+  flex-shrink   : 0;
+  display       : flex;
+  flex-direction: column;
+  gap           : 4px;
+}
+
+// 搜尋輸入框（Pill 設計）
+.search-input-box {
+  width         : 100%;
+  flex-shrink   : 0;
+  display       : flex;
+  align-items   : center;
+  gap           : 8px;
+  background    : $bg-white;
+  border        : 1px solid #CBCBCB;
+  border-radius : 50px;
+  padding       : 0 12px 0 14px;
+  cursor        : text;
+  height        : 50px;
+  transition    : border-color $ease-fast, box-shadow $ease-fast;
+  box-sizing    : border-box;
+
+  &:hover,
+  &:focus-within {
+    border-color: $primary;
+    box-shadow  : 0 0 0 3px rgba(15, 63, 133, 0.08);
+  }
+
+  .search-ico-left {
+    width     : 32px;
+    height    : 32px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  input {
+    border    : none;
+    outline   : none;
+    background: transparent;
+    font-size : 14px;
+    font-family: inherit;
+    color     : $tx-main;
+    flex      : 1;
+    min-width : 0;
+
+    &::placeholder { color: #999; }
+  }
+}
+
+// 分隔線（X 與篩選之間）
+.search-divider {
+  width     : 1px;
+  height    : 20px;
+  background: #D8D8D8;
+  flex-shrink: 0;
+}
+
+// 篩選圖示（pill 內右側）
+.filter-btn {
+  background   : none;
+  border       : none;
+  border-radius: 50%;
+  width        : 32px;
+  height       : 32px;
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  cursor       : pointer;
+  flex-shrink  : 0;
+  transition   : background $ease-fast;
+  padding      : 0;
+
+  img {
+    width     : 32px;
+    height    : 32px;
+    object-fit: contain;
+  }
+
+  &:hover,
+  &.is-active { background: #F0F0F0; }
+}
+
+// 清除 ✕ 按鈕
+.search-clear-btn {
+  background    : none;
+  border        : none;
+  cursor        : pointer;
+  color         : $tx-light;
+  font-size     : 16px;
+  width         : 32px;
+  height        : 32px;
+  display       : none;
+  align-items   : center;
+  justify-content: center;
+  border-radius : 50%;
+  flex-shrink   : 0;
+  transition    : all $ease-fast;
+
+  &.is-visible { display: flex; }
+  &:hover      { background: #E5EDF6; color: $tx-main; }
+}
+
+
+// 搜尋結果摘要
+.result-info {
+  font-size    : 12px;
+  color        : $tx-mid;
+  padding-bottom: 8px;
+  display      : none;
+
+  &.is-visible { display: block; }
+
+  mark {
+    background : none;
+    color      : $blue;
+    font-weight: 700;
+    font-style : normal;
+  }
+}
+
+// ── Main inner（tree + cases）────────────────────────────
+.main-inner {
+  display    : flex;
+  flex       : 1;
+  overflow   : hidden;
+  gap        : 20px;           // Figma: gap 20px
+  padding    : 0px 20px 20px; // Figma: 浮動面板間距
+  background : $bg-white;
+}

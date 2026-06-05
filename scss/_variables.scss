@@ -1,0 +1,70 @@
+// ============================================================
+//  _variables.scss
+//  Design Tokens — 國貿署 KM 系統
+// ============================================================
+
+// ── 品牌漸層 ──────────────────────────────────────────────
+$grad-start : #2C8085;
+$grad-end   : #3145A5;
+$grad-h     : linear-gradient(90deg, $grad-start 0%, $grad-end 100%);   // 水平
+$grad-v     : linear-gradient(180deg, $grad-start 0%, $grad-end 100%);  // 垂直
+$grad-diag  : linear-gradient(150deg, #EEF3FA, #E5EDF6);                // 首頁背景
+
+// ── 文字色 ────────────────────────────────────────────────
+$tx-main    : #2F3D50;
+$tx-mid     : #566578;
+$tx-light   : #8898AA;
+$tx-white   : #ffffff;
+
+// ── 背景 ──────────────────────────────────────────────────
+$bg-page    : #F0F4F9;
+$bg-app     : #EDF5F7;  // App 頁面背景（Figma: #edf5f7）
+$bg-white   : #ffffff;
+
+// ── 邊框 ──────────────────────────────────────────────────
+$bdr        : #D8E2EE;
+$bdr-focus  : #2457A7;
+
+// ── 語意色 ────────────────────────────────────────────────
+$primary    : #0F3F85;  // 主要藍（Figma: #0f3f85）
+$blue       : #2457A7;
+$navy       : #1B3263;
+$teal       : #2C8086;
+$green      : #16806D;  // Figma: #16806d
+$red        : #FF4D4D;  // Figma: #ff4d4d
+$amber      : #E8911A;
+$hl         : #FEF08A;  // Figma: #fef08a
+
+// ── Tag 背景 ──────────────────────────────────────────────
+$tag-new-bg : #EDF7F6;  // Figma: #edf7f6
+$tag-lt-bg  : #E6F5EE;
+$tag-hv-bg  : #FFEAEA;
+$tag-hv-bdr : #FFCCCC;
+
+// ── 陰影 ──────────────────────────────────────────────────
+$sh1 : 0 1px 4px rgba(44, 63, 90, 0.09);
+$sh2 : 0 4px 18px rgba(44, 63, 90, 0.14);
+$sh3 : 0 10px 36px rgba(44, 63, 90, 0.20);
+
+// ── 圓角 ──────────────────────────────────────────────────
+$r-sm  : 4px;
+$r-md  : 10px;
+$r-lg  : 16px;
+$r-xl  : 20px;
+$r-pill: 20px;
+
+// ── 尺寸 ──────────────────────────────────────────────────
+$topbar-h    : 56px;
+$sidebar-w   : 240px;   // Figma: 240px
+$tree-w      : 300px;   // Figma: 300px
+$side-panel-w: 560px;
+
+// ── 過渡 ──────────────────────────────────────────────────
+$ease-fast  : 0.12s ease;
+$ease-mid   : 0.20s ease;
+$ease-panel : 0.28s cubic-bezier(0, 0, 0.2, 1);
+
+// ── 字型 ──────────────────────────────────────────────────
+$font-base  : 'Noto Sans TC', -apple-system, sans-serif;
+$fs-base    : 13px;
+$lh-base    : 1.55;
