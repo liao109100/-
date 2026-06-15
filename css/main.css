@@ -635,7 +635,15 @@ a[href],
   font-size: 11px;
   color: #566578;
 }
+.sidebar-logo .logo-full {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
 .sidebar-logo .logo-mini {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
   display: none;
 }
 

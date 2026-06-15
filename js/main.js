@@ -10,6 +10,7 @@
  *   Sidebar    — 側欄縮合
  *   Modal      — 進階搜尋 & 法規選擇彈窗
  *   Toast      — 輕提示訊息
+ *   Render     — 共用內容動態渲染（資料來源：js/data.js）
  *   Init       — DOM 事件綁定入口
  */
 
@@ -714,9 +715,106 @@ const Toast = {
 };
 
 // ─────────────────────────────────────────────────────────
+//  Render — 共用內容動態渲染（資料來源：js/data.js）
+// ─────────────────────────────────────────────────────────
+const Render = {
+  /** Sidebar 選單（依 [data-sidebar] 容器產生對應 active 項目） */
+  sidebars() {
+    document.querySelectorAll('[data-sidebar]').forEach(scr => {
+      const aside = scr.querySelector('.sidebar');
+      const logo  = aside?.querySelector('.sidebar-logo');
+      if (!logo) return;
+
+      const activeKey = scr.dataset.sidebar;
+      const html = SIDEBAR_ITEMS.map(item => {
+        const isActive = item.key === activeKey;
+        const cls = 'sidebar-item' + (isActive ? ' is-active' : '');
+        const onclick = isActive ? '' : ` onclick="KM.${item.action}()"`;
+        return `<div class="${cls}"${onclick}>
+      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="${item.icon}" fill="currentColor"/>
+      </svg>
+      ${esc(item.label)}
+    </div>`;
+      }).join('');
+
+      logo.insertAdjacentHTML('afterend', html);
+    });
+  },
+
+  /** 首頁功能卡片 */
+  homeCards() {
+    const el = $('home-grid');
+    if (!el) return;
+    el.innerHTML = HOME_CARDS.map(c => `<div class="card" onclick="KM.${c.action}()">
+        <div class="card-ico">
+          <img src="img/${c.icon}" alt="${esc(c.alt)}">
+        </div>
+        ${c.featured ? '<div class="card-arrow">→</div>' : ''}
+        <div class="card-title">${esc(c.title)}</div>
+        ${c.sub ? `<div class="card-sub">${esc(c.sub)}</div>` : ''}
+      </div>`).join('');
+  },
+
+  /** 首頁最新異動 */
+  news() {
+    const el = $('news-list');
+    if (!el) return;
+    el.innerHTML = NEWS_ITEMS.map(n => `<div class="news-card">
+        <div class="news-row">
+          <span class="news-tag">${esc(n.tag)}</span>
+          <span class="news-date">${esc(n.date)}</span>
+        </div>
+        <div class="news-title">${esc(n.title)}</div>
+        <div class="news-body">${esc(n.body)}</div>
+      </div>`).join('');
+  },
+
+  /** 首頁常用連結 */
+  quickLinks() {
+    const el = $('quick-links');
+    if (!el) return;
+    el.innerHTML = QUICK_LINKS.map(q => `<div class="quick-item">
+          <img src="img/${q.icon}" alt="">
+          ${esc(q.label)}
+        </div>`).join('');
+  },
+
+  /** 處分案樣態樹狀清單（出口 / 進口） */
+  tree() {
+    const treeItem = (item) => {
+      const cls = 'tree-item' + (item.active ? ' is-active' : '');
+      const arg = (item.arg ?? item.label).replace(/'/g, "\\'");
+      return `<div class="${cls}" data-cat="${item.cat}" onclick="KM.selectTree(this,'${arg}')">
+              <span class="tree-folder"></span>
+              <span>${esc(item.label)}</span>
+              <span class="tree-count">0</span>
+            </div>`;
+    };
+
+    const exEl = $('tree-export');
+    const imEl = $('tree-import');
+    if (exEl) exEl.innerHTML = TREE_EXPORT_ITEMS.map(treeItem).join('');
+    if (imEl) imEl.innerHTML = TREE_IMPORT_ITEMS.map(treeItem).join('');
+  },
+
+  /** 於 init() 開頭呼叫，產生所有共用內容 */
+  all() {
+    this.sidebars();
+    this.homeCards();
+    this.news();
+    this.quickLinks();
+    this.tree();
+  },
+};
+
+// ─────────────────────────────────────────────────────────
 //  Init — DOM 事件綁定
 // ─────────────────────────────────────────────────────────
 function init() {
+  // ── 動態內容渲染（Sidebar、首頁卡片、樹狀清單…）─────
+  Render.all();
+
   // ── 鍵盤 Esc ────────────────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;

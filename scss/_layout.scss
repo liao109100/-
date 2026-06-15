@@ -191,7 +191,8 @@
   .zh          { font-size: 12px; font-weight: 700; color: $navy; }
   .en          { font-size: 11px; color: $tx-mid; }
 
-  .logo-mini   { display: none; }
+  .logo-full   { height: 36px; width: auto; object-fit: contain; }
+  .logo-mini   { width: 36px; height: 36px; object-fit: contain; display: none; }
 }
 
 .sidebar-item {
