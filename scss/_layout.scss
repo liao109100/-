@@ -83,6 +83,9 @@
     font-size     : 12.5px;
     color         : rgba(255, 255, 255, 0.88);
     cursor        : pointer;
+    align-items: center;
+    justify-content: center;
+    display: flex;
     text-decoration: none;
     white-space   : nowrap;
     transition    : color $ease-fast;
@@ -182,6 +185,7 @@
 .sidebar-logo {
   display      : flex;
   align-items  : center;
+  justify-content: center;
   gap          : 9px;
   padding      : 10px 8px 16px;
   border-bottom: 1px solid $bdr;
@@ -191,7 +195,7 @@
   .zh          { font-size: 12px; font-weight: 700; color: $navy; }
   .en          { font-size: 11px; color: $tx-mid; }
 
-  .logo-full   { height: 36px; width: auto; object-fit: contain; }
+  .logo-full   { height: 50px; width: auto; object-fit: contain; }
   .logo-mini   { width: 36px; height: 36px; object-fit: contain; display: none; }
 }
 

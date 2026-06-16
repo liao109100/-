@@ -135,8 +135,6 @@
       </button>
     </div>
     <nav class="topbar-nav">
-      <a>知識管理</a>
-      <a>系統設定</a>
       <a><span class="mi">person</span> 管理模式(科長)</a>
       <a>登出</a>
     </nav>
@@ -587,10 +585,10 @@
           </div>
 
           <!-- 右（2）：細節資訊（sticky）-->
-          <div style="position:sticky;top:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="width: 240px;position:sticky;top:16px;display:flex;flex-direction:column;gap:14px">
             <div class="doc-card" style="padding:16px">
               <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">案件資訊</div>
-              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:14px">
                 <div style="color:#8898AA;font-weight:600">處分對象</div>
                 <div style="color:#2F3D50">OOO食品公司</div>
                 <div style="color:#8898AA;font-weight:600;margin-top:4px">涉及法規</div>
@@ -611,6 +609,11 @@
               <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
                 <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span> OOO聲明書.pdf</span>
                 <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span> OOOOO調查資料.pdf</span>
+              </div>
+            </div>
+            <div class="doc-card" style="padding:16px">
+              <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">關聯案例</div>
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
                 <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
               </div>
             </div>
@@ -1364,12 +1367,14 @@
           </div>
         </div>
 
-        <!-- 附件 & 關聯案例 -->
+        <!-- 相關附件 -->
         <div class="detail-attach-bar">
           <span>相關附件：</span>
           <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span> OOO文件</span>
           <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span> OOOOO法規</span>
-          <span class="attach-sep"></span>
+        </div>
+        <!-- 關聯案例 -->
+        <div class="detail-attach-bar" style="border-top:1px solid #EEF0F4;padding-top:10px;padding-bottom:10px">
           <span>關聯案例：</span>
           <span class="link-pill" onclick="KM.openPanel()" style="cursor:pointer"><span class="mi">link</span> OOO處分案例</span>
         </div>

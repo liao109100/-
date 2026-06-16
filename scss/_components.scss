@@ -183,11 +183,14 @@
   display    : flex;
   align-items: center;
   gap        : 7px;
+  flex       : 1;
+  min-width  : 0;
 
+  span:not(.mi) { word-break: break-word; }
   svg { color: $primary; }
 }
 
-.btn-group { display: flex; gap: 8px; }
+.btn-group { display: flex; gap: 8px; flex-shrink: 0; }
 
 // ── Buttons ──────────────────────────────────────────────
 .btn {

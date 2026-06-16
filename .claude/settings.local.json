@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx sass *)",
+      "Bash(mkdir -p /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km/css && npx sass scss/main.scss css/main.css --style=expanded 2>&1)",
+      "mcp__plugin_figma_figma__get_metadata",
+      "mcp__plugin_figma_figma__get_screenshot",
+      "mcp__plugin_figma_figma__get_design_context",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(grep -E '\\.scss$')",
+      "Skill(figma:figma-implement-design)",
+      "Skill(figma:figma-implement-design:*)",
+      "Bash(sed -n '399,405p' /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km/index.html)",
+      "Bash(sed -n '775,781p' /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km/index.html)",
+      "Bash(sed -n '395,403p' /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km/index.html)",
+      "Bash(sed -n '772,780p' /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km/index.html)",
+      "Bash(python3 /Users/liaoweicheng/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.0.1/.claude/skills/ui-ux-pro-max/scripts/search.py \"government enterprise knowledge management SaaS dashboard professional\" --design-system -p \"國貿署 KM 系統\")",
+      "Bash(python3 /Users/liaoweicheng/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.0.1/.claude/skills/ui-ux-pro-max/scripts/search.py \"accessibility keyboard navigation focus government dashboard\" --domain ux -n 6)",
+      "Bash(claude marketplace *)",
+      "Read(//Users/liaoweicheng/.claude/plugins/**)",
+      "Read(//Users/liaoweicheng/.claude/plugins/cache/**)",
+      "Bash(find ~/.claude -name \"*.json\" | grep -i \"marketplace\\\\|catalog\\\\|registry\" 2>/dev/null | head -20)",
+      "Read(//Users/liaoweicheng/.claude/**)",
+      "WebSearch"
+    ],
+    "additionalDirectories": [
+      "/Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; echo \"$f\" | grep -qE '\\.scss$' && cd /Users/liaoweicheng/Downloads/專案_工作/國貿知識庫/trade-km && npx sass scss/main.scss css/main.css; } 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "編譯 SCSS..."
+          }
+        ]
+      }
+    ]
+  }
+}
