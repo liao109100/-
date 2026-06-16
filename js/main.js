@@ -705,7 +705,7 @@ const FileModal = {
       return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;${border}">
         <span class="mi" style="color:#2C8086;font-size:22px;flex-shrink:0">picture_as_pdf</span>
         <span style="flex:1;font-size:14px;color:#1E293B;word-break:break-all">${name}</span>
-        <button class="btn btn--gray-outline" style="padding:4px 14px;font-size:12px;white-space:nowrap" onclick="KM.toast()">↓ 下載</button>
+        <button class="btn btn--gray-outline" style="padding:8px 14px;font-size:12px;white-space:nowrap" onclick="KM.toast()">↓ 下載</button>
       </div>`;
     }).join('');
 

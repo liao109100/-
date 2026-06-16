@@ -2001,7 +2001,7 @@ select.filter-select:focus {
 }
 
 .back-btn-lg {
-  padding: 6px 20px;
+  padding: 8px 20px;
   border: 1.5px solid #D8E2EE;
   border-radius: 4px;
   background: #ffffff;
@@ -2264,7 +2264,7 @@ select.filter-select:focus {
 }
 
 .btn-edit-flow {
-  padding: 4px 16px;
+  padding: 8px 16px;
   font-size: 12px;
   font-family: inherit;
   font-weight: 500;
@@ -2835,7 +2835,7 @@ select.filter-select {
 }
 
 .nc-type-btn {
-  padding: 6px 20px;
+  padding: 8px 20px;
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
