@@ -955,7 +955,13 @@
             <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085">edit_document</span>
             新增範本案例
           </div>
-          <button class="back-btn-lg" onclick="KM.goApp()">＜ 返回</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--clear" onclick="KM.goApp()">取消</button>
+            <button class="btn btn--gray-outline" onclick="KM.ncSave(false)">儲存草稿</button>
+            <button class="btn btn--search" onclick="KM.ncSave(true)">
+              <span class="mi">check</span> 發布案例
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1083,16 +1089,6 @@
 
         </div><!-- /.nc-form-card -->
 
-        <!-- 底部操作 -->
-        <div class="nc-footer">
-          <button class="btn btn--clear" onclick="KM.goApp()">取消</button>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn--gray-outline" onclick="KM.ncSave(false)">儲存草稿</button>
-            <button class="btn btn--search" onclick="KM.ncSave(true)">
-              <span class="mi">check</span> 發布案例
-            </button>
-          </div>
-        </div>
 
       </div><!-- /.nc-body -->
     </main>
