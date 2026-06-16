@@ -10,6 +10,7 @@
  *   Sidebar    — 側欄縮合
  *   Modal      — 進階搜尋 & 法規選擇彈窗
  *   Toast      — 輕提示訊息
+ *   FileModal  — 單筆附件下載彈窗
  *   Render     — 共用內容動態渲染（資料來源：js/data.js）
  *   Init       — DOM 事件綁定入口
  */
@@ -689,6 +690,18 @@ const Modal = {
 };
 
 // ─────────────────────────────────────────────────────────
+//  FileModal — 單筆附件下載彈窗
+// ─────────────────────────────────────────────────────────
+const FileModal = {
+  open(el) {
+    const iconText = el.querySelector('.mi')?.textContent ?? '';
+    const name = el.textContent.replace(iconText, '').trim();
+    $('file-dl-name').textContent = name;
+    Modal.open('modal-file-dl');
+  },
+};
+
+// ─────────────────────────────────────────────────────────
 //  Toast — 輕提示
 // ─────────────────────────────────────────────────────────
 const Toast = {
@@ -1125,6 +1138,7 @@ window.KM = {
   // Modal
   openModal         : id  => Modal.open(id),
   closeModal        : id  => Modal.close(id),
+  openFileModal     : el  => FileModal.open(el),
   openLawModal      : (tagsId, returnTo) => Modal.openLaw(tagsId, returnTo),
   closeLawModal     : () => Modal.closeLaw(),
   handleDateRange   : sel => Modal.handleDateRange(sel),
