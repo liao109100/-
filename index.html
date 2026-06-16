@@ -1941,23 +1941,17 @@
 </div><!-- /#modal-download -->
 
 
-<!-- ── 單筆附件下載彈窗 ──────────────────────────────────── -->
+<!-- ── 附件下載彈窗 ──────────────────────────────────────── -->
 <div class="overlay" id="modal-file-dl" onclick="KM.overlayClick(event,'modal-file-dl')">
   <div class="modal modal--sm">
     <div class="modal-header">
-      <span class="modal-title">下載附件</span>
+      <span class="modal-title">相關附件</span>
       <button class="modal-close" onclick="KM.closeModal('modal-file-dl')"><span class="mi">close</span></button>
     </div>
-    <div style="display:flex;align-items:center;gap:30px;padding:6px 0 10px">
-      <span class="mi" style="font-size:40px;color:#2C8086;flex-shrink:0">picture_as_pdf</span>
-      <div>
-        <div id="file-dl-name" style="font-size:15px;font-weight:700;color:#1E293B;word-break:break-all;line-height:1.4"></div>
-        <div style="font-size:12px;color:#8898AA;margin-top:4px">附件</div>
-      </div>
-    </div>
+    <div id="file-dl-list"></div>
     <div class="modal-footer">
       <button class="btn btn--clear" onclick="KM.closeModal('modal-file-dl')">取消</button>
-      <button class="btn btn--search"><span class="mi" style="font-size:14px;vertical-align:-2px">download</span> 下載</button>
+      <button class="btn btn--search" onclick="KM.toast()"><span class="mi" style="font-size:14px;vertical-align:-2px">download</span> 一鍵下載</button>
     </div>
   </div>
 </div>

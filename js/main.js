@@ -10,7 +10,7 @@
  *   Sidebar    — 側欄縮合
  *   Modal      — 進階搜尋 & 法規選擇彈窗
  *   Toast      — 輕提示訊息
- *   FileModal  — 單筆附件下載彈窗
+ *   FileModal  — 附件下載彈窗（顯示同一卡片所有附件）
  *   Render     — 共用內容動態渲染（資料來源：js/data.js）
  *   Init       — DOM 事件綁定入口
  */
@@ -690,13 +690,25 @@ const Modal = {
 };
 
 // ─────────────────────────────────────────────────────────
-//  FileModal — 單筆附件下載彈窗
+//  FileModal — 附件下載彈窗（顯示同一卡片所有附件）
 // ─────────────────────────────────────────────────────────
 const FileModal = {
   open(el) {
-    const iconText = el.querySelector('.mi')?.textContent ?? '';
-    const name = el.textContent.replace(iconText, '').trim();
-    $('file-dl-name').textContent = name;
+    const container = el.closest('.attach-row, .detail-attach-bar, .doc-card')
+      ?? el.parentElement;
+    const pills = Array.from(container.querySelectorAll('.attach-pill'));
+
+    $('file-dl-list').innerHTML = pills.map((pill, i) => {
+      const icon = pill.querySelector('.mi')?.textContent ?? '';
+      const name = esc(pill.textContent.replace(icon, '').trim());
+      const border = i < pills.length - 1 ? 'border-bottom:1px solid #EEF0F4;' : '';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;${border}">
+        <span class="mi" style="color:#2C8086;font-size:22px;flex-shrink:0">picture_as_pdf</span>
+        <span style="flex:1;font-size:14px;color:#1E293B;word-break:break-all">${name}</span>
+        <button class="btn btn--gray-outline" style="padding:4px 14px;font-size:12px;white-space:nowrap" onclick="KM.toast()">↓ 下載</button>
+      </div>`;
+    }).join('');
+
     Modal.open('modal-file-dl');
   },
 };
