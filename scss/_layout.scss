@@ -99,7 +99,7 @@
   display       : flex;
   flex-direction: column;
   flex          : 1;
-  height        : 100vh;
+  height        : calc(100vh - #{$footer-h});
   overflow      : hidden;
 }
 
@@ -107,7 +107,7 @@
 .sidebar-wrap {
   position   : relative;
   flex-shrink: 0;
-  height     : 100vh;
+  height     : calc(100vh - #{$footer-h});
 
   // ── 縮合狀態（由 JS toggle 在此元素上）──────────────
   &.is-collapsed {

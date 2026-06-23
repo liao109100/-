@@ -31,9 +31,28 @@ const esc = str =>
      .replace(/>/g, '&gt;');
 
 // ─────────────────────────────────────────────────────────
+//  CardFocus — 記住點擊的卡片，返回列表時回到該卡片位置
+// ─────────────────────────────────────────────────────────
+const CardFocus = {
+  _el: null,
+
+  remember(el) {
+    this._el = el ?? null;
+  },
+
+  restore() {
+    const el = this._el;
+    if (!el || !document.body.contains(el)) return;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('is-focus-flash');
+    setTimeout(() => el.classList.remove('is-focus-flash'), 1800);
+  },
+};
+
+// ─────────────────────────────────────────────────────────
 //  Nav — 頁面切換
 // ─────────────────────────────────────────────────────────
-const SCREENS = ['home', 'app', 'app-flow-list', 'app-flow-edit', 'app-case-detail', 'app-customs', 'app-customs-detail', 'app-new-case'];
+const SCREENS = ['home', 'app', 'app-flow-list', 'app-flow-edit', 'app-case-detail', 'app-customs', 'app-customs-detail', 'app-new-case', 'app-customs-new-case'];
 
 const Nav = {
   _show(id) {
@@ -59,16 +78,84 @@ const Nav = {
     this._show('app-customs-detail');
   },
 
+  openCustomsDetail(el) {
+    CardFocus.remember(el);
+    this.goCustomsDetail();
+  },
+
+  backToCustomsList() {
+    this.goCustoms();
+    CardFocus.restore();
+  },
+
   goCaseDetail() {
     SidePanel.close();
     this._show('app-case-detail');
   },
 
-  goFlowList() {
+  openCaseDetail(el) {
+    CardFocus.remember(el);
+    this.goCaseDetail();
+  },
+
+  backToCaseList() {
+    this.goApp();
+    CardFocus.restore();
+  },
+
+  /** 處理流程清單的來源（'cases' | 'customs'），決定麵包屑與返回目標 */
+  _flowSource: 'cases',
+
+  _syncFlowBreadcrumb() {
+    const isCustoms = this._flowSource === 'customs';
+    const midLabel  = isCustoms ? '海關答聯單處理' : '處分案件';
+    const goMid     = () => isCustoms ? this.goCustoms() : this.goApp();
+    const titleText = isCustoms
+      ? ($('customs-section-title')?.textContent ?? '')
+      : ($('section-title')?.textContent ?? '');
+
+    const mid = $('flow-breadcrumb-mid');
+    if (mid) { mid.textContent = midLabel; mid.onclick = goMid; }
+    const title = $('flow-breadcrumb-title');
+    if (title) title.textContent = titleText;
+    const pageTitle = $('flow-page-title-text');
+    if (pageTitle) pageTitle.textContent = titleText;
+    const backBtn = $('flow-back-btn');
+    if (backBtn) backBtn.onclick = goMid;
+
+    const midEdit = $('flow-edit-breadcrumb-mid');
+    if (midEdit) { midEdit.textContent = midLabel; midEdit.onclick = goMid; }
+    const titleEdit = $('flow-edit-breadcrumb-title');
+    if (titleEdit) titleEdit.textContent = titleText;
+    const pageTitleEdit = $('flow-edit-page-title-text');
+    if (pageTitleEdit) pageTitleEdit.textContent = titleText;
+
+    // 流程清單名稱（案例 vs 海關答聯單，命名邏輯不同）
+    const names = isCustoms
+      ? ['標準答聯流程', '加急答聯流程（擋關案件）', 'CITES 案件答聯流程']
+      : ['一般處理流程', '特殊處理流程', '鞋類處理流程'];
+    ['flow-1-name', 'flow-1-draft-name', 'flow-1-archive-name'].forEach(id => {
+      const el = $(id);
+      if (el) el.textContent = names[0];
+    });
+    const n2 = $('flow-2-name');
+    if (n2) n2.textContent = names[1];
+    const n3 = $('flow-3-name');
+    if (n3) n3.textContent = names[2];
+  },
+
+  goFlowList(source) {
+    if (source) this._flowSource = source;
+    this._syncFlowBreadcrumb();
     this._show('app-flow-list');
   },
 
-  goNewCase() {
+  goNewCase(source) {
+    if (source === 'customs') {
+      this._show('app-customs-new-case');
+      CustomsNewCase.init();
+      return;
+    }
     this._show('app-new-case');
     NewCase.init();
   },
@@ -81,6 +168,7 @@ const Nav = {
     if (banner) banner.style.display = 'none';
     document.querySelectorAll('#app-flow-edit .btn--search, #app-flow-edit .btn--clear, .flow-add-btn')
       .forEach(b => b.style.display = '');
+    this._syncFlowBreadcrumb();
     this._show('app-flow-edit');
     FlowEdit.init();
   },
@@ -93,6 +181,7 @@ const Nav = {
     if (banner) banner.style.display = 'flex';
     document.querySelectorAll('#app-flow-edit .btn--search, #app-flow-edit .btn--clear, .flow-add-btn')
       .forEach(b => b.style.display = 'none');
+    this._syncFlowBreadcrumb();
     this._show('app-flow-edit');
     FlowEdit.init();
   },
@@ -189,17 +278,100 @@ const FLOW_STEPS_DATA = [
   }
 ];
 
+// 海關答聯單的處理流程是機關間固定的公文往復順序（海關來文 → 產發署研議 → 本署回復），
+// 步驟（階段）數量、順序固定，不可拖曳排序或新增；但同一階段實務上可能有多次往復
+// 公文（如海關追加來文、本署分次回復），因此每個 step 底下改為一份可新增的文件清單，
+// 每筆文件各自記錄類型（來文／回文）、文號、日期、內容、附件
+const CUSTOMS_FLOW_STEPS_DATA = [
+  {
+    title: '海關來文',
+    docs: [
+      {
+        type : '來文',
+        no   : 'ATEG1140027',
+        date : '114/10/14',
+        body : '＿＿＿＿股份有限公司（出口人）報運出口貨物1批（出口報單AT/BC/14/＿＿＿＿號）至美國，依出口人說明案貨為出口人設計並持有模具及核心技術之專業檢測儀器，部分組裝及焊接程序於中國大陸關係企業完成。\n\n本案出口貨品與原進口貨品之稅則號別前6位碼相異；惟其加工製程作業是否符合原產地證明書及加工證明書管理辦法第5條第3項規定，屬簡易加工，視為非實質轉型？請貴署惠示意見。',
+      },
+    ],
+  },
+  {
+    title: '產發署研議',
+    docs: [
+      {
+        type : '回文',
+        no   : '1140681763',
+        date : '114/10/25',
+        body : '查本案加工程序僅涉及部分組裝及焊接，依「原產地認定標準」，尚未達實質轉型門檻，加工後之稅則號別變更非屬實質性轉型行為。\n\n建議仍以原始產地（中國大陸）認定，惟請貴署參酌出口人所附技術文件後，併同法規意見回復海關。',
+      },
+    ],
+  },
+  {
+    title: '本署回復',
+    docs: [
+      {
+        type : '回文',
+        no   : '貿管理字第1140912345號',
+        date : '114/10/28',
+        body : '復貴關114年10月14日ATEG1140027號函。\n\n經洽產業發展署研議，本案貨品加工程序未達實質轉型標準，產地應認定為中國大陸，請依此辦理後續通關事宜；如出口人標示與本認定不符，請依貿易法相關規定處理。',
+      },
+    ],
+  },
+];
+
 const FlowEdit = {
   dragSrc: null,
+  _isCustoms: false,
+
+  /** 取得當前資料來源：海關答聯單為固定 3 步驟，處分案例為可自訂 8 步驟 */
+  _data() {
+    return this._isCustoms ? CUSTOMS_FLOW_STEPS_DATA : FLOW_STEPS_DATA;
+  },
 
   init() {
+    this._isCustoms = Nav._flowSource === 'customs';
+    this._renderStepList();
+
+    const addBtn = $('flow-add-btn');
+    if (addBtn) addBtn.style.display = this._isCustoms ? 'none' : '';
+    const genericEditor = $('flow-edit-generic');
+    if (genericEditor) genericEditor.style.display = this._isCustoms ? 'none' : '';
+    const docsEditor = $('flow-edit-docs');
+    if (docsEditor) docsEditor.style.display = this._isCustoms ? '' : 'none';
+    const titleEl = $('flow-right-title');
+    if (titleEl) titleEl.readOnly = this._isCustoms;
+
     const isView = $('app-flow-edit')?.classList.contains('is-view-mode');
-    if (!isView) this.bindDrag();  // 檢視模式不綁 drag
+    if (!isView && !this._isCustoms) this.bindDrag();  // 海關答聯單步驟固定，不可拖曳；檢視模式也不綁 drag
+    const addDocBtn = document.querySelector('.flow-doc-add-btn');
+    if (addDocBtn) addDocBtn.style.display = isView ? 'none' : '';
     // 檢視模式設 contenteditable="false"
     const body = $('flow-rich-body');
     if (body) body.contentEditable = isView ? 'false' : 'true';
     const first = document.querySelector('#flow-step-list .step-card');
     if (first) this.selectStep(first);
+
+    // 附件區（獨立於步驟之外，整個流程共用）
+    const uploadZone = document.querySelector('.flow-attach-section .nc-upload-zone');
+    if (uploadZone) uploadZone.style.display = isView ? 'none' : '';
+    this._renderFileList();
+  },
+
+  /** 依資料來源重建左側步驟清單（海關答聯單固定步驟，不含拖曳把手） */
+  _renderStepList() {
+    const list = $('flow-step-list');
+    if (!list) return;
+    const data = this._data();
+    list.innerHTML = data.map((d, i) => {
+      const sep = i < data.length - 1 ? '<div class="step-sep">↓</div>' : '';
+      const drag = this._isCustoms ? '' : '<div class="step-drag">⠿</div>';
+      return `<div class="step-card${i === 0 ? ' is-active' : ''}" draggable="${!this._isCustoms}" data-idx="${i}">
+        ${drag}
+        <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
+          <div class="step-num">Step${i + 1}</div>
+          <div class="step-title-sm">${esc(d.title)}</div>
+        </div>
+      </div>${sep}`;
+    }).join('');
   },
 
   bindDrag() {
@@ -257,6 +429,9 @@ const FlowEdit = {
     });
   },
 
+  /** 目前選中的步驟索引（供海關答聯單的多筆文件清單操作用） */
+  _currentStepIdx: 0,
+
   selectStep(card) {
     document.querySelectorAll('#flow-step-list .step-card').forEach(c => c.classList.remove('is-active'));
     card.classList.add('is-active');
@@ -269,24 +444,118 @@ const FlowEdit = {
     if (numEl)   numEl.textContent = numText;
     if (titleEl) titleEl.value     = title;
 
-    // 載入對應步驟的假資料內容
-    if (bodyEl) {
-      const idx  = parseInt(numText.replace(/\D/g, ''), 10) - 1;
-      const data = FLOW_STEPS_DATA[idx];
-      if (data) {
-        bodyEl.innerHTML = data.body;
-        if (titleEl) titleEl.value = data.title;
-        card.querySelector('.step-title-sm').textContent = data.title;
-      }
+    // 載入對應步驟的假資料內容（以 data-idx 對應，新增的自訂步驟無對應資料則維持手動內容）
+    const idx  = parseInt(card.dataset.idx ?? '', 10);
+    this._currentStepIdx = idx;
+    const data = Number.isInteger(idx) ? this._data()[idx] : null;
+    if (data && !this._isCustoms) {
+      if (bodyEl)  bodyEl.innerHTML = data.body;
+      if (titleEl) titleEl.value    = data.title;
+      card.querySelector('.step-title-sm').textContent = data.title;
     }
+
+    if (this._isCustoms) this._renderDocList();
   },
 
   updateTitle(val) {
+    if (this._isCustoms) return; // 海關答聯單步驟名稱固定，不可重新命名
     const active = document.querySelector('#flow-step-list .step-card.is-active');
     if (active) active.querySelector('.step-title-sm').textContent = val;
   },
 
+  /** 取得目前步驟的文件清單（海關答聯單專用） */
+  _currentDocs() {
+    return CUSTOMS_FLOW_STEPS_DATA[this._currentStepIdx]?.docs ?? [];
+  },
+
+  /** 重繪目前步驟的來文／回文清單（附件已獨立於流程之外，見 _files / _renderFileList） */
+  _renderDocList() {
+    const list = $('flow-doc-list');
+    if (!list) return;
+    const docs = this._currentDocs();
+    list.innerHTML = docs.map((d, i) => `
+      <div class="flow-doc-card">
+        <div class="flow-doc-hd">
+          <select class="filter-select flow-doc-type" onchange="KM.flowDocUpdate(${i},'type',this.value)">
+            <option value="來文" ${d.type === '來文' ? 'selected' : ''}>來文</option>
+            <option value="回文" ${d.type === '回文' ? 'selected' : ''}>回文</option>
+          </select>
+          ${docs.length > 1 ? `<button class="flow-doc-remove" onclick="KM.flowRemoveDoc(${i})" title="刪除"><span class="mi">close</span></button>` : ''}
+        </div>
+        <div class="nc-fields-grid">
+          <div class="nc-field">
+            <label class="nc-label">發文文號</label>
+            <input type="text" class="nc-input" value="${esc(d.no)}" oninput="KM.flowDocUpdate(${i},'no',this.value)">
+          </div>
+          <div class="nc-field">
+            <label class="nc-label">發文日期</label>
+            <input type="text" class="nc-input" value="${esc(d.date)}" oninput="KM.flowDocUpdate(${i},'date',this.value)">
+          </div>
+        </div>
+        <textarea class="nc-textarea" rows="4" placeholder="請輸入公文內容…" oninput="KM.flowDocUpdate(${i},'body',this.value)">${esc(d.body)}</textarea>
+      </div>`).join('');
+  },
+
+  /** 新增一筆來文／回文（保留可新增性：同一階段可能多次往復公文） */
+  addDoc() {
+    const docs = this._currentDocs();
+    docs.push({ type: '來文', no: '', date: '', body: '' });
+    this._renderDocList();
+  },
+
+  removeDoc(idx) {
+    const docs = this._currentDocs();
+    docs.splice(idx, 1);
+    this._renderDocList();
+  },
+
+  updateDocField(idx, field, val) {
+    const doc = this._currentDocs()[idx];
+    if (doc) doc[field] = val;
+  },
+
+  /** 附件：獨立於流程步驟之外，整個流程（無論幾個步驟）共用一份清單 */
+  _files: [],
+
+  handleFiles(input) {
+    [...(input.files || [])].forEach(f => {
+      f.note = '';
+      this._files.push(f);
+    });
+    input.value = '';
+    this._renderFileList();
+  },
+
+  removeFile(idx) {
+    this._files.splice(idx, 1);
+    this._renderFileList();
+  },
+
+  updateFileNote(idx, val) {
+    if (this._files[idx]) this._files[idx].note = val;
+  },
+
+  _renderFileList() {
+    const list = $('flow-file-list');
+    if (!list) return;
+    if (this._files.length === 0) {
+      list.innerHTML = '<span class="nc-empty-hint">尚未選擇任何附件</span>';
+      return;
+    }
+    list.innerHTML = this._files.map((f, i) => `
+      <div class="nc-file-item">
+        <span class="mi" style="color:#2457A7;font-size:18px">attach_file</span>
+        <div class="nc-file-main">
+          <span class="nc-file-name">${esc(f.name)}</span>
+          <input type="text" class="nc-file-note" placeholder="輸入備註（選填）" value="${esc(f.note || '')}" oninput="KM.flowUpdateFileNote(${i},this.value)">
+        </div>
+        <span class="nc-file-size">${(f.size / 1024).toFixed(0)} KB</span>
+        <button class="nc-file-remove" onclick="KM.flowRemoveFile(${i})"><span class="mi">close</span></button>
+      </div>`).join('');
+  },
+
   addStep() {
+    if (this._isCustoms) { Toast.show('海關答聯單流程為固定步驟，不可新增'); return; }
     const list = document.getElementById('flow-step-list');
 
     // 建立新步驟卡（獨特樣式）
@@ -699,12 +968,15 @@ const FileModal = {
     const pills = Array.from(container.querySelectorAll('.attach-pill'));
 
     $('file-dl-list').innerHTML = pills.map((pill, i) => {
-      const icon = pill.querySelector('.mi')?.textContent ?? '';
-      const name = esc(pill.textContent.replace(icon, '').trim());
+      const no   = esc(pill.querySelector('.attach-pill-no')?.textContent.trim() ?? '');
+      const desc = esc(pill.querySelector('.attach-pill-desc')?.textContent.trim() ?? '');
       const border = i < pills.length - 1 ? 'border-bottom:1px solid #EEF0F4;' : '';
       return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;${border}">
         <span class="mi" style="color:#2C8086;font-size:22px;flex-shrink:0">picture_as_pdf</span>
-        <span style="flex:1;font-size:14px;color:#1E293B;word-break:break-all">${name}</span>
+        <span style="flex:1;min-width:0">
+          <div style="font-size:14px;color:#1E293B;font-weight:600;word-break:break-all">${no}</div>
+          <div style="font-size:11.5px;color:#8898AA;margin-top:2px">${desc}</div>
+        </span>
         <button class="btn btn--gray-outline" style="padding:8px 14px;font-size:12px;white-space:nowrap" onclick="KM.toast()">↓ 下載</button>
       </div>`;
     }).join('');
@@ -931,6 +1203,51 @@ const Download = {
 };
 
 // ─────────────────────────────────────────────────────────
+//  RelatedPicker — 關聯案例／關聯答聯單 共用選擇彈窗
+// ─────────────────────────────────────────────────────────
+const RelatedPicker = {
+  _targetId: 'nc-related-tags',
+  _emptyHint: '點擊選擇關聯案例',
+
+  openFor(targetId, items, opts = {}) {
+    this._targetId  = targetId;
+    this._emptyHint = opts.emptyHint || '點擊選擇關聯案例';
+    const list = $('nc-related-list');
+    if (list && items) {
+      list.innerHTML = items.map(label => `
+        <div class="law-item nc-related-item" onclick="KM.ncToggleRelated(this)">
+          <input type="checkbox"><label class="nc-related-label">${esc(label)}</label>
+        </div>`).join('');
+    }
+    const title = $('modal-related-title');
+    if (title) title.textContent = opts.title || '選擇關聯案例';
+    Modal.open('modal-related');
+  },
+
+  toggleItem(item) {
+    item.classList.toggle('is-checked');
+  },
+
+  confirm() {
+    const checked = document.querySelectorAll('#nc-related-list .nc-related-item.is-checked');
+    const area = $(this._targetId);
+    if (!area) return;
+    area.innerHTML = '';
+    checked.forEach(item => {
+      const label = item.querySelector('.nc-related-label')?.textContent || '';
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.textContent = label;
+      area.appendChild(tag);
+    });
+    if (area.children.length === 0) {
+      area.innerHTML = `<span style="color:#8898AA;font-size:12px">${esc(this._emptyHint)}</span>`;
+    }
+    Modal.close('modal-related');
+  },
+};
+
+// ─────────────────────────────────────────────────────────
 //  NewCase — 新增範本案例
 // ─────────────────────────────────────────────────────────
 const NewCase = {
@@ -972,6 +1289,7 @@ const NewCase = {
   /** 附件上傳 */
   handleFiles(input) {
     [...(input.files || [])].forEach(f => {
+      f.note = '';
       this._files.push(f);
     });
     input.value = '';
@@ -981,6 +1299,10 @@ const NewCase = {
   removeFile(idx) {
     this._files.splice(idx, 1);
     this._renderFileList();
+  },
+
+  updateNote(idx, val) {
+    if (this._files[idx]) this._files[idx].note = val;
   },
 
   _renderFileList() {
@@ -993,7 +1315,10 @@ const NewCase = {
     list.innerHTML = this._files.map((f, i) => `
       <div class="nc-file-item">
         <span class="mi" style="color:#2457A7;font-size:18px">attach_file</span>
-        <span class="nc-file-name">${esc(f.name)}</span>
+        <div class="nc-file-main">
+          <span class="nc-file-name">${esc(f.name)}</span>
+          <input type="text" class="nc-file-note" placeholder="輸入備註（選填）" value="${esc(f.note || '')}" oninput="KM.ncUpdateNote(${i},this.value)">
+        </div>
         <span class="nc-file-size">${(f.size / 1024).toFixed(0)} KB</span>
         <button class="nc-file-remove" onclick="KM.ncRemoveFile(${i})"><span class="mi">close</span></button>
       </div>`).join('');
@@ -1001,29 +1326,13 @@ const NewCase = {
 
   /** 關聯案例 Modal */
   openRelated() {
-    Modal.open('modal-related');
-  },
-
-  confirmRelated() {
-    const checked = document.querySelectorAll('#nc-related-list .nc-related-item.is-checked');
-    const area = $('nc-related-tags');
-    if (!area) return;
-    area.innerHTML = '';
-    checked.forEach(item => {
-      const label = item.querySelector('.nc-related-label')?.textContent || '';
-      const tag = document.createElement('span');
-      tag.className = 'filter-tag';
-      tag.textContent = label;
-      area.appendChild(tag);
-    });
-    if (area.children.length === 0) {
-      area.innerHTML = '<span style="color:#8898AA;font-size:12px">點擊選擇關聯案例</span>';
-    }
-    Modal.close('modal-related');
-  },
-
-  toggleRelatedItem(item) {
-    item.classList.toggle('is-checked');
+    RelatedPicker.openFor('nc-related-tags', [
+      '貿管理字第114704321號 · OOO食品公司（從輕）',
+      '貿管理字第114703105號 · ABC科技（從輕）',
+      '貿管理字第114706788號 · XYZ農業（從重）',
+      '貿管理字第114705412號 · 全康醫療（從輕）',
+      '貿管理字第114701834號 · 美洲服飾（從重）',
+    ], { title: '選擇關聯案例', emptyHint: '點擊選擇關聯案例' });
   },
 
   /** 儲存 / 送出 */
@@ -1032,6 +1341,74 @@ const NewCase = {
     if (!title) { Toast.show('請先選擇樣態'); return; }
     Toast.show(publish ? '案例已發布！' : '草稿已儲存');
     Nav.goApp();
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+//  CustomsNewCase — 新增答聯單範本/案例
+// ─────────────────────────────────────────────────────────
+const CustomsNewCase = {
+  _files: [],
+
+  init() {
+    this._files = [];
+    this._renderFileList();
+  },
+
+  /** 附件上傳 */
+  handleFiles(input) {
+    [...(input.files || [])].forEach(f => {
+      f.note = '';
+      this._files.push(f);
+    });
+    input.value = '';
+    this._renderFileList();
+  },
+
+  removeFile(idx) {
+    this._files.splice(idx, 1);
+    this._renderFileList();
+  },
+
+  updateNote(idx, val) {
+    if (this._files[idx]) this._files[idx].note = val;
+  },
+
+  _renderFileList() {
+    const list = $('cnc-file-list');
+    if (!list) return;
+    if (this._files.length === 0) {
+      list.innerHTML = '<span style="color:#8898AA;font-size:12px">尚未選擇任何附件</span>';
+      return;
+    }
+    list.innerHTML = this._files.map((f, i) => `
+      <div class="nc-file-item">
+        <span class="mi" style="color:#2457A7;font-size:18px">attach_file</span>
+        <div class="nc-file-main">
+          <span class="nc-file-name">${esc(f.name)}</span>
+          <input type="text" class="nc-file-note" placeholder="輸入備註（選填）" value="${esc(f.note || '')}" oninput="KM.cncUpdateNote(${i},this.value)">
+        </div>
+        <span class="nc-file-size">${(f.size / 1024).toFixed(0)} KB</span>
+        <button class="nc-file-remove" onclick="KM.cncRemoveFile(${i})"><span class="mi">close</span></button>
+      </div>`).join('');
+  },
+
+  /** 關聯答聯單 Modal */
+  openRelated() {
+    RelatedPicker.openFor('cnc-related-tags', [
+      'ATEG1140027 · 基隆關桃園分關南崁業務課（實質轉型）',
+      'ATEG1140153 · 臺北關機場分關（產地標示）',
+      'ATEG1140268 · 高雄關五堵分關（CITES）',
+      'ATEG1140311 · 臺中關清水分關（其他）',
+    ], { title: '選擇關聯答聯單', emptyHint: '點擊選擇關聯答聯單' });
+  },
+
+  /** 儲存 / 送出 */
+  save(publish) {
+    const title = $('cnc-category')?.value;
+    if (!title) { Toast.show('請先選擇答聯單態樣'); return; }
+    Toast.show(publish ? '案例已發布！' : '草稿已儲存');
+    Nav.goCustoms();
   },
 };
 
@@ -1096,16 +1473,26 @@ window.KM = {
   goHome        : () => Nav.goHome(),
   goCustoms      : () => Nav.goCustoms(),
   goCustomsDetail: () => Nav.goCustomsDetail(),
+  openCustomsDetail : el => Nav.openCustomsDetail(el),
+  backToCustomsList : () => Nav.backToCustomsList(),
   goCaseDetail   : () => Nav.goCaseDetail(),
-  goNewCase      : () => Nav.goNewCase(),
+  openCaseDetail : el => Nav.openCaseDetail(el),
+  backToCaseList : () => Nav.backToCaseList(),
+  goNewCase      : s  => Nav.goNewCase(s),
   ncSwitchType   : t  => NewCase.switchType(t),
   ncHandleFiles  : el => NewCase.handleFiles(el),
   ncRemoveFile   : i  => NewCase.removeFile(i),
+  ncUpdateNote   : (i, v) => NewCase.updateNote(i, v),
   ncOpenRelated  : () => NewCase.openRelated(),
-  ncConfirmRelated:() => NewCase.confirmRelated(),
-  ncToggleRelated: el => NewCase.toggleRelatedItem(el),
+  ncConfirmRelated:() => RelatedPicker.confirm(),
+  ncToggleRelated: el => RelatedPicker.toggleItem(el),
   ncSave         : p  => NewCase.save(p),
-  goFlowList     : () => Nav.goFlowList(),
+  cncHandleFiles : el => CustomsNewCase.handleFiles(el),
+  cncRemoveFile  : i  => CustomsNewCase.removeFile(i),
+  cncUpdateNote  : (i, v) => CustomsNewCase.updateNote(i, v),
+  cncOpenRelated : () => CustomsNewCase.openRelated(),
+  cncSave        : p  => CustomsNewCase.save(p),
+  goFlowList     : s  => Nav.goFlowList(s),
   goFlowEdit     : () => Nav.goFlowEdit(),
   goFlowView     : () => Nav.goFlowView(),
 
@@ -1124,6 +1511,12 @@ window.KM = {
   flowAddStep   : ()     => FlowEdit.addStep(),
   flowSelectStep: card   => FlowEdit.selectStep(card),
   flowUpdateTitle: val   => FlowEdit.updateTitle(val),
+  flowAddDoc        : () => FlowEdit.addDoc(),
+  flowRemoveDoc     : i  => FlowEdit.removeDoc(i),
+  flowDocUpdate     : (i, field, val) => FlowEdit.updateDocField(i, field, val),
+  flowHandleFiles   : el => FlowEdit.handleFiles(el),
+  flowRemoveFile    : i  => FlowEdit.removeFile(i),
+  flowUpdateFileNote: (i, val) => FlowEdit.updateFileNote(i, val),
   flowSave      : ()     => FlowList.save(),
   flowPublish   : ()     => FlowList.publish(),
   flowSetDefault: id     => FlowList.setDefault(id),

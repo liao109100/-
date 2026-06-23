@@ -36,11 +36,30 @@ html {
 }
 
 body {
-  font-family : $font-base;
-  background  : $bg-page;
-  color       : $tx-main;
-  font-size   : $fs-base;
-  line-height : $lh-base;
+  font-family   : $font-base;
+  background    : $bg-page;
+  color         : $tx-main;
+  font-size     : $fs-base;
+  line-height   : $lh-base;
+  padding-bottom: $footer-h;
+}
+
+// ── 全站共用 Copyright footer ───────────────────────────
+.app-copyright {
+  position       : fixed;
+  bottom         : 0;
+  left           : 0;
+  right          : 0;
+  height         : $footer-h;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  font-size      : 11px;
+  color          : $tx-light;
+  background     : rgba(255, 255, 255, 0.92);
+  border-top     : 1px solid $bdr;
+  z-index        : 40;
+  pointer-events : none;
 }
 
 // 捲軸
