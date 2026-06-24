@@ -71,6 +71,14 @@
      ╚══════════════════════════════════════════════════════════╝ -->
 <div id="home" class="scr on">
 
+  <!-- 登入資訊（目前登入者 + 登出） -->
+  <div class="home-userbar">
+    <span class="mi">person</span>
+    <span class="home-userbar-name">管理模式(科長)</span>
+    <span class="home-userbar-sep"></span>
+    <button class="home-userbar-logout" onclick="KM.logout()">登出</button>
+  </div>
+
   <!-- 左欄 -->
   <div class="h-left">
 
@@ -133,6 +141,7 @@
       <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </button>
+      <span class="topbar-sysname">業務管理知識庫</span>
     </div>
     <nav class="topbar-nav">
       <a><span class="mi">person</span> 管理模式(科長)</a>
@@ -260,7 +269,7 @@
           <!-- ── Case Card 1（從輕）───────────────────── -->
           <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 食品 產地標示不實 出口貿易限制 OOO食品公司 貿易法 從輕 12萬 高頻治具線 泰國" data-category="ex-1">
             <div class="tag-row">
-              <span class="tag tag--new">近期更新</span>
+              <span class="tag tag--new">更新日期 114.11.25</span>
               <span class="tag tag--lt">從輕</span>
               <span class="tag tag--pe">處以罰緩 12 萬</span>
             </div>
@@ -382,7 +391,7 @@
           <!-- ── Case Card 5（進口／從輕）──────────────── -->
           <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="進口 醫療器材 出口貿易限制 從輕 9萬 全康醫療 德國 貿易法 許可" data-category="im-1">
             <div class="tag-row">
-              <span class="tag tag--new">近期更新</span>
+              <span class="tag tag--new">更新日期 114.12.01</span>
               <span class="tag tag--lt">從輕</span>
               <span class="tag tag--pe">處以罰緩 9 萬</span>
             </div>
@@ -519,6 +528,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
     </nav>
@@ -599,7 +609,7 @@
                 <div style="color:#2F3D50">出口</div>
               </div>
               <div class="tag-row" style="margin-top:12px;padding-top:10px;border-top:1px solid #EEE;margin-bottom:0;flex-wrap:wrap;gap:5px">
-                <span class="tag tag--new">近期更新</span>
+                <span class="tag tag--new">更新日期 114.11.25</span>
                 <span class="tag tag--lt">從輕</span>
                 <span class="tag tag--pe">罰緩 12 萬</span>
               </div>
@@ -662,6 +672,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
     </nav>
@@ -701,12 +712,12 @@
             <span class="flow-name" id="flow-1-name">一般處理流程</span>
             <span class="flow-version" id="flow-1-version">v3.0</span>
             <div class="flow-row-btns">
-              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
-              <button class="btn-edit-flow btn-edit-flow--primary" id="flow-1-edit-btn" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" id="flow-1-edit-btn" onclick="event.stopPropagation();KM.goFlowEdit()"><span class="mi">edit</span>編輯</button>
             </div>
             <div style="display:flex;align-items:center;gap:7px">
-              <div class="toggle-track is-on" id="toggle-1" onclick="event.stopPropagation();KM.flowSetDefault(1)"></div>
-              <span style="font-size:12px;color:#566578">預設</span>
+              <div class="toggle-track is-on" id="toggle-1" onclick="event.stopPropagation();KM.flowToggleEnabled(1)"></div>
+              <span style="font-size:12px;color:#566578" id="toggle-1-label">啟用</span>
             </div>
           </div>
           <!-- 草稿列（儲存後顯示） -->
@@ -716,11 +727,23 @@
             <span class="flow-name" id="flow-1-draft-name">一般處理流程</span>
             <span class="flow-version">v3.1</span>
             <div class="flow-row-btns">
-              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()"><span class="mi">edit</span>編輯</button>
             </div>
             <div class="flow-publish-wrap">
-              <button class="btn btn--gradient" style="padding:8px 16px;font-size:12px" onclick="event.stopPropagation();KM.flowPublish()">發佈</button>
+              <button class="btn-edit-flow btn-edit-flow--publish" onclick="event.stopPropagation();KM.flowPublish()"><span class="mi">check</span>發佈</button>
               <div class="flow-tooltip">新增完草稿會下方不會直接替換</div>
+            </div>
+          </div>
+          <!-- 審核列（與草稿列同時顯示，呈現審核人員視角：無編輯，只有 檢視／同意／退回） -->
+          <div class="flow-row flow-row--review" id="flow-review-row" style="display:none" onclick="KM.flowSelectRow(this)">
+            <span class="flow-draft-badge flow-review-badge">待審核</span>
+            <span class="flow-date">2025/12/08</span>
+            <span class="flow-name" id="flow-1-review-name">一般處理流程</span>
+            <span class="flow-version">v3.1</span>
+            <div class="flow-row-btns">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.flowReject()">退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.flowApprove()">同意</button>
             </div>
           </div>
           <!-- 舊版本列（發佈後顯示） -->
@@ -728,7 +751,7 @@
             <span class="flow-date" style="color:#B0BECA">2025/12/08</span>
             <span class="flow-name" id="flow-1-archive-name" style="color:#B0BECA">一般處理流程</span>
             <span class="flow-version" style="color:#B0BECA">v3.0</span>
-            <button class="btn-edit-flow" onclick="KM.flowView()">檢視</button>
+            <button class="btn-edit-flow" onclick="KM.flowView()"><span class="mi">search</span>檢視</button>
           </div>
         </div>
 
@@ -739,12 +762,12 @@
             <span class="flow-name" id="flow-2-name">特殊處理流程</span>
             <span class="flow-version">v2.0</span>
             <div class="flow-row-btns">
-              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
-              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()"><span class="mi">edit</span>編輯</button>
             </div>
             <div style="display:flex;align-items:center;gap:7px">
-              <div class="toggle-track" id="toggle-2" onclick="event.stopPropagation();KM.flowSetDefault(2)"></div>
-              <span style="font-size:12px;color:#566578">預設</span>
+              <div class="toggle-track" id="toggle-2" onclick="event.stopPropagation();KM.flowToggleEnabled(2)"></div>
+              <span style="font-size:12px;color:#566578" id="toggle-2-label">停用</span>
             </div>
           </div>
         </div>
@@ -756,12 +779,12 @@
             <span class="flow-name" id="flow-3-name">鞋類處理流程</span>
             <span class="flow-version">v1.0</span>
             <div class="flow-row-btns">
-              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()">檢視</button>
-              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()">編輯</button>
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.flowView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit()"><span class="mi">edit</span>編輯</button>
             </div>
             <div style="display:flex;align-items:center;gap:7px">
-              <div class="toggle-track" id="toggle-3" onclick="event.stopPropagation();KM.flowSetDefault(3)"></div>
-              <span style="font-size:12px;color:#566578">預設</span>
+              <div class="toggle-track" id="toggle-3" onclick="event.stopPropagation();KM.flowToggleEnabled(3)"></div>
+              <span style="font-size:12px;color:#566578" id="toggle-3-label">停用</span>
             </div>
           </div>
         </div>
@@ -794,6 +817,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
     </nav>
@@ -812,16 +836,21 @@
             </svg>
             <span id="flow-edit-page-title-text">未依規定標示產地、輸美、一般產地標示不實</span>
           </div>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px" id="flow-edit-actions">
             <button class="btn btn--clear" onclick="KM.toast('確認刪除此流程？')">刪除</button>
             <button class="btn btn--search" onclick="KM.flowSave()">儲存</button>
+          </div>
+          <!-- 審核人員視角：檢視待審核流程時顯示，取代上方編輯按鈕 -->
+          <div style="display:none;gap:8px" id="flow-review-actions">
+            <button class="btn btn--clear flow-reject-btn" onclick="KM.flowReject()">退回</button>
+            <button class="btn btn--search flow-approve-btn" onclick="KM.flowApprove()">同意</button>
           </div>
         </div>
         <!-- 檢視模式提示（編輯模式下隱藏） -->
         <div id="flow-view-banner" style="display:none;background:#EEF4FB;border:1px solid #C2D5EE;border-radius:4px;padding:8px 16px;margin-bottom:10px;font-size:12px;color:#2457A7;align-items:center;gap:6px">
           <span class="mi" style="font-size:16px">visibility</span>
           <span style="flex:1">檢視模式 — 此流程為唯讀，無法編輯或拖移步驟</span>
-          <button class="back-btn-lg" onclick="KM.goFlowList()" style="font-size:12px;padding:8px 14px"
+          <button class="back-btn-lg" onclick="KM.goFlowList()" style="font-size:12px;padding:8px 14px">
             <span class="mi" style="font-size:14px">arrow_back</span> 返回列表
           </button>
         </div>
@@ -923,6 +952,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
     </nav>
@@ -1105,6 +1135,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
     </nav>
@@ -1303,6 +1334,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
         <a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
@@ -1465,6 +1497,7 @@
         <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
         <a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
@@ -1714,7 +1747,7 @@
     <div class="side-title">未依規定標示產地：未見標示</div>
 
     <div class="tag-row" style="margin-bottom:12px">
-      <span class="tag tag--new">近期更新</span>
+      <span class="tag tag--new">更新日期 114.11.25</span>
       <span class="tag tag--lt">從輕</span>
       <span class="tag tag--pe">處以罰緩 12 萬</span>
     </div>

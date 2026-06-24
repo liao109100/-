@@ -64,6 +64,14 @@
   &:hover { background: rgba(255, 255, 255, 0.30); }
 }
 
+.topbar-sysname {
+  margin-left: 10px;
+  font-size  : 14px;
+  font-weight: 700;
+  color      : white;
+  white-space: nowrap;
+}
+
 .topbar-logo {
   display    : flex;
   align-items: center;

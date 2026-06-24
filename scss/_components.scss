@@ -1411,6 +1411,9 @@ select.filter-select {
 
 // ── Flow Edit Button（灰框）────────────────────────────────────
 .btn-edit-flow {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 4px;
   padding      : 8px 16px;
   font-size    : 12px;
   font-family  : inherit;
@@ -1423,6 +1426,8 @@ select.filter-select {
   white-space  : nowrap;
   transition   : all $ease-fast;
 
+  .mi { font-size: 14px; flex-shrink: 0; }
+
   &:hover { border-color: $blue; color: $blue; }
 
   // 編輯按鈕：主色調
@@ -1431,6 +1436,24 @@ select.filter-select {
     color       : white;
     border-color: $primary;
     &:hover { background: #082d63; border-color: #082d63; color: white; }
+  }
+
+  // 發佈按鈕：與 btn--gradient 同色，但尺寸與其他按鈕一致
+  &--publish {
+    background  : #2C8086;
+    color       : white;
+    border-color: #2C8086;
+    &:hover { opacity: 0.88; }
+  }
+
+  // 審核：同意／退回
+  &--approve {
+    color: $green; border-color: $green;
+    &:hover { background: $green; border-color: $green; color: white; }
+  }
+  &--reject {
+    color: $red; border-color: $red;
+    &:hover { background: $red; border-color: $red; color: white; }
   }
 }
 
@@ -1506,6 +1529,7 @@ select.filter-select {
 
   &--active  { background: #EEF3FB; }
   &--draft   { background: #FAFBFF; border-top: 1px solid $bdr; }
+  &--review  { background: #FFFBF2; border-top: 1px solid $bdr; }
   &--archive { border-top: 1px solid $bdr; opacity: 0.7; cursor: default; }
 
   .flow-date    { color: $tx-light; white-space: nowrap; }
@@ -1522,6 +1546,13 @@ select.filter-select {
   color        : $amber;
   border       : 1px solid #FFE0B2;
   white-space  : nowrap;
+}
+
+// 待審核標籤：與草稿（橘）區分，採用藍色
+.flow-review-badge {
+  background: #E7F0FE;
+  color     : $blue;
+  border    : 1px solid #C7DCFB;
 }
 
 .flow-publish-wrap {

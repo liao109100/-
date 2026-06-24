@@ -6,6 +6,7 @@
 @use 'variables' as *;
 
 #home {
+  position      : relative;
   background    : $grad-diag;
   flex-direction: row;
   align-items   : flex-start;
@@ -26,6 +27,46 @@
     width     : 316px;
     flex-shrink: 0;
   }
+}
+
+// ── 登入資訊（目前登入者 + 登出） ───────────────────────────
+.home-userbar {
+  position     : absolute;
+  top          : 20px;
+  right        : 30px;
+  display      : flex;
+  align-items  : center;
+  gap          : 8px;
+  padding      : 8px 14px;
+  border-radius: $r-pill;
+  background   : rgba(255, 255, 255, 0.6);
+  border       : 1px solid rgba(15, 63, 133, 0.12);
+  font-size    : 12.5px;
+  color        : $tx-main;
+
+  .mi { font-size: 18px; color: $primary; }
+}
+
+.home-userbar-name { font-weight: 600; white-space: nowrap; }
+
+.home-userbar-sep {
+  width     : 1px;
+  height    : 14px;
+  background: $bdr;
+  flex-shrink: 0;
+}
+
+.home-userbar-logout {
+  background: none;
+  border    : none;
+  cursor    : pointer;
+  font-size : 12.5px;
+  font-family: inherit;
+  color     : $tx-mid;
+  padding   : 2px 4px;
+  transition: color $ease-fast;
+
+  &:hover { color: $primary; text-decoration: underline; }
 }
 
 // Logo（首頁用）

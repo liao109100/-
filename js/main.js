@@ -134,7 +134,7 @@ const Nav = {
     const names = isCustoms
       ? ['標準答聯流程', '加急答聯流程（擋關案件）', 'CITES 案件答聯流程']
       : ['一般處理流程', '特殊處理流程', '鞋類處理流程'];
-    ['flow-1-name', 'flow-1-draft-name', 'flow-1-archive-name'].forEach(id => {
+    ['flow-1-name', 'flow-1-draft-name', 'flow-1-archive-name', 'flow-1-review-name'].forEach(id => {
       const el = $(id);
       if (el) el.textContent = names[0];
     });
@@ -163,24 +163,44 @@ const Nav = {
   goFlowEdit() {
     // 進入編輯模式 → 確保清除 view mode
     const screen = $('app-flow-edit');
-    if (screen) screen.classList.remove('is-view-mode');
+    if (screen) screen.classList.remove('is-view-mode', 'is-review-mode');
     const banner = $('flow-view-banner');
     if (banner) banner.style.display = 'none';
-    document.querySelectorAll('#app-flow-edit .btn--search, #app-flow-edit .btn--clear, .flow-add-btn')
-      .forEach(b => b.style.display = '');
+    const addBtn = document.querySelector('.flow-add-btn');
+    if (addBtn) addBtn.style.display = '';
+    const editActions = $('flow-edit-actions');
+    if (editActions) editActions.style.display = 'flex';
+    const reviewActions = $('flow-review-actions');
+    if (reviewActions) reviewActions.style.display = 'none';
     this._syncFlowBreadcrumb();
     this._show('app-flow-edit');
     FlowEdit.init();
   },
 
+  /** 一般檢視（唯讀，無審核按鈕）*/
   goFlowView() {
-    // 進入檢視模式 → 設定 view mode，不清除
+    this._enterFlowViewMode(false);
+  },
+
+  /** 審核人員檢視待審核流程（唯讀＋上方顯示同意／退回）*/
+  goFlowReviewView() {
+    this._enterFlowViewMode(true);
+  },
+
+  _enterFlowViewMode(isReview) {
     const screen = $('app-flow-edit');
-    if (screen) screen.classList.add('is-view-mode');
+    if (screen) {
+      screen.classList.add('is-view-mode');
+      screen.classList.toggle('is-review-mode', isReview);
+    }
     const banner = $('flow-view-banner');
     if (banner) banner.style.display = 'flex';
-    document.querySelectorAll('#app-flow-edit .btn--search, #app-flow-edit .btn--clear, .flow-add-btn')
-      .forEach(b => b.style.display = 'none');
+    const addBtn = document.querySelector('.flow-add-btn');
+    if (addBtn) addBtn.style.display = 'none';
+    const editActions = $('flow-edit-actions');
+    if (editActions) editActions.style.display = 'none';
+    const reviewActions = $('flow-review-actions');
+    if (reviewActions) reviewActions.style.display = isReview ? 'flex' : 'none';
     this._syncFlowBreadcrumb();
     this._show('app-flow-edit');
     FlowEdit.init();
@@ -596,9 +616,30 @@ const FlowList = {
     Nav.goFlowList();
     const draftRow = $('flow-draft-row');
     if (draftRow) draftRow.style.display = '';
+    const reviewRow = $('flow-review-row');
+    if (reviewRow) reviewRow.style.display = '';
     const editBtn = $('flow-1-edit-btn');
     if (editBtn) editBtn.style.display = 'none';
-    Toast.show('草稿已儲存');
+    Toast.show('草稿已儲存，已送出審核');
+  },
+
+  /** 審核人員：同意 → 視同發佈，關閉審核列 */
+  approve() {
+    this.publish();
+    const reviewRow = $('flow-review-row');
+    if (reviewRow) reviewRow.style.display = 'none';
+    Nav.goFlowList();
+    Toast.show('已同意，流程發佈成功');
+  },
+
+  /** 審核人員：退回 → 關閉審核列，草稿保留待修改 */
+  reject() {
+    const reviewRow = $('flow-review-row');
+    if (reviewRow) reviewRow.style.display = 'none';
+    const editBtn = $('flow-1-edit-btn');
+    if (editBtn) editBtn.style.display = '';
+    Nav.goFlowList();
+    Toast.show('已退回，請修改後重新送審');
   },
 
   publish() {
@@ -613,17 +654,13 @@ const FlowList = {
     Toast.show('發佈成功！流程已更新至 v3.1');
   },
 
-  setDefault(id) {
-    [1, 2, 3].forEach(i => {
-      const t = $(`toggle-${i}`);
-      if (t) t.classList.toggle('is-on', i === id);
-    });
-    const container  = $('flow-group-list');
-    const target     = $(`flow-group-${id}`);
-    const firstGroup = container?.querySelector('.flow-group');
-    if (container && target && target !== firstGroup) {
-      container.insertBefore(target, firstGroup);
-    }
+  /** 啟用／停用，各流程獨立切換，互不影響 */
+  toggleEnabled(id) {
+    const t = $(`toggle-${id}`);
+    if (!t) return;
+    const isOn = t.classList.toggle('is-on');
+    const label = $(`toggle-${id}-label`);
+    if (label) label.textContent = isOn ? '啟用' : '停用';
   },
 
   /** 複製選中（或第一個）的流程，附加到清單最下方 */
@@ -1471,6 +1508,7 @@ window.KM = {
   // Nav
   goApp         : () => Nav.goApp(),
   goHome        : () => Nav.goHome(),
+  logout        : () => Toast.show('已登出系統'),
   goCustoms      : () => Nav.goCustoms(),
   goCustomsDetail: () => Nav.goCustomsDetail(),
   openCustomsDetail : el => Nav.openCustomsDetail(el),
@@ -1495,6 +1533,7 @@ window.KM = {
   goFlowList     : s  => Nav.goFlowList(s),
   goFlowEdit     : () => Nav.goFlowEdit(),
   goFlowView     : () => Nav.goFlowView(),
+  goFlowReviewView: () => Nav.goFlowReviewView(),
 
   // Search
   onSearch   : v  => Search.onInput(v),
@@ -1519,7 +1558,9 @@ window.KM = {
   flowUpdateFileNote: (i, val) => FlowEdit.updateFileNote(i, val),
   flowSave      : ()     => FlowList.save(),
   flowPublish   : ()     => FlowList.publish(),
-  flowSetDefault: id     => FlowList.setDefault(id),
+  flowToggleEnabled: id  => FlowList.toggleEnabled(id),
+  flowApprove   : ()     => FlowList.approve(),
+  flowReject    : ()     => FlowList.reject(),
   flowCopy      : ()     => FlowList.copy(),
   flowView      : ()     => FlowList.view(),
   flowSelectRow : el     => FlowList.selectRow(el),
