@@ -1488,6 +1488,7 @@ a[href],
 }
 .attach-dl-btn .mi {
   font-size: 16px;
+  justify-content: center;
 }
 .attach-dl-btn:hover {
   background: #0F3F85;
