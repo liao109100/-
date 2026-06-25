@@ -41,13 +41,17 @@ const SIDEBAR_ITEMS = [
 ];
 
 // ─────────────────────────────────────────────────────────
-//  首頁卡片（home-grid，4 張）
+//  首頁卡片（home-grid，8 張）
 // ─────────────────────────────────────────────────────────
 const HOME_CARDS = [
-  { icon: 'pending_actions.svg',   alt: '處分案範例',   title: '處分案範例',                       sub: '違規產地標示不實',           featured: true,  action: 'goApp' },
-  { icon: 'anchor.svg',            alt: '海關答聯單處理', title: '海關答聯單處理',                   sub: '通關疑義公文與白聯單查詢',   featured: false, action: 'goCustoms' },
-  { icon: 'record_voice_over.svg', alt: '聲明異議',     title: '聲明異議、訴願、行政訴訟案例查詢', sub: null,                          featured: false, action: 'toast' },
-  { icon: 'balance.svg',           alt: '立法/監察院相關', title: '立法/監察院相關',                 sub: '書面報告、立法院QA、監察院回應', featured: false, action: 'toast' },
+  { mi: 'post_add',               alt: '申請專案輸入',           title: '申請專案輸入',             sub: '新增／查詢專案輸入申請案件',     featured: false, action: 'toast' },
+  { icon: 'pending_actions.svg',  alt: '處分案例',               title: '處分案例',                 sub: '違規產地標示不實',               featured: true,  action: 'goApp' },
+  { icon: 'anchor.svg',           alt: '海關答聯單',             title: '海關答聯單',               sub: '通關疑義公文與白聯單查詢',       featured: false, action: 'goCustoms' },
+  { icon: 'balance.svg',          alt: '貿易法規重要函文/函釋',   title: '貿易法規重要函文／函釋',   sub: '重要法規函釋彙整查詢',           featured: false, action: 'toast' },
+  { icon: 'record_voice_over.svg',alt: '聲明異議',               title: '聲明異議／訴願／行政訴訟', sub: null,                              featured: false, action: 'toast' },
+  { mi: 'mail',                   alt: '民眾意見信箱處理',       title: '民眾意見信箱處理',         sub: '民眾陳情及意見回覆紀錄',         featured: false, action: 'toast' },
+  { mi: 'question_answer',        alt: '立法院質詢書面及回應',   title: '立法院質詢書面及回應',     sub: '書面質詢與回應彙整',             featured: false, action: 'toast' },
+  { mi: 'history_edu',            alt: '重要大事記',             title: '重要大事記',               sub: '重大政策與事件時間軸',           featured: false, action: 'toast' },
 ];
 
 // ─────────────────────────────────────────────────────────

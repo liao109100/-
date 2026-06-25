@@ -19,7 +19,7 @@
   .h-left {
     flex     : 1;
     min-width: 320px;
-    max-width: 780px;
+    max-width: 920px;
   }
 
   // ── 右欄（資訊面板）────────────────────────────────────
@@ -88,18 +88,65 @@
   }
 }
 
+.h-title-row {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  gap            : 16px;
+  margin-bottom  : 22px;
+}
+
 .h-title {
   font-size    : 32px;
   font-weight  : 700;
   color        : $blue;
-  margin-bottom: 22px;
   padding-left: 10px;
+}
+
+.home-pending-btn {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 6px;
+  padding      : 9px 16px;
+  border-radius: $r-pill;
+  background   : $bg-white;
+  border       : 1.5px solid $amber;
+  color        : $amber;
+  font-size    : 14px;
+  font-weight  : 700;
+  font-family  : inherit;
+  cursor       : pointer;
+  white-space  : nowrap;
+  flex-shrink  : 0;
+  transition   : all $ease-fast;
+
+  .mi { font-size: 18px; }
+
+  &:hover { background: $amber; color: white; }
+}
+
+.pending-count-badge {
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  min-width      : 20px;
+  height         : 20px;
+  padding        : 0 5px;
+  border-radius  : 50%;
+  background     : $amber;
+  color          : white;
+  font-size      : 11px;
+}
+
+.home-pending-btn:hover .pending-count-badge {
+  background: white;
+  color     : $amber;
 }
 
 // ── 功能卡片格線 ────────────────────────────────────────
 .home-grid {
   display              : grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap                  : 20px;
 }
 
@@ -155,6 +202,13 @@
       height    : 26px;
       object-fit: contain;
       filter    : brightness(0) invert(1); // 轉成白色
+    }
+
+    .mi {
+      font-size: 26px;
+      color    : white;
+      min-width: auto;
+      width    : auto;
     }
   }
 

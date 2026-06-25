@@ -52,7 +52,7 @@ const CardFocus = {
 // ─────────────────────────────────────────────────────────
 //  Nav — 頁面切換
 // ─────────────────────────────────────────────────────────
-const SCREENS = ['home', 'app', 'app-flow-list', 'app-flow-edit', 'app-case-detail', 'app-customs', 'app-customs-detail', 'app-new-case', 'app-customs-new-case'];
+const SCREENS = ['home', 'app', 'app-flow-list', 'app-flow-edit', 'app-case-detail', 'app-customs', 'app-customs-detail', 'app-new-case', 'app-customs-new-case', 'app-pending-review'];
 
 const Nav = {
   _show(id) {
@@ -70,16 +70,84 @@ const Nav = {
     Search.clear();
   },
 
+  goPendingReview() {
+    this._show('app-pending-review');
+  },
+
   goCustoms() {
     this._show('app-customs');
   },
 
+  /** 麵包屑路徑追蹤：array of {label, fn, isList}，最後一項＝返回時的目標 */
+  _crumbTrail: [],
+  _customsTitle: '專案(擋關)',
+  _caseTitle   : '未依規定標示產地：未見標示',
+
+  _setCrumbRoot(label, fn) {
+    this._crumbTrail = [{ label, fn, isList: true }];
+  },
+
+  _pushCrumb(label, fn) {
+    this._crumbTrail.push({ label, fn, isList: true });
+  },
+
+  /** 渲染麵包屑（首頁 › ...trail... › 標題）與返回按鈕文字／行為 */
+  _renderDetailCrumb(breadcrumbId, backBtnId, title) {
+    const el = $(breadcrumbId);
+    if (el) {
+      el.innerHTML = '';
+      const home = document.createElement('a');
+      home.textContent = '首頁';
+      home.onclick = () => this.goHome();
+      el.append(home, this._crumbSep());
+      this._crumbTrail.forEach(c => {
+        const a = document.createElement('a');
+        a.textContent = c.label;
+        a.onclick = c.fn;
+        el.append(a, this._crumbSep());
+      });
+      const cur = document.createElement('span');
+      cur.textContent = title;
+      el.append(cur);
+    }
+
+    const btn = $(backBtnId);
+    if (btn) {
+      const last = this._crumbTrail[this._crumbTrail.length - 1];
+      btn.textContent = last ? `＜ 返回${last.label}${last.isList ? '列表' : ''}` : '＜ 返回列表';
+      btn.onclick = () => this._backInTrail();
+    }
+  },
+
+  _crumbSep() {
+    const s = document.createElement('span');
+    s.textContent = '›';
+    return s;
+  },
+
+  _backInTrail() {
+    const popped = this._crumbTrail.pop();
+    CardFocus.restore();
+    if (popped) popped.fn(); else this.goApp();
+  },
+
   goCustomsDetail() {
+    this._renderDetailCrumb('customs-detail-breadcrumb', 'customs-detail-back-btn', this._customsTitle);
     this._show('app-customs-detail');
   },
 
   openCustomsDetail(el) {
     CardFocus.remember(el);
+    this._customsTitle = '專案(擋關)';
+    this._setCrumbRoot('海關答聯單', () => this.goCustoms());
+    this.goCustomsDetail();
+  },
+
+  /** 從處分案例卡片的「關聯案例」連結，跨類別導向海關答聯單詳情 */
+  openRelatedCustomsFromCase() {
+    this._customsTitle = '專案(擋關)';
+    this._setCrumbRoot('處分案例', () => this.goApp());
+    this._pushCrumb('海關答聯單', () => this.goCustoms());
     this.goCustomsDetail();
   },
 
@@ -90,11 +158,15 @@ const Nav = {
 
   goCaseDetail() {
     SidePanel.close();
+    this._renderDetailCrumb('case-detail-breadcrumb', 'case-detail-back-btn', this._caseTitle);
     this._show('app-case-detail');
   },
 
   openCaseDetail(el) {
     CardFocus.remember(el);
+    const allCats = [...TREE_EXPORT_ITEMS, ...TREE_IMPORT_ITEMS];
+    this._caseTitle = allCats.find(c => c.cat === el?.dataset.category)?.label || '案例完整詳情';
+    this._setCrumbRoot('處分案例', () => this.goApp());
     this.goCaseDetail();
   },
 
@@ -607,7 +679,7 @@ let _selectedFlowRow = null;
 const FlowList = {
   /** 點擊 flow-row 選中效果 */
   selectRow(el) {
-    document.querySelectorAll('#app-flow-list .flow-row').forEach(r => r.classList.remove('is-selected'));
+    el.closest('.scr')?.querySelectorAll('.flow-row, .pending-row').forEach(r => r.classList.remove('is-selected'));
     el.classList.add('is-selected');
     _selectedFlowRow = el;
   },
@@ -700,6 +772,32 @@ const FlowList = {
   /** 進入檢視模式（唯讀） */
   view() {
     Nav.goFlowView();
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+//  PendingReview — 待審表單詳情頁（首頁「待審」按鈕進入）
+// ─────────────────────────────────────────────────────────
+const PendingReview = {
+  approve(el) {
+    el.closest('.pending-row')?.remove();
+    Toast.show('已同意，流程發佈成功');
+    this._syncCount();
+  },
+
+  reject(el) {
+    el.closest('.pending-row')?.remove();
+    Toast.show('已退回，請修改後重新送審');
+    this._syncCount();
+  },
+
+  _syncCount() {
+    const remaining = document.querySelectorAll('#pending-review-list .pending-row').length;
+    document.querySelectorAll('.pending-count-badge').forEach(b => b.textContent = remaining);
+    const pageBadge = $('pending-review-count');
+    if (pageBadge) pageBadge.textContent = remaining;
+    const empty = $('pending-review-empty');
+    if (empty) empty.style.display = remaining === 0 ? 'block' : 'none';
   },
 };
 
@@ -1080,9 +1178,9 @@ const Render = {
   homeCards() {
     const el = $('home-grid');
     if (!el) return;
-    el.innerHTML = HOME_CARDS.map(c => `<div class="card" onclick="KM.${c.action}()">
+    el.innerHTML = HOME_CARDS.map(c => `<div class="card${c.featured ? ' feat' : ''}" onclick="KM.${c.action}()">
         <div class="card-ico">
-          <img src="img/${c.icon}" alt="${esc(c.alt)}">
+          ${c.icon ? `<img src="img/${c.icon}" alt="${esc(c.alt)}">` : `<span class="mi">${c.mi}</span>`}
         </div>
         ${c.featured ? '<div class="card-arrow">→</div>' : ''}
         <div class="card-title">${esc(c.title)}</div>
@@ -1508,6 +1606,9 @@ window.KM = {
   // Nav
   goApp         : () => Nav.goApp(),
   goHome        : () => Nav.goHome(),
+  goPendingReview: () => Nav.goPendingReview(),
+  pendingApprove : el => PendingReview.approve(el),
+  pendingReject  : el => PendingReview.reject(el),
   logout        : () => Toast.show('已登出系統'),
   goCustoms      : () => Nav.goCustoms(),
   goCustomsDetail: () => Nav.goCustomsDetail(),
@@ -1516,6 +1617,7 @@ window.KM = {
   goCaseDetail   : () => Nav.goCaseDetail(),
   openCaseDetail : el => Nav.openCaseDetail(el),
   backToCaseList : () => Nav.backToCaseList(),
+  openRelatedCustomsFromCase: () => Nav.openRelatedCustomsFromCase(),
   goNewCase      : s  => Nav.goNewCase(s),
   ncSwitchType   : t  => NewCase.switchType(t),
   ncHandleFiles  : el => NewCase.handleFiles(el),

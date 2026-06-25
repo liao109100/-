@@ -74,7 +74,7 @@
   <!-- 登入資訊（目前登入者 + 登出） -->
   <div class="home-userbar">
     <span class="mi">person</span>
-    <span class="home-userbar-name">管理模式(科長)</span>
+    <span class="home-userbar-name">王大明</span>
     <span class="home-userbar-sep"></span>
     <button class="home-userbar-logout" onclick="KM.logout()">登出</button>
   </div>
@@ -87,7 +87,13 @@
       <img class="logo-ico" src="img/logo.png" style="height:48px;width:auto;object-fit:contain">
     </div>
 
-    <h1 class="h-title">貿易業務知識資料庫</h1>
+    <div class="h-title-row">
+      <h1 class="h-title">貿易業務知識資料庫</h1>
+      <button class="home-pending-btn" onclick="KM.goPendingReview()">
+        <span class="mi">pending_actions</span>
+        待審<span class="pending-count-badge">6</span>
+      </button>
+    </div>
 
     <!-- 功能卡片格線（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
     <div class="home-grid" id="home-grid"></div><!-- /.home-grid -->
@@ -110,6 +116,139 @@
 
   </div><!-- /.h-right -->
 </div><!-- /#home -->
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  BLOCK ／ 待審表單詳情頁（首頁「待審」按鈕進入）            ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="app-pending-review" class="scr" data-sidebar="cases">
+
+  <div class="sidebar-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="KM.goHome()" style="cursor:pointer">
+      <img class="logo-full" src="img/logo.png">
+      <img class="logo-mini" src="img/logo2.png">
+    </div>
+    <!-- Sidebar 選單項目由 js/data.js 的 SIDEBAR_ITEMS 動態產生 -->
+  </aside>
+  </div>
+
+  <div class="app-right">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="KM.toggleSidebar()" aria-label="縮合側欄">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="home-btn" onclick="KM.goHome()" aria-label="回首頁">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+        <span class="topbar-sysname">業務管理知識庫</span>
+      </div>
+      <nav class="topbar-nav">
+        <a><span class="mi">person</span> 王大明</a>
+        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a>
+      </nav>
+    </nav>
+
+    <main class="main">
+      <div class="breadcrumb">
+        <a onclick="KM.goHome()">首頁</a><span>›</span>
+        <span>待審表單詳情</span>
+      </div>
+      <div class="sub-header" style="padding:0 30px">
+        <div class="detail-title-row">
+          <div class="page-title" style="padding:8px 0 10px">
+            <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#E8911A">pending_actions</span>
+            待審表單詳情（<span id="pending-review-count">6</span>）
+          </div>
+          <button class="back-btn-lg" onclick="KM.goHome()">＜ 返回首頁</button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <div id="pending-review-list" class="pending-table">
+
+          <div class="pending-table-hd">
+            <span>日期</span>
+            <span>名稱</span>
+            <span>提交人</span>
+            <span>功能</span>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/08</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">處分案例</span>一般處理流程 v3.1</span>
+            <span class="pending-submitter">王小華</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/10</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">處分案例</span>特殊處理流程 v2.1</span>
+            <span class="pending-submitter">陳美玲</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/13</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">處分案例</span>鞋類處理流程 v1.1</span>
+            <span class="pending-submitter">張淑芬</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/11</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">海關答聯單</span>標準答聯流程 v1.1</span>
+            <span class="pending-submitter">林志強</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/12</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">海關答聯單</span>加急答聯流程 v1.0</span>
+            <span class="pending-submitter">吳建宏</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <div class="pending-row" onclick="KM.flowSelectRow(this)">
+            <span class="pending-date">2025/12/14</span>
+            <span class="pending-name"><span class="flow-draft-badge flow-review-badge">海關答聯單</span>CITES 案件答聯流程 v1.0</span>
+            <span class="pending-submitter">黃國強</span>
+            <div class="pending-actions">
+              <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView()"><span class="mi">search</span>檢視</button>
+              <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
+              <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+            </div>
+          </div>
+
+          <!-- 全部審核完成時顯示 -->
+          <div id="pending-review-empty" class="nc-empty-hint" style="display:none;text-align:center;padding:60px 0;font-size:14px">目前沒有待審表單</div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div><!-- /#app-pending-review -->
 
 
 <!-- ╔══════════════════════════════════════════════════════════╗
@@ -144,8 +283,8 @@
       <span class="topbar-sysname">業務管理知識庫</span>
     </div>
     <nav class="topbar-nav">
-      <a><span class="mi">person</span> 管理模式(科長)</a>
-      <a>登出</a>
+      <a><span class="mi">person</span> 王大明</a>
+      <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a>
     </nav>
   </nav>
 
@@ -295,7 +434,7 @@
             </div>
             <div class="link-row">
               <span class="row-label">關聯案例：</span>
-              <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
+              <span class="link-pill" style="cursor:pointer" onclick="event.stopPropagation();KM.openRelatedCustomsFromCase()"><span class="mi">link</span> OOO關聯答聯單</span>
             </div>
           </div><!-- /.case-card -->
 
@@ -530,10 +669,10 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a></nav>
     </nav>
     <main class="main">
-      <div class="breadcrumb">
+      <div class="breadcrumb" id="case-detail-breadcrumb">
         <a onclick="KM.goHome()">首頁</a><span>›</span>
         <a onclick="KM.goApp()">處分案件</a><span>›</span>
         <span>未依規定標示產地：未見標示</span>
@@ -547,7 +686,7 @@
             </svg>
             貿管理字第114704321號 — 案例完整詳情
           </div>
-          <button class="back-btn-lg" onclick="KM.backToCaseList()">＜ 返回列表</button>
+          <button class="back-btn-lg" id="case-detail-back-btn" onclick="KM.backToCaseList()">＜ 返回列表</button>
         </div>
       </div>
       <div class="detail-body">
@@ -674,7 +813,7 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a></nav>
     </nav>
     <main class="main">
       <div class="breadcrumb">
@@ -819,7 +958,7 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a></nav>
     </nav>
     <main class="main">
       <div class="breadcrumb">
@@ -954,7 +1093,7 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a></nav>
     </nav>
 
     <main class="main">
@@ -1137,7 +1276,7 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a></nav>
     </nav>
 
     <main class="main">
@@ -1337,7 +1476,7 @@
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
-        <a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
+        <a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a>
       </nav>
     </nav>
 
@@ -1500,12 +1639,12 @@
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
-        <a><span class="mi">person</span> 管理模式(科長)</a><a>登出</a>
+        <a><span class="mi">person</span> 王大明</a><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a>登出</a>
       </nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb">
+      <div class="breadcrumb" id="customs-detail-breadcrumb">
         <a onclick="KM.goHome()">首頁</a><span>›</span>
         <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
         <span>專案(擋關)</span>
@@ -1520,7 +1659,7 @@
             </svg>
             海關答聯單處理-專案(擋關)
           </div>
-          <button class="back-btn-lg" onclick="KM.backToCustomsList()">＜ 返回</button>
+          <button class="back-btn-lg" id="customs-detail-back-btn" onclick="KM.backToCustomsList()">＜ 返回</button>
         </div>
       </div>
 

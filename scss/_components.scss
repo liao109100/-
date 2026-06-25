@@ -428,6 +428,12 @@
   font-size  : 13px;
 }
 
+// 處分案例／海關答聯單列表卡片上隱藏「相關附件」（side-panel／詳細頁不受影響）
+.case-card .attach-row,
+.customs-card .attach-row {
+  display: none;
+}
+
 .row-label { color: $tx-main; font-weight: 700; flex-shrink: 0; }
 
 // 附件 pill（Figma: bg-white border-[#cbcbcb] px-[16px] py-[8px] rounded-[5px]）
@@ -1554,6 +1560,57 @@ select.filter-select {
   color     : $blue;
   border    : 1px solid #C7DCFB;
 }
+
+// ── 待審表單詳情頁：表格式呈現（日期／名稱／提交人／功能） ─────
+.pending-table { display: flex; flex-direction: column; }
+
+.pending-table-hd {
+  display      : grid;
+  grid-template-columns: 130px 1fr 130px auto;
+  gap          : 12px;
+  padding      : 12px 20px;
+  font-size    : 12px;
+  font-weight  : 700;
+  color        : $tx-mid;
+  background   : $bg-page;
+  border-bottom: 2px solid $bdr;
+  position     : sticky;
+  top          : 0;
+  z-index      : 5;
+}
+
+.pending-row {
+  display      : grid;
+  grid-template-columns: 130px 1fr 130px auto;
+  gap          : 12px;
+  align-items  : center;
+  padding      : 14px 20px;
+  font-size    : 13px;
+  cursor       : pointer;
+  background   : #FFFBF2;
+  border-bottom: 1px solid $bdr;
+  transition   : background $ease-fast;
+
+  &:hover { background: #FFF6E0; }
+
+  &.is-selected {
+    background    : #EEF4FB;
+    outline       : 2px solid $primary;
+    outline-offset: -2px;
+  }
+}
+
+.pending-date       { color: $tx-light; white-space: nowrap; }
+.pending-name        {
+  font-weight: 600;
+  color      : $tx-main;
+  display    : flex;
+  align-items: center;
+  gap        : 8px;
+  min-width  : 0;
+}
+.pending-submitter   { color: $tx-main; }
+.pending-actions     { display: flex; gap: 6px; flex-shrink: 0; }
 
 .flow-publish-wrap {
   position: relative;

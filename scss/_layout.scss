@@ -102,6 +102,19 @@
   }
 }
 
+// topbar 上的「待審」徽章按鈕
+.topbar-pending-btn {
+  gap          : 5px;
+  padding      : 5px 12px;
+  border-radius: $r-pill;
+  background   : rgba(255, 255, 255, 0.16);
+  color        : white !important;
+
+  .mi { font-size: 16px; }
+
+  &:hover { background: rgba(255, 255, 255, 0.28); }
+}
+
 // ── 右側容器（Topbar + Main）────────────────────────────
 .app-right {
   display       : flex;
