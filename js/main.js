@@ -62,6 +62,7 @@ const Nav = {
 
   goApp() {
     this._show('app');
+    Tree.switchTab('ex');  // 每次進入主功能都預設顯示第一個樣態為選中狀態
   },
 
   goHome() {
@@ -72,15 +73,33 @@ const Nav = {
 
   goPendingReview() {
     this._show('app-pending-review');
+    PendingReview.init();
   },
 
   goCustoms() {
     this._show('app-customs');
+    this._selectFirstCustomsTree();  // 每次進入主功能都預設顯示第一個樣態為選中狀態
+  },
+
+  /** 重置答聯單態樣樹，選中第一個項目 */
+  _selectFirstCustomsTree() {
+    const first = document.querySelector('#app-customs .tree-item');
+    if (!first) return;
+    const title = first.querySelector('span:not(.tree-count):not(.tree-folder)')?.textContent.trim() || '';
+    this.selectCustomsTree(first, title);
+  },
+
+  /** 選取答聯單態樣項目，更新右側標題 */
+  selectCustomsTree(el, title) {
+    document.querySelectorAll('#app-customs .tree-item').forEach(i => i.classList.remove('is-active'));
+    el.classList.add('is-active');
+    $('customs-section-title').textContent = title;
   },
 
   /** 麵包屑路徑追蹤：array of {label, fn, isList}，最後一項＝返回時的目標 */
   _crumbTrail: [],
   _customsTitle: '專案(擋關)',
+  _customsDocNo: '專案(擋關)',
   _caseTitle   : '未依規定標示產地：未見標示',
 
   _setCrumbRoot(label, fn) {
@@ -98,12 +117,17 @@ const Nav = {
       el.innerHTML = '';
       const home = document.createElement('a');
       home.textContent = '首頁';
-      home.onclick = () => this.goHome();
+      home.onclick = () => { this._crumbTrail = []; this.goHome(); };
       el.append(home, this._crumbSep());
-      this._crumbTrail.forEach(c => {
+      this._crumbTrail.forEach((c, idx) => {
         const a = document.createElement('a');
         a.textContent = c.label;
-        a.onclick = c.fn;
+        // 點擊任一中間麵包屑時，先把路徑截斷到該層，避免殘留下層（如已跨類別疊加）的舊路徑
+        a.onclick = () => {
+          this._crumbTrail = this._crumbTrail.slice(0, idx);
+          CardFocus.restore();
+          c.fn();
+        };
         el.append(a, this._crumbSep());
       });
       const cur = document.createElement('span');
@@ -113,8 +137,7 @@ const Nav = {
 
     const btn = $(backBtnId);
     if (btn) {
-      const last = this._crumbTrail[this._crumbTrail.length - 1];
-      btn.textContent = last ? `＜ 返回${last.label}${last.isList ? '列表' : ''}` : '＜ 返回列表';
+      btn.textContent = '＜ 返回樣態列表';
       btn.onclick = () => this._backInTrail();
     }
   },
@@ -131,57 +154,241 @@ const Nav = {
     if (popped) popped.fn(); else this.goApp();
   },
 
+  /**
+   * 渲染「跨類別導航」用的麵包屑：與一般列表式麵包屑（_crumbTrail / _backInTrail）邏輯完全獨立。
+   * trail 由呼叫端明確列出每一層（每層皆可點擊回到該層），返回按鈕則直接執行 backFn——
+   * 即「從哪裡進來就返回哪裡」的原地返回上一頁，而非退回該類別的列表。
+   */
+  _renderCrossCrumb(breadcrumbId, backBtnId, trail, title, backFn, backLabel) {
+    const el = $(breadcrumbId);
+    if (el) {
+      el.innerHTML = '';
+      const home = document.createElement('a');
+      home.textContent = '首頁';
+      home.onclick = () => this.goHome();
+      el.append(home, this._crumbSep());
+      trail.forEach(c => {
+        const a = document.createElement('a');
+        a.textContent = c.label;
+        a.onclick = c.fn;
+        el.append(a, this._crumbSep());
+      });
+      const cur = document.createElement('span');
+      cur.textContent = title;
+      el.append(cur);
+    }
+    const btn = $(backBtnId);
+    if (btn) {
+      btn.textContent = backLabel;
+      btn.onclick = backFn;
+    }
+  },
+
+  /**
+   * 通用跨主要功能導航：任何卡片的「關聯檔案」都比照同一套規則——
+   * 麵包屑＝首頁 › 主要功能 › 樣態 › 該卡片標題 › 本次關聯檔案標題。
+   * 返回按鈕預設回到該卡片本身（origin.cardFn）；若這個連結是直接長在「列表頁」的卡片上
+   * （使用者根本沒進過該卡片的詳情頁），可傳入 origin.backFn / backLabel 改成回到列表，
+   * 才會符合「從哪裡進來就返回哪裡」。
+   * 8 個主要功能彼此互連時，都呼叫這個函式即可保持麵包屑與返回邏輯一致。
+   *
+   * @param {{mainLabel:string, mainFn:Function, catLabel:string, catFn:Function, cardLabel:string, cardFn:Function, backFn?:Function, backLabel?:string}} origin
+   * @param {{screenId:string, breadcrumbId:string, backBtnId:string, title:string, syncContent?:Function}} target
+   */
+  crossNavigate(origin, target) {
+    const trail = [
+      { label: origin.mainLabel, fn: origin.mainFn },
+      { label: origin.catLabel, fn: origin.catFn },
+      { label: origin.cardLabel, fn: origin.cardFn },
+    ];
+    this._show(target.screenId);
+    if (target.syncContent) target.syncContent();
+    this._renderCrossCrumb(
+      target.breadcrumbId, target.backBtnId,
+      trail, target.title,
+      origin.backFn ?? origin.cardFn,
+      origin.backLabel ?? `＜ 返回${origin.cardLabel}`,
+    );
+  },
+
   goCustomsDetail() {
     this._renderDetailCrumb('customs-detail-breadcrumb', 'customs-detail-back-btn', this._customsTitle);
     this._show('app-customs-detail');
   },
 
+  _customsCatLabel: '專案(擋關)',
+
   openCustomsDetail(el) {
     CardFocus.remember(el);
-    this._customsTitle = '專案(擋關)';
+    this._loadCustomsMeta(el);
     this._setCrumbRoot('海關答聯單', () => this.goCustoms());
+    this._pushCrumb(this._customsCatLabel, () => this.goCustoms());
     this.goCustomsDetail();
   },
 
-  /** 從處分案例卡片的「關聯案例」連結，跨類別導向海關答聯單詳情 */
-  openRelatedCustomsFromCase() {
-    this._customsTitle = '專案(擋關)';
+  /** 從海關答聯單卡片（列表頁或詳情頁皆可）讀出該卡片的中繼資料，供麵包屑/標題綁定使用 */
+  _loadCustomsMeta(el) {
+    this._customsDocNo = this._readCustomsCardMeta(el, '發文文號') || this._customsDocNo;
+    // 海關答聯單目前以左側樹狀分類（而非每卡各自的 data-category）來區分樣態，故取目前選中的分類名稱
+    this._customsCatLabel = $('customs-section-title')?.textContent || this._customsCatLabel;
+    this._customsTitle = this._customsDocNo;
+  },
+
+  /** 從海關答聯單卡片的 cmeta 區塊（cm-key／cm-val 為同層相鄰元素，非 case 卡的 row 結構）取出指定欄位 */
+  _readCustomsCardMeta(el, key) {
+    const keys = el?.querySelectorAll('.cm-key') ?? [];
+    for (const k of keys) {
+      if (k.textContent.replace('：', '') === key) return k.nextElementSibling?.textContent ?? '';
+    }
+    return '';
+  },
+
+  /** 由跨類別流程返回案例詳情：用已記錄的案例狀態重建麵包屑路徑，不依賴（也不會被）一般流程的 _crumbTrail 影響 */
+  _returnToCaseFromCustoms() {
     this._setCrumbRoot('處分案例', () => this.goApp());
-    this._pushCrumb('海關答聯單', () => this.goCustoms());
+    this._pushCrumb(this._caseCatLabel, () => this.goApp());
+    this.goCaseDetail();
+  },
+
+  /** 由跨類別流程返回海關答聯單詳情：與上面同理，獨立於一般流程的 _crumbTrail */
+  _returnToCustomsFromCase() {
+    this._setCrumbRoot('海關答聯單', () => this.goCustoms());
+    this._pushCrumb(this._customsCatLabel, () => this.goCustoms());
     this.goCustomsDetail();
+  },
+
+  /**
+   * 從處分案例卡片的「關聯案例」連結，跨主要功能導向海關答聯單詳情。
+   * 這個連結直接長在列表頁的卡片上（並未先進入該案例的詳情頁），
+   * 所以必須由傳入的卡片元素直接讀取中繼資料，不能依賴前一次 openCaseDetail() 留下的狀態。
+   */
+  openRelatedCustomsFromCase(cardEl) {
+    if (cardEl) {
+      this._loadCaseMeta(cardEl);
+      CardFocus.remember(cardEl);
+    }
+    this.crossNavigate(
+      {
+        mainLabel: '處分案例', mainFn: () => this.goApp(),
+        catLabel : this._caseCatLabel, catFn: () => this.goApp(),
+        cardLabel: this._caseTitle, cardFn: () => this._returnToCaseFromCustoms(),
+        // 連結是直接點在列表卡片上（沒有先開過該案例的詳情頁），所以返回鈕回到列表並聚焦該卡片，而非該案例的詳情頁
+        backFn: () => this.backToCaseList(), backLabel: '＜ 返回處分案例列表',
+      },
+      {
+        screenId: 'app-customs-detail',
+        breadcrumbId: 'customs-detail-breadcrumb', backBtnId: 'customs-detail-back-btn',
+        title: this._customsTitle,
+      },
+    );
+  },
+
+  /**
+   * 從海關答聯單卡片的「關聯案例」連結，跨主要功能導向處分案例詳情——與上面的方向相反，但邏輯完全一致：
+   * 同樣直接從列表卡片讀取中繼資料，返回鈕回到海關答聯單列表並聚焦原卡片。
+   */
+  openRelatedCaseFromCustoms(cardEl) {
+    if (cardEl) {
+      this._loadCustomsMeta(cardEl);
+      CardFocus.remember(cardEl);
+    }
+    // mock 資料只有一筆完整案例可連結，固定指向該案例作為示範，避免沿用上一次瀏覽過的其他案例殘留狀態
+    this._caseDocNo = '貿管理字第114704321號';
+    this._caseDate = '中華民國114年11月25日';
+    this._caseTarget = 'OOO食品公司';
+    this._caseCatLabel = '未依規定標示產地：未見標示';
+    this._caseTitle = this._caseDocNo;
+    this.crossNavigate(
+      {
+        mainLabel: '海關答聯單', mainFn: () => this.goCustoms(),
+        catLabel : this._customsCatLabel, catFn: () => this.goCustoms(),
+        cardLabel: this._customsTitle, cardFn: () => this._returnToCustomsFromCase(),
+        backFn: () => this.backToCustomsList(), backLabel: '＜ 返回海關答聯單列表',
+      },
+      {
+        screenId: 'app-case-detail',
+        breadcrumbId: 'case-detail-breadcrumb', backBtnId: 'case-detail-back-btn',
+        title: this._caseTitle,
+        syncContent: () => this._syncCaseDetailContent(),
+      },
+    );
   },
 
   backToCustomsList() {
-    this.goCustoms();
+    // 比照「從哪裡進來就返回哪裡」：直接顯示畫面，不重置樣態選取，保留原本瀏覽的分類
+    this._show('app-customs');
     CardFocus.restore();
+  },
+
+  /** 從案例卡片的 meta-row 取出指定欄位（如「發文字號」）的值 */
+  _readCardMeta(el, key) {
+    const rows = el?.querySelectorAll('.meta-row') ?? [];
+    for (const row of rows) {
+      const k = row.querySelector('.meta-key')?.textContent.replace('：', '');
+      if (k === key) return row.querySelector('.meta-val')?.textContent ?? '';
+    }
+    return '';
+  },
+
+  _caseDocNo: '貿管理字第114704321號',
+  _caseDate : '中華民國114年11月25日',
+  _caseTarget: 'OOO食品公司',
+  _caseCatLabel: '未依規定標示產地：未見標示',
+
+  /** 把目前的 _caseDocNo/_caseDate/_caseTarget 寫進案例詳情頁的內容欄位（一般進入與跨主要功能進入都共用） */
+  _syncCaseDetailContent() {
+    const titleEl = $('case-detail-title-text');
+    if (titleEl) titleEl.textContent = `${this._caseDocNo} — 案例完整詳情`;
+    const docNoEl = $('case-detail-docno');
+    if (docNoEl) docNoEl.textContent = this._caseDocNo;
+    const dateEl = $('case-detail-date');
+    if (dateEl) dateEl.textContent = this._caseDate;
+    const targetEl = $('case-detail-target');
+    if (targetEl) targetEl.textContent = this._caseTarget;
   },
 
   goCaseDetail() {
     SidePanel.close();
     this._renderDetailCrumb('case-detail-breadcrumb', 'case-detail-back-btn', this._caseTitle);
+    this._syncCaseDetailContent();
     this._show('app-case-detail');
+  },
+
+  /** 從案例卡片（無論在列表頁或詳情頁）讀出該卡片的中繼資料，供麵包屑/標題綁定使用 */
+  _loadCaseMeta(el) {
+    this._caseDocNo = this._readCardMeta(el, '發文字號') || this._caseDocNo;
+    this._caseDate = this._readCardMeta(el, '處分日期') || this._caseDate;
+    this._caseTarget = this._readCardMeta(el, '處分對象') || this._caseTarget;
+    const allCats = [...TREE_EXPORT_ITEMS, ...TREE_IMPORT_ITEMS];
+    this._caseCatLabel = allCats.find(c => c.cat === el?.dataset.category)?.label || '案例完整詳情';
+    // 麵包屑最後一層與頁面標題綁定，顯示發文字號；樣態（分類）仍保留為上一層
+    this._caseTitle = this._caseDocNo;
   },
 
   openCaseDetail(el) {
     CardFocus.remember(el);
-    const allCats = [...TREE_EXPORT_ITEMS, ...TREE_IMPORT_ITEMS];
-    this._caseTitle = allCats.find(c => c.cat === el?.dataset.category)?.label || '案例完整詳情';
+    this._loadCaseMeta(el);
     this._setCrumbRoot('處分案例', () => this.goApp());
+    this._pushCrumb(this._caseCatLabel, () => this.goApp());
     this.goCaseDetail();
   },
 
   backToCaseList() {
-    this.goApp();
+    // 比照「從哪裡進來就返回哪裡」：直接顯示畫面，不重置樣態選取，保留原本瀏覽的分類
+    this._show('app');
     CardFocus.restore();
   },
 
   /** 處理流程清單的來源（'cases' | 'customs'），決定麵包屑與返回目標 */
   _flowSource: 'cases',
+  /** 是否由「待審表單詳情」的檢視進入：是的話麵包屑與返回都要回待審清單，而非該分類的流程列表 */
+  _reviewFromPending: false,
 
   _syncFlowBreadcrumb() {
     const isCustoms = this._flowSource === 'customs';
-    const midLabel  = isCustoms ? '海關答聯單處理' : '處分案件';
-    const goMid     = () => isCustoms ? this.goCustoms() : this.goApp();
+    const fromPending = this._reviewFromPending;
+    const midLabel  = fromPending ? '待審表單詳情' : (isCustoms ? '海關答聯單處理' : '處分案件');
+    const goMid     = fromPending ? () => this.goPendingReview() : (() => isCustoms ? this.goCustoms() : this.goApp());
     const titleText = isCustoms
       ? ($('customs-section-title')?.textContent ?? '')
       : ($('section-title')?.textContent ?? '');
@@ -198,9 +405,19 @@ const Nav = {
     const midEdit = $('flow-edit-breadcrumb-mid');
     if (midEdit) { midEdit.textContent = midLabel; midEdit.onclick = goMid; }
     const titleEdit = $('flow-edit-breadcrumb-title');
-    if (titleEdit) titleEdit.textContent = titleText;
+    if (titleEdit) { titleEdit.textContent = titleText; titleEdit.onclick = fromPending ? goMid : () => this.goFlowList(); }
     const pageTitleEdit = $('flow-edit-page-title-text');
     if (pageTitleEdit) pageTitleEdit.textContent = titleText;
+
+    const viewBackBtn = $('flow-view-back-btn');
+    if (viewBackBtn) viewBackBtn.onclick = goMid;
+    const viewBackBtnText = $('flow-view-back-btn-text');
+    if (viewBackBtnText) viewBackBtnText.textContent = fromPending ? '返回待審表單詳情' : '返回列表';
+
+    // 側欄 active 項目要跟著「從哪個主要功能進來」走，而非固定指向處分案例
+    const sidebarKey = isCustoms ? 'customs' : 'cases';
+    Render.setSidebarActive('app-flow-list', sidebarKey);
+    Render.setSidebarActive('app-flow-edit', sidebarKey);
 
     // 流程清單名稱（案例 vs 海關答聯單，命名邏輯不同）
     const names = isCustoms
@@ -218,6 +435,7 @@ const Nav = {
 
   goFlowList(source) {
     if (source) this._flowSource = source;
+    this._reviewFromPending = false;
     this._syncFlowBreadcrumb();
     this._show('app-flow-list');
   },
@@ -234,6 +452,7 @@ const Nav = {
 
   goFlowEdit() {
     // 進入編輯模式 → 確保清除 view mode
+    this._reviewFromPending = false;
     const screen = $('app-flow-edit');
     if (screen) screen.classList.remove('is-view-mode', 'is-review-mode');
     const banner = $('flow-view-banner');
@@ -251,11 +470,19 @@ const Nav = {
 
   /** 一般檢視（唯讀，無審核按鈕）*/
   goFlowView() {
+    this._reviewFromPending = false;
     this._enterFlowViewMode(false);
   },
 
-  /** 審核人員檢視待審核流程（唯讀＋上方顯示同意／退回）*/
-  goFlowReviewView() {
+  /**
+   * 審核人員檢視待審核流程（唯讀＋上方顯示同意／退回）。
+   * fromPending：是否由「待審表單詳情」進入；el：被點擊的按鈕，用來判斷所屬的 .pending-group（cases／customs），
+   * 確保檢視到的是對應分類的流程內容，而非沿用上一次的 _flowSource。
+   */
+  goFlowReviewView(fromPending, el) {
+    this._reviewFromPending = !!fromPending;
+    const group = el?.closest('.pending-group')?.dataset.group;
+    if (group) this._flowSource = group;
     this._enterFlowViewMode(true);
   },
 
@@ -379,9 +606,14 @@ const CUSTOMS_FLOW_STEPS_DATA = [
     title: '海關來文',
     docs: [
       {
-        type : '來文',
+        type : '海關來文',
         no   : 'ATEG1140027',
         date : '114/10/14',
+        org  : '基隆關桃園分關南崁業務課',
+        contact1Name: '郭俊男', contact1Phone: '03-3558584', contact1Fax: '',
+        contact2Name: '吳佩儒', contact2Phone: '03-3558220', contact2Fax: '',
+        ext: '316',
+        note : '電傳號碼：03-3255480',
         body : '＿＿＿＿股份有限公司（出口人）報運出口貨物1批（出口報單AT/BC/14/＿＿＿＿號）至美國，依出口人說明案貨為出口人設計並持有模具及核心技術之專業檢測儀器，部分組裝及焊接程序於中國大陸關係企業完成。\n\n本案出口貨品與原進口貨品之稅則號別前6位碼相異；惟其加工製程作業是否符合原產地證明書及加工證明書管理辦法第5條第3項規定，屬簡易加工，視為非實質轉型？請貴署惠示意見。',
       },
     ],
@@ -393,6 +625,11 @@ const CUSTOMS_FLOW_STEPS_DATA = [
         type : '回文',
         no   : '1140681763',
         date : '114/10/25',
+        org  : '經濟部產業發展署',
+        contact1Name: '蔡忠平副組長', contact1Phone: '(02)2754-1255', contact1Fax: '',
+        contact2Name: '', contact2Phone: '(02)2704-9128', contact2Fax: '',
+        ext: '202',
+        note : '',
         body : '查本案加工程序僅涉及部分組裝及焊接，依「原產地認定標準」，尚未達實質轉型門檻，加工後之稅則號別變更非屬實質性轉型行為。\n\n建議仍以原始產地（中國大陸）認定，惟請貴署參酌出口人所附技術文件後，併同法規意見回復海關。',
       },
     ],
@@ -401,9 +638,14 @@ const CUSTOMS_FLOW_STEPS_DATA = [
     title: '本署回復',
     docs: [
       {
-        type : '回文',
+        type : '本署回復',
         no   : '貿管理字第1140912345號',
         date : '114/10/28',
+        org  : '經濟部國際貿易署貿易管理組',
+        contact1Name: '余副組長明芳', contact1Phone: '02-23977502', contact1Fax: '02-23970522',
+        contact2Name: '彭瑜', contact2Phone: '02-23510271', contact2Fax: '',
+        ext: '529',
+        note : '',
         body : '復貴關114年10月14日ATEG1140027號函。\n\n經洽產業發展署研議，本案貨品加工程序未達實質轉型標準，產地應認定為中國大陸，請依此辦理後續通關事宜；如出口人標示與本認定不符，請依貿易法相關規定處理。',
       },
     ],
@@ -413,6 +655,8 @@ const CUSTOMS_FLOW_STEPS_DATA = [
 const FlowEdit = {
   dragSrc: null,
   _isCustoms: false,
+  /** 海關答聯單：記錄本次編輯session中新增的步驟 idx，渲染時加上 step-card--new 樣式 */
+  _newStepIdxs: new Set(),
 
   /** 取得當前資料來源：海關答聯單為固定 3 步驟，處分案例為可自訂 8 步驟 */
   _data() {
@@ -421,19 +665,18 @@ const FlowEdit = {
 
   init() {
     this._isCustoms = Nav._flowSource === 'customs';
+    this._newStepIdxs = new Set();
     this._renderStepList();
 
-    const addBtn = $('flow-add-btn');
-    if (addBtn) addBtn.style.display = this._isCustoms ? 'none' : '';
     const genericEditor = $('flow-edit-generic');
     if (genericEditor) genericEditor.style.display = this._isCustoms ? 'none' : '';
     const docsEditor = $('flow-edit-docs');
     if (docsEditor) docsEditor.style.display = this._isCustoms ? '' : 'none';
     const titleEl = $('flow-right-title');
-    if (titleEl) titleEl.readOnly = this._isCustoms;
+    if (titleEl) titleEl.readOnly = false;
 
     const isView = $('app-flow-edit')?.classList.contains('is-view-mode');
-    if (!isView && !this._isCustoms) this.bindDrag();  // 海關答聯單步驟固定，不可拖曳；檢視模式也不綁 drag
+    if (!isView) this.bindDrag();  // 編輯模式下左側步驟皆可拖曳排序（含海關答聯單）；檢視模式不綁 drag
     const addDocBtn = document.querySelector('.flow-doc-add-btn');
     if (addDocBtn) addDocBtn.style.display = isView ? 'none' : '';
     // 檢視模式設 contenteditable="false"
@@ -448,16 +691,16 @@ const FlowEdit = {
     this._renderFileList();
   },
 
-  /** 依資料來源重建左側步驟清單（海關答聯單固定步驟，不含拖曳把手） */
+  /** 依資料來源重建左側步驟清單（編輯模式皆可拖曳排序，含海關答聯單） */
   _renderStepList() {
     const list = $('flow-step-list');
     if (!list) return;
     const data = this._data();
     list.innerHTML = data.map((d, i) => {
       const sep = i < data.length - 1 ? '<div class="step-sep">↓</div>' : '';
-      const drag = this._isCustoms ? '' : '<div class="step-drag">⠿</div>';
-      return `<div class="step-card${i === 0 ? ' is-active' : ''}" draggable="${!this._isCustoms}" data-idx="${i}">
-        ${drag}
+      const isNew = this._isCustoms && this._newStepIdxs.has(i);
+      return `<div class="step-card${i === 0 ? ' is-active' : ''}${isNew ? ' step-card--new' : ''}" draggable="true" data-idx="${i}">
+        <div class="step-drag">⠿</div>
         <div class="step-info" onclick="KM.flowSelectStep(this.closest('.step-card'))">
           <div class="step-num">Step${i + 1}</div>
           <div class="step-title-sm">${esc(d.title)}</div>
@@ -550,9 +793,12 @@ const FlowEdit = {
   },
 
   updateTitle(val) {
-    if (this._isCustoms) return; // 海關答聯單步驟名稱固定，不可重新命名
     const active = document.querySelector('#flow-step-list .step-card.is-active');
     if (active) active.querySelector('.step-title-sm').textContent = val;
+    if (this._isCustoms) {
+      const idx = parseInt(active?.dataset.idx ?? '', 10);
+      if (Number.isInteger(idx) && CUSTOMS_FLOW_STEPS_DATA[idx]) CUSTOMS_FLOW_STEPS_DATA[idx].title = val;
+    }
   },
 
   /** 取得目前步驟的文件清單（海關答聯單專用） */
@@ -561,6 +807,17 @@ const FlowEdit = {
   },
 
   /** 重繪目前步驟的來文／回文清單（附件已獨立於流程之外，見 _files / _renderFileList） */
+  /** 公文屬性 → 全文欄位的可變動小字標籤 */
+  _bodyLabel(type) {
+    return (type === '發文' || type === '海關來文') ? '案情摘要及疑問' : '權責機關答復';
+  },
+
+  /** 答聯單狀態下拉變更時，需重繪以同步全文欄位的小字標籤 */
+  changeDocType(idx, val) {
+    this.updateDocField(idx, 'type', val);
+    this._renderDocList();
+  },
+
   _renderDocList() {
     const list = $('flow-doc-list');
     if (!list) return;
@@ -568,30 +825,88 @@ const FlowEdit = {
     list.innerHTML = docs.map((d, i) => `
       <div class="flow-doc-card">
         <div class="flow-doc-hd">
-          <select class="filter-select flow-doc-type" onchange="KM.flowDocUpdate(${i},'type',this.value)">
-            <option value="來文" ${d.type === '來文' ? 'selected' : ''}>來文</option>
-            <option value="回文" ${d.type === '回文' ? 'selected' : ''}>回文</option>
-          </select>
+          <div class="nc-fields-grid nc-fields-grid--3" style="flex:1;margin-bottom:0">
+            <div class="nc-field">
+              <label class="nc-label nc-label--muted">答聯單狀態</label>
+              <select class="filter-select flow-doc-type" onchange="KM.flowDocTypeChange(${i},this.value)">
+                <option value="海關來文" ${d.type === '海關來文' ? 'selected' : ''}>海關來文</option>
+                <option value="本署回復" ${d.type === '本署回復' ? 'selected' : ''}>本署回復</option>
+                <option value="發文" ${d.type === '發文' ? 'selected' : ''}>發文</option>
+                <option value="回文" ${d.type === '回文' ? 'selected' : ''}>回文</option>
+              </select>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">發文文號</label>
+              <input type="text" class="nc-input" value="${esc(d.no)}" oninput="KM.flowDocUpdate(${i},'no',this.value)">
+            </div>
+            <div class="nc-field">
+              <label class="nc-label">發文日期</label>
+              <input type="text" class="nc-input" value="${esc(d.date)}" oninput="KM.flowDocUpdate(${i},'date',this.value)">
+            </div>
+          </div>
           ${docs.length > 1 ? `<button class="flow-doc-remove" onclick="KM.flowRemoveDoc(${i})" title="刪除"><span class="mi">close</span></button>` : ''}
         </div>
-        <div class="nc-fields-grid">
+        <div class="nc-field" style="margin-bottom:10px">
+          <label class="nc-label">機關名稱</label>
+          <input type="text" class="nc-input" placeholder="請輸入發文／受文機關" value="${esc(d.org ?? '')}" oninput="KM.flowDocUpdate(${i},'org',this.value)">
+        </div>
+        <div class="nc-fields-grid nc-fields-grid--3">
           <div class="nc-field">
-            <label class="nc-label">發文文號</label>
-            <input type="text" class="nc-input" value="${esc(d.no)}" oninput="KM.flowDocUpdate(${i},'no',this.value)">
+            <label class="nc-label">聯絡人</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact1Name ?? '')}" oninput="KM.flowDocUpdate(${i},'contact1Name',this.value)">
           </div>
           <div class="nc-field">
-            <label class="nc-label">發文日期</label>
-            <input type="text" class="nc-input" value="${esc(d.date)}" oninput="KM.flowDocUpdate(${i},'date',this.value)">
+            <label class="nc-label">電話號碼</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact1Phone ?? '')}" oninput="KM.flowDocUpdate(${i},'contact1Phone',this.value)">
+          </div>
+          <div class="nc-field">
+            <label class="nc-label">電傳號碼</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact1Fax ?? '')}" oninput="KM.flowDocUpdate(${i},'contact1Fax',this.value)">
           </div>
         </div>
-        <textarea class="nc-textarea" rows="4" placeholder="請輸入公文內容…" oninput="KM.flowDocUpdate(${i},'body',this.value)">${esc(d.body)}</textarea>
+        <div class="nc-fields-grid nc-fields-grid--3">
+          <div class="nc-field">
+            <label class="nc-label">承辦人</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact2Name ?? '')}" oninput="KM.flowDocUpdate(${i},'contact2Name',this.value)">
+          </div>
+          <div class="nc-field">
+            <label class="nc-label">電話號碼</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact2Phone ?? '')}" oninput="KM.flowDocUpdate(${i},'contact2Phone',this.value)">
+          </div>
+          <div class="nc-field">
+            <label class="nc-label">電傳號碼</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.contact2Fax ?? '')}" oninput="KM.flowDocUpdate(${i},'contact2Fax',this.value)">
+          </div>
+        </div>
+        <div class="nc-fields-grid nc-fields-grid--3">
+          <div class="nc-field">
+            <label class="nc-label">市話／分機</label>
+            <div class="nc-ext-row">
+              <input type="text" class="nc-input" placeholder="市話" value="${esc(d.extPhone ?? '')}" oninput="KM.flowDocUpdate(${i},'extPhone',this.value)">
+              <input type="text" class="nc-input nc-ext-input" placeholder="分機" value="${esc(d.ext ?? '')}" oninput="KM.flowDocUpdate(${i},'ext',this.value)">
+            </div>
+          </div>
+          <div class="nc-field nc-field--span2">
+            <label class="nc-label">備註</label>
+            <input type="text" class="nc-input" placeholder="選填" value="${esc(d.note ?? '')}" oninput="KM.flowDocUpdate(${i},'note',this.value)">
+          </div>
+        </div>
+        <div class="nc-field">
+          <label class="nc-label nc-label--body-hint">${this._bodyLabel(d.type)}</label>
+          <textarea class="nc-textarea" rows="4" placeholder="請輸入公文內容…" oninput="KM.flowDocUpdate(${i},'body',this.value)">${esc(d.body)}</textarea>
+        </div>
       </div>`).join('');
   },
 
   /** 新增一筆來文／回文（保留可新增性：同一階段可能多次往復公文） */
   addDoc() {
     const docs = this._currentDocs();
-    docs.push({ type: '來文', no: '', date: '', body: '' });
+    docs.push({
+      type: '海關來文', no: '', date: '', org: '',
+      contact1Name: '', contact1Phone: '', contact1Fax: '',
+      contact2Name: '', contact2Phone: '', contact2Fax: '',
+      extPhone: '', ext: '', note: '', body: '',
+    });
     this._renderDocList();
   },
 
@@ -647,7 +962,18 @@ const FlowEdit = {
   },
 
   addStep() {
-    if (this._isCustoms) { Toast.show('海關答聯單流程為固定步驟，不可新增'); return; }
+    if (this._isCustoms) {
+      // 海關答聯單往來次數不固定，新步驟依時間序加在最後，並建立對應的文件清單資料
+      CUSTOMS_FLOW_STEPS_DATA.push({ title: '新步驟', docs: [] });
+      const idx = CUSTOMS_FLOW_STEPS_DATA.length - 1;
+      this._newStepIdxs.add(idx);
+      this._renderStepList();
+      this.bindDrag();
+      const newCard = document.querySelector(`#flow-step-list .step-card[data-idx="${idx}"]`);
+      if (newCard) this.selectStep(newCard);
+      Toast.show(`已新增 Step${idx + 1}，請填寫內容`);
+      return;
+    }
     const list = document.getElementById('flow-step-list');
 
     // 建立新步驟卡（獨特樣式）
@@ -700,7 +1026,7 @@ const FlowList = {
     this.publish();
     const reviewRow = $('flow-review-row');
     if (reviewRow) reviewRow.style.display = 'none';
-    Nav.goFlowList();
+    Nav._reviewFromPending ? Nav.goPendingReview() : Nav.goFlowList();
     Toast.show('已同意，流程發佈成功');
   },
 
@@ -710,7 +1036,7 @@ const FlowList = {
     if (reviewRow) reviewRow.style.display = 'none';
     const editBtn = $('flow-1-edit-btn');
     if (editBtn) editBtn.style.display = '';
-    Nav.goFlowList();
+    Nav._reviewFromPending ? Nav.goPendingReview() : Nav.goFlowList();
     Toast.show('已退回，請修改後重新送審');
   },
 
@@ -779,25 +1105,100 @@ const FlowList = {
 //  PendingReview — 待審表單詳情頁（首頁「待審」按鈕進入）
 // ─────────────────────────────────────────────────────────
 const PendingReview = {
+  _pageSize: 10,
+  _currentPage: {},
+  /** 少於這個數量時，不顯示該分類的分頁列（含每頁筆數選擇器） */
+  _minForPagination: 10,
+
+  init() {
+    this._currentPage = {};
+    document.querySelectorAll('.pending-group').forEach(g => {
+      this._currentPage[g.dataset.group] = 1;
+      this._renderGroup(g.dataset.group);
+    });
+    this._syncOverall();
+  },
+
+  changePageSize(group, size) {
+    this._pageSize = Number(size) || 10;
+    this._currentPage[group] = 1;
+    this._renderGroup(group);
+  },
+
   approve(el) {
+    const group = el.closest('.pending-group')?.dataset.group;
     el.closest('.pending-row')?.remove();
     Toast.show('已同意，流程發佈成功');
-    this._syncCount();
+    this._renderGroup(group);
+    this._syncOverall();
   },
 
   reject(el) {
+    const group = el.closest('.pending-group')?.dataset.group;
     el.closest('.pending-row')?.remove();
     Toast.show('已退回，請修改後重新送審');
-    this._syncCount();
+    this._renderGroup(group);
+    this._syncOverall();
   },
 
-  _syncCount() {
-    const remaining = document.querySelectorAll('#pending-review-list .pending-row').length;
-    document.querySelectorAll('.pending-count-badge').forEach(b => b.textContent = remaining);
+  /** 更新整體待審徽章數量、各分類件數標示，及全部清空時的提示 */
+  _syncOverall() {
+    const total = document.querySelectorAll('.pending-row').length;
+    document.querySelectorAll('.pending-count-badge').forEach(b => b.textContent = total);
     const pageBadge = $('pending-review-count');
-    if (pageBadge) pageBadge.textContent = remaining;
+    if (pageBadge) pageBadge.textContent = total;
+
+    document.querySelectorAll('.pending-group').forEach(g => {
+      const count = g.querySelectorAll('.pending-row').length;
+      const countEl = g.querySelector('.pending-group-count');
+      if (countEl) countEl.textContent = count;
+      g.style.display = total === 0 ? 'none' : '';
+    });
+
     const empty = $('pending-review-empty');
-    if (empty) empty.style.display = remaining === 0 ? 'block' : 'none';
+    if (empty) empty.style.display = total === 0 ? 'block' : 'none';
+  },
+
+  /** 依目前頁碼只顯示該分類該頁的列；該分類總數低於門檻時隱藏其分頁列 */
+  _renderGroup(group) {
+    if (!group) return;
+    const groupEl = document.querySelector(`.pending-group[data-group="${group}"]`);
+    if (!groupEl) return;
+
+    const rows = [...groupEl.querySelectorAll('.pending-row')];
+    const groupEmpty = groupEl.querySelector('.pending-group-empty');
+    if (groupEmpty) groupEmpty.style.display = rows.length === 0 ? 'block' : 'none';
+
+    const pagination = groupEl.querySelector('.pending-pagination');
+    if (pagination) pagination.style.display = rows.length < this._minForPagination ? 'none' : 'flex';
+
+    const totalPages = Math.max(1, Math.ceil(rows.length / this._pageSize));
+    if (!this._currentPage[group] || this._currentPage[group] > totalPages) this._currentPage[group] = totalPages;
+    const cur = this._currentPage[group];
+
+    rows.forEach((row, i) => {
+      const page = Math.floor(i / this._pageSize) + 1;
+      row.style.display = page === cur ? '' : 'none';
+    });
+
+    const pager = groupEl.querySelector('.pending-pager-btns');
+    if (!pager) return;
+    pager.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const mkBtn = (label, page, disabled, active) => {
+      const b = document.createElement('button');
+      b.className = 'pg-btn' + (active ? ' is-active' : '');
+      b.textContent = label;
+      b.disabled = !!disabled;
+      b.onclick = () => { this._currentPage[group] = page; this._renderGroup(group); };
+      return b;
+    };
+    pager.append(mkBtn('‹', cur - 1, cur === 1));
+    for (let p = 1; p <= totalPages; p++) {
+      pager.append(mkBtn(String(p), p, false, p === cur));
+    }
+    pager.append(mkBtn('›', cur + 1, cur === totalPages));
   },
 };
 
@@ -863,12 +1264,17 @@ const Tree = {
     }
   },
 
-  /** 選取樹狀項目，更新右側標題 */
+  /** 選取樹狀項目，更新右側標題並只顯示該樣態的卡片 */
   select(el, title) {
     document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('is-active'));
     el.classList.add('is-active');
     $('section-title').textContent = title;
     SidePanel.close();
+
+    const cat = el.dataset.cat;
+    document.querySelectorAll('#app .case-card').forEach(card => {
+      card.classList.toggle('is-category-hidden', !!cat && card.dataset.category !== cat);
+    });
   },
 };
 
@@ -1161,16 +1567,27 @@ const Render = {
       const html = SIDEBAR_ITEMS.map(item => {
         const isActive = item.key === activeKey;
         const cls = 'sidebar-item' + (isActive ? ' is-active' : '');
-        const onclick = isActive ? '' : ` onclick="KM.${item.action}()"`;
-        return `<div class="${cls}"${onclick}>
-      <svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        const iconHtml = item.icon
+          ? `<svg width="16" height="16" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="${item.icon}" fill="currentColor"/>
-      </svg>
+      </svg>`
+          : `<span class="mi" style="font-size:16px;color:currentColor;-webkit-text-fill-color:currentColor">${item.mi}</span>`;
+        // 一律綁定 onclick（即使目前是 active）：某些畫面（如流程清單／編輯）的 active 項目
+        // 會隨著進入來源（處分案例 vs 海關答聯單）動態改變，需要靠 setSidebarActive() 之後仍能正確點擊切換
+        return `<div class="${cls}" data-key="${item.key}" onclick="KM.${item.action}()">
+      ${iconHtml}
       ${esc(item.label)}
     </div>`;
       }).join('');
 
       logo.insertAdjacentHTML('afterend', html);
+    });
+  },
+
+  /** 動態切換某畫面側欄目前 active 的項目（用於同一畫面依進入來源不同而高亮不同主要功能，如流程清單／編輯頁） */
+  setSidebarActive(screenId, key) {
+    document.querySelectorAll(`#${screenId} .sidebar-item`).forEach(item => {
+      item.classList.toggle('is-active', item.dataset.key === key);
     });
   },
 
@@ -1182,7 +1599,7 @@ const Render = {
         <div class="card-ico">
           ${c.icon ? `<img src="img/${c.icon}" alt="${esc(c.alt)}">` : `<span class="mi">${c.mi}</span>`}
         </div>
-        ${c.featured ? '<div class="card-arrow">→</div>' : ''}
+        <div class="card-arrow">→</div>
         <div class="card-title">${esc(c.title)}</div>
         ${c.sub ? `<div class="card-sub">${esc(c.sub)}</div>` : ''}
       </div>`).join('');
@@ -1228,6 +1645,10 @@ const Render = {
     const imEl = $('tree-import');
     if (exEl) exEl.innerHTML = TREE_EXPORT_ITEMS.map(treeItem).join('');
     if (imEl) imEl.innerHTML = TREE_IMPORT_ITEMS.map(treeItem).join('');
+
+    // 套用預設選中項目的卡片篩選（比照點擊樹狀項目的行為，避免初始進入時右側顯示所有樣態的卡片）
+    const active = document.querySelector('#app .tree-item.is-active');
+    if (active) Tree.select(active, active.querySelector('span:not(.tree-count):not(.tree-folder)')?.textContent.trim() || '');
   },
 
   /** 於 init() 開頭呼叫，產生所有共用內容 */
@@ -1591,16 +2012,20 @@ const CustomsSearch = {
   },
 };
 
-// ── 步驟切換（海關答聯單詳細頁）────────────────────────────
+// ── 步驟切換（海關答聯單詳細頁，唯讀檢視）：依目前實際存在的 .step-item／.step-content 計算 ──
 const StepView = {
   switch(n) {
-    [1, 2, 3].forEach(i => {
-      $(`step-btn-${i}`)?.classList.toggle('is-active', i === n);
-      const c = $(`step-c-${i}`);
-      if (c) c.style.display = i === n ? '' : 'none';
+    document.querySelectorAll('#app-customs-detail .step-item').forEach(item => {
+      const i = Number(item.id.replace('step-btn-', ''));
+      item.classList.toggle('is-active', i === n);
+    });
+    document.querySelectorAll('#app-customs-detail .step-content').forEach(c => {
+      const i = Number(c.id.replace('step-c-', ''));
+      c.style.display = i === n ? '' : 'none';
     });
   },
 };
+
 
 window.KM = {
   // Nav
@@ -1609,6 +2034,7 @@ window.KM = {
   goPendingReview: () => Nav.goPendingReview(),
   pendingApprove : el => PendingReview.approve(el),
   pendingReject  : el => PendingReview.reject(el),
+  pendingChangePageSize: (group, size) => PendingReview.changePageSize(group, size),
   logout        : () => Toast.show('已登出系統'),
   goCustoms      : () => Nav.goCustoms(),
   goCustomsDetail: () => Nav.goCustomsDetail(),
@@ -1617,7 +2043,8 @@ window.KM = {
   goCaseDetail   : () => Nav.goCaseDetail(),
   openCaseDetail : el => Nav.openCaseDetail(el),
   backToCaseList : () => Nav.backToCaseList(),
-  openRelatedCustomsFromCase: () => Nav.openRelatedCustomsFromCase(),
+  openRelatedCustomsFromCase: cardEl => Nav.openRelatedCustomsFromCase(cardEl),
+  openRelatedCaseFromCustoms: cardEl => Nav.openRelatedCaseFromCustoms(cardEl),
   goNewCase      : s  => Nav.goNewCase(s),
   ncSwitchType   : t  => NewCase.switchType(t),
   ncHandleFiles  : el => NewCase.handleFiles(el),
@@ -1635,7 +2062,7 @@ window.KM = {
   goFlowList     : s  => Nav.goFlowList(s),
   goFlowEdit     : () => Nav.goFlowEdit(),
   goFlowView     : () => Nav.goFlowView(),
-  goFlowReviewView: () => Nav.goFlowReviewView(),
+  goFlowReviewView: (fromPending, el) => Nav.goFlowReviewView(fromPending, el),
 
   // Search
   onSearch   : v  => Search.onInput(v),
@@ -1655,6 +2082,7 @@ window.KM = {
   flowAddDoc        : () => FlowEdit.addDoc(),
   flowRemoveDoc     : i  => FlowEdit.removeDoc(i),
   flowDocUpdate     : (i, field, val) => FlowEdit.updateDocField(i, field, val),
+  flowDocTypeChange : (i, val) => FlowEdit.changeDocType(i, val),
   flowHandleFiles   : el => FlowEdit.handleFiles(el),
   flowRemoveFile    : i  => FlowEdit.removeFile(i),
   flowUpdateFileNote: (i, val) => FlowEdit.updateFileNote(i, val),
@@ -1670,11 +2098,7 @@ window.KM = {
   // Tree
   switchTab: t        => Tree.switchTab(t),
   selectTree: (el, t) => Tree.select(el, t),
-  selectCustomsTree: (el, t) => {
-    document.querySelectorAll('#app-customs .tree-item').forEach(i => i.classList.remove('is-active'));
-    el.classList.add('is-active');
-    $('customs-section-title').textContent = t;
-  },
+  selectCustomsTree: (el, t) => Nav.selectCustomsTree(el, t),
 
   // Sidebar
   toggleSidebar: () => Sidebar.toggle(),

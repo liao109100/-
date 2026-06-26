@@ -41,6 +41,9 @@
 }
 
 .tree-tab {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
   flex       : 1;
   height     : 50px;         // Figma: h-[50px]
   font-size  : 16px;
@@ -194,17 +197,18 @@
 
 // ── Buttons ──────────────────────────────────────────────
 .btn {
-  display      : inline-flex;
-  align-items  : center;
-  gap          : 5px;
-  padding      : 10px 14px;
-  border-radius: $r-sm;
-  font-size    : 12px;
-  font-weight  : 600;
-  cursor       : pointer;
-  border       : none;
-  font-family  : inherit;
-  transition   : all 0.13s ease;
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 5px;
+  padding        : 10px 14px;
+  border-radius  : $r-sm;
+  font-size      : 12px;
+  font-weight    : 600;
+  cursor         : pointer;
+  border         : none;
+  font-family    : inherit;
+  transition     : all 0.13s ease;
 
   // 處理流程 — 填充藍（Figma: bg-[#0f3f85]）
   &--blue-outline,
@@ -283,7 +287,8 @@
     border-color: $grad-start  ;
   }
 
-  &.is-filtered-out {
+  &.is-filtered-out,
+  &.is-category-hidden {
     display: none;
   }
 }
@@ -483,19 +488,20 @@
 }
 
 .attach-bulk-btn {
-  display      : inline-flex;
-  align-items  : center;
-  gap          : 4px;
-  padding      : 8px 10px;
-  font-size    : 11px;
-  font-weight  : 600;
-  border       : 1px solid #CBCBCB;
-  border-radius: 5px;
-  background   : $bg-white;
-  color        : $tx-mid;
-  cursor       : pointer;
-  white-space  : nowrap;
-  transition   : all $ease-fast;
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 4px;
+  padding        : 8px 10px;
+  font-size      : 11px;
+  font-weight    : 600;
+  border         : 1px solid #CBCBCB;
+  border-radius  : 5px;
+  background     : $bg-white;
+  color          : $tx-mid;
+  cursor         : pointer;
+  white-space    : nowrap;
+  transition     : all $ease-fast;
 
   .mi { font-size: 14px; flex-shrink: 0; }
 
@@ -547,21 +553,24 @@
   &:hover { background: $primary; border-color: $primary; color: white; }
 }
 
-// 關聯案例 pill（Figma: bg-[#f5f9ff] border-l-3 border-[#0f3f85] px-[16px] py-[8px]）
+// 關聯案例 pill：淡藍細框＋藍字的輕量按鈕，與引用用途的淺藍色框（如 .snippet-block）區隔
 .link-pill {
   display      : inline-flex;
   align-items  : center;
-  gap          : 4px;
-  background   : #F5F9FF;
-  border-left  : 3px solid $primary;
-  border-radius: 4px;
-  padding      : 8px 16px;
-  color        : $tx-main;
+  gap          : 6px;
+  background   : $bg-white;
+  border       : 1px solid #B9CCEA;
+  border-radius: $r-sm;
+  padding      : 7px 16px;
+  color        : $blue;
   font-size    : 12px;
+  font-weight  : 500;
   cursor       : pointer;
-  transition   : opacity $ease-fast;
+  transition   : all $ease-fast;
 
-  &:hover { opacity: 0.75; }
+  .mi { font-size: 14px; }
+
+  &:hover { background: #F0F5FC; border-color: $blue; }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -626,19 +635,20 @@
 .side-panel-label { font-size: 16px; font-weight: 600; color: rgba(255, 255, 255, 0.88); flex: 1; }
 
 .side-panel-detail-btn {
-  display      : flex;
-  align-items  : center;
-  gap          : 5px;
-  padding      : 5px 12px;
-  background   : rgba(255, 255, 255, 0.18);
-  border       : 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: $r-sm;
-  color        : white;
-  font-size    : 12px;
-  font-family  : inherit;
-  cursor       : pointer;
-  white-space  : nowrap;
-  transition   : background $ease-fast;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 5px;
+  padding        : 5px 12px;
+  background     : rgba(255, 255, 255, 0.18);
+  border         : 1px solid rgba(255, 255, 255, 0.4);
+  border-radius  : $r-sm;
+  color          : white;
+  font-size      : 12px;
+  font-family    : inherit;
+  cursor         : pointer;
+  white-space    : nowrap;
+  transition     : background $ease-fast;
 
   &:hover { background: rgba(255, 255, 255, 0.30); }
 }
@@ -750,16 +760,19 @@
 }
 
 .modal-tab {
-  padding      : 7px 18px;
-  font-size    : 12.5px;
-  font-weight  : 500;
-  cursor       : pointer;
-  border       : none;
-  background   : $bg-white;
-  font-family  : inherit;
-  color        : $tx-mid;
-  transition   : all $ease-fast;
-  border-right : 1px solid #CDD8E8;
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  padding        : 7px 18px;
+  font-size      : 12.5px;
+  font-weight    : 500;
+  cursor         : pointer;
+  border         : none;
+  background     : $bg-white;
+  font-family    : inherit;
+  color          : $tx-mid;
+  transition     : all $ease-fast;
+  border-right   : 1px solid #CDD8E8;
 
   &:last-child { border-right: none; }
 
@@ -1195,16 +1208,20 @@ select.filter-select {
 }
 
 .back-btn-lg {
-  padding      : 8px 20px;
-  border       : 1.5px solid $bdr;
-  border-radius: $r-sm;
-  background   : $bg-white;
-  cursor       : pointer;
-  font-size    : 12.5px;
-  font-family  : inherit;
-  color        : $tx-mid;
-  transition   : all $ease-fast;
-  white-space  : nowrap;
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 4px;
+  padding        : 8px 20px;
+  border         : 1.5px solid $bdr;
+  border-radius  : $r-sm;
+  background     : $bg-white;
+  cursor         : pointer;
+  font-size      : 12.5px;
+  font-family    : inherit;
+  color          : $tx-mid;
+  transition     : all $ease-fast;
+  white-space    : nowrap;
 
   &:hover { border-color: $primary; color: $primary; }
 }
@@ -1417,20 +1434,21 @@ select.filter-select {
 
 // ── Flow Edit Button（灰框）────────────────────────────────────
 .btn-edit-flow {
-  display      : inline-flex;
-  align-items  : center;
-  gap          : 4px;
-  padding      : 8px 16px;
-  font-size    : 12px;
-  font-family  : inherit;
-  font-weight  : 500;
-  color        : #566578;
-  border       : 1.5px solid #C8D0DC;
-  border-radius: $r-sm;
-  background   : $bg-white;
-  cursor       : pointer;
-  white-space  : nowrap;
-  transition   : all $ease-fast;
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 4px;
+  padding        : 8px 16px;
+  font-size      : 12px;
+  font-family    : inherit;
+  font-weight    : 500;
+  color          : #566578;
+  border         : 1.5px solid #C8D0DC;
+  border-radius  : $r-sm;
+  background     : $bg-white;
+  cursor         : pointer;
+  white-space    : nowrap;
+  transition     : all $ease-fast;
 
   .mi { font-size: 14px; flex-shrink: 0; }
 
@@ -1561,12 +1579,47 @@ select.filter-select {
   border    : 1px solid #C7DCFB;
 }
 
-// ── 待審表單詳情頁：表格式呈現（日期／名稱／提交人／功能） ─────
+// ── 待審表單詳情頁：依分類分組 + 表格式呈現（日期／流程名稱／提交人／版本／功能） ─────
+.pending-group {
+  margin-bottom: 28px;
+  &:last-child { margin-bottom: 0; }
+}
+
+.pending-group-hd {
+  margin-bottom: 10px;
+
+  h3 {
+    display    : flex;
+    align-items: center;
+    gap        : 6px;
+    font-size  : 15px;
+    font-weight: 700;
+    color      : $tx-main;
+  }
+}
+
+.pending-group-count {
+  font-size  : 13px;
+  font-weight: 700;
+  color      : $tx-light;
+}
+
+.pending-table-card {
+  background   : $bg-white;
+  border       : 1px solid $bdr;
+  border-radius: $r-md;
+  overflow     : hidden;
+  box-shadow   : $sh1;
+}
+
 .pending-table { display: flex; flex-direction: column; }
+
+// 表頭與資料列共用同一組欄寬，確保兩者對齊（功能欄需容納 3 顆按鈕，寬度不可過窄否則會被卡片邊緣裁切）
+$pending-cols: 110px 1fr 100px 70px 280px;
 
 .pending-table-hd {
   display      : grid;
-  grid-template-columns: 130px 1fr 130px auto;
+  grid-template-columns: $pending-cols;
   gap          : 12px;
   padding      : 12px 20px;
   font-size    : 12px;
@@ -1581,17 +1634,18 @@ select.filter-select {
 
 .pending-row {
   display      : grid;
-  grid-template-columns: 130px 1fr 130px auto;
+  grid-template-columns: $pending-cols;
   gap          : 12px;
   align-items  : center;
   padding      : 14px 20px;
   font-size    : 13px;
   cursor       : pointer;
-  background   : #FFFBF2;
+  background   : $bg-white;
   border-bottom: 1px solid $bdr;
   transition   : background $ease-fast;
 
-  &:hover { background: #FFF6E0; }
+  &:last-child { border-bottom: none; }
+  &:hover { background: #F5F8FD; }
 
   &.is-selected {
     background    : #EEF4FB;
@@ -1610,7 +1664,72 @@ select.filter-select {
   min-width  : 0;
 }
 .pending-submitter   { color: $tx-main; }
+.pending-version     { color: $primary; font-weight: 600; white-space: nowrap; }
+.pending-col-actions { white-space: nowrap; }
 .pending-actions     { display: flex; gap: 6px; flex-shrink: 0; }
+
+.pending-group-empty { background: $bg-white; }
+
+.pending-pagination {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  padding        : 12px 20px;
+  border-top     : 1px solid $bdr;
+  font-size      : 12.5px;
+  color          : $tx-mid;
+}
+
+.pending-page-size {
+  display    : flex;
+  align-items: center;
+  gap        : 6px;
+}
+
+.pending-page-size-select {
+  border       : 1px solid $bdr;
+  border-radius: $r-sm;
+  padding      : 4px 8px;
+  font-size    : 12.5px;
+  font-family  : inherit;
+  color        : $tx-main;
+  background   : $bg-white;
+}
+
+.pending-pager-btns {
+  display: flex;
+  gap    : 4px;
+}
+
+.pg-btn {
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  min-width      : 28px;
+  height         : 28px;
+  padding        : 0 6px;
+  border         : 1px solid $bdr;
+  border-radius  : $r-sm;
+  background     : $bg-white;
+  color          : $tx-mid;
+  font-size      : 12.5px;
+  font-family    : inherit;
+  cursor         : pointer;
+  transition     : all $ease-fast;
+
+  &:hover:not(:disabled) { border-color: $primary; color: $primary; }
+
+  &.is-active {
+    background  : $primary;
+    border-color: $primary;
+    color       : white;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor : not-allowed;
+  }
+}
 
 .flow-publish-wrap {
   position: relative;
@@ -1704,17 +1823,20 @@ select.filter-select {
 }
 
 .flow-add-btn {
-  width        : 100%;
-  padding      : 9px;
-  background   : $grad-h;
-  color        : white;
-  border       : none;
-  border-radius: $r-sm;
-  font-size    : 13px;
-  font-weight  : 700;
-  cursor       : pointer;
-  font-family  : inherit;
-  margin-bottom: 12px;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 100%;
+  padding        : 9px;
+  background     : $grad-h;
+  color          : white;
+  border         : none;
+  border-radius  : $r-sm;
+  font-size      : 13px;
+  font-weight    : 700;
+  cursor         : pointer;
+  font-family    : inherit;
+  margin-bottom  : 12px;
 
   &:hover { opacity: 0.88; }
 }
@@ -1881,11 +2003,9 @@ select.filter-select {
 
 .flow-doc-hd {
   display        : flex;
-  align-items    : center;
+  align-items    : flex-end;
   justify-content: space-between;
   gap            : 8px;
-
-  .flow-doc-type { width: 110px; flex-shrink: 0; }
 }
 
 .flow-doc-remove {
@@ -2065,14 +2185,17 @@ select.filter-select { font-size: 16px; }
 }
 
 .nc-type-btn {
-  padding     : 8px 20px;
-  font-size   : 13px;
-  font-weight : 600;
-  font-family : inherit;
-  border      : none;
-  cursor      : pointer;
-  background  : $bg-white;
-  color       : $tx-mid;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  padding        : 8px 20px;
+  font-size      : 13px;
+  font-weight    : 600;
+  font-family    : inherit;
+  border         : none;
+  cursor         : pointer;
+  background     : $bg-white;
+  color          : $tx-mid;
   transition  : all $ease-fast;
   border-right: 1px solid $bdr;
 
@@ -2135,6 +2258,8 @@ select.filter-select { font-size: 16px; }
   grid-template-columns: 1fr 1fr;
   gap                  : 14px 24px;
   margin-bottom        : 4px;
+
+  &--3 { grid-template-columns: 1fr 1fr 1fr; }
 }
 
 .nc-field {
@@ -2142,7 +2267,8 @@ select.filter-select { font-size: 16px; }
   flex-direction: column;
   gap           : 5px;
 
-  &--wide { grid-column: 1 / -1; }
+  &--wide  { grid-column: 1 / -1; }
+  &--span2 { grid-column: span 2; }
 }
 
 .nc-label {
@@ -2151,6 +2277,19 @@ select.filter-select { font-size: 16px; }
   color      : $tx-mid;
 
   &.is-required::before { content: '* '; color: $red; }
+
+  // 海關答聯單公文卡：次要資訊（答聯單狀態）用淡灰小字
+  &--muted {
+    font-weight: 500;
+    color      : $tx-light;
+  }
+
+  // 海關答聯單公文卡：全文欄位標籤，依公文屬性顯示「案情摘要及疑問／權責機關答復」
+  &--body-hint {
+    font-size  : 14px;
+    font-weight: 700;
+    color      : $teal;
+  }
 }
 
 .nc-input {
@@ -2167,6 +2306,22 @@ select.filter-select { font-size: 16px; }
 
   &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(36,87,167,0.12); }
   &::placeholder { color: #B0BECA; }
+}
+
+// 市話／分機並排輸入（提高特異性蓋過 .nc-input 的 width:100%，避免兩欄寬度互相搶位）
+.nc-ext-row {
+  display: flex;
+  gap    : 8px;
+
+  .nc-input {
+    flex     : 1;
+    min-width: 0;
+    width    : auto;
+  }
+  .nc-ext-input {
+    flex : 0 0 76px;
+    width: 76px;
+  }
 }
 
 .nc-radio-row {
