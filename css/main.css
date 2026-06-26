@@ -2788,7 +2788,7 @@ select.filter-select:focus {
 
 .pending-table-hd {
   display: grid;
-  grid-template-columns: 110px 1fr 100px 70px 280px;
+  grid-template-columns: 110px 1fr 100px 70px 110px;
   gap: 12px;
   padding: 12px 20px;
   font-size: 12px;
@@ -2803,7 +2803,7 @@ select.filter-select:focus {
 
 .pending-row {
   display: grid;
-  grid-template-columns: 110px 1fr 100px 70px 280px;
+  grid-template-columns: 110px 1fr 100px 70px 110px;
   gap: 12px;
   align-items: center;
   padding: 14px 20px;
@@ -2857,6 +2857,11 @@ select.filter-select:focus {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
+}
+
+#app-pending-review .pending-actions .btn-edit-flow--reject,
+#app-pending-review .pending-actions .btn-edit-flow--approve {
+  display: none;
 }
 
 .pending-group-empty {

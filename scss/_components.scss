@@ -1614,8 +1614,9 @@ select.filter-select {
 
 .pending-table { display: flex; flex-direction: column; }
 
-// 表頭與資料列共用同一組欄寬，確保兩者對齊（功能欄需容納 3 顆按鈕，寬度不可過窄否則會被卡片邊緣裁切）
-$pending-cols: 110px 1fr 100px 70px 280px;
+// 表頭與資料列共用同一組欄寬，確保兩者對齊
+// 功能欄目前只顯示「檢視」一顆按鈕（同意／退回暫時隱藏），欄寬縮小避免留下大片空白
+$pending-cols: 110px 1fr 100px 70px 110px;
 
 .pending-table-hd {
   display      : grid;
@@ -1667,6 +1668,12 @@ $pending-cols: 110px 1fr 100px 70px 280px;
 .pending-version     { color: $primary; font-weight: 600; white-space: nowrap; }
 .pending-col-actions { white-space: nowrap; }
 .pending-actions     { display: flex; gap: 6px; flex-shrink: 0; }
+
+// 暫時隱藏待審表單詳情頁的同意／退回按鈕，只保留檢視
+#app-pending-review .pending-actions .btn-edit-flow--reject,
+#app-pending-review .pending-actions .btn-edit-flow--approve {
+  display: none;
+}
 
 .pending-group-empty { background: $bg-white; }
 
