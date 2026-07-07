@@ -71,31 +71,45 @@
      ╚══════════════════════════════════════════════════════════╝ -->
 <div id="home" class="scr on">
 
-  <!-- 左欄 -->
-  <div class="h-left">
-
-    <!-- Logo -->
-    <div class="logo">
-      <img class="logo-ico" src="img/logo.png" style="height:48px;width:auto;object-fit:contain">
-    </div>
-
-    <div class="h-title-row">
-      <h1 class="h-title">貿易業務知識資料庫</h1>
-      <div class="h-title-row-right">
-        <div class="theme-switcher" id="theme-switcher-home"></div>
-        <button class="home-pending-btn" onclick="KM.goPendingReview()">
-          <span class="mi">pending_actions</span>
-          待審<span class="pending-count-badge">5</span>
+ <!-- 頂列（外層，直接置於背景上，不在白色面板內）：Logo（左）／通知鈴鐺＋登入資訊（右） -->
+ <div class="home-topbar">
+    <img class="home-logo" src="img/logo.png" alt="經濟部國際貿易署">
+    <div class="home-topbar-right">
+      <!-- 卡片顯示切換：4（第一期上線）／8（完整卡片，含未上線項目供比對） -->
+      <div class="home-card-toggle" id="home-card-toggle">
+        <button type="button" class="home-card-toggle-btn is-active" data-mode="4" onclick="KM.setHomeCardMode('4')">4</button>
+        <button type="button" class="home-card-toggle-btn" data-mode="8" onclick="KM.setHomeCardMode('8')">8</button>
+      </div>
+      <button class="home-pending-btn" onclick="KM.goPendingReview()">
+        <span class="mi">pending_actions</span>
+        待審<span class="pending-count-badge">5</span>
+      </button>
+      <!-- 通知鈴鐺：點擊展開「最新異動」下拉面板（內容由 js/data.js 的 NEWS_ITEMS 動態產生） -->
+      <div class="home-notif">
+        <button class="home-notif-btn" onclick="KM.toggleHomeNotif()" aria-label="最新異動通知">
+          <img id="home-notif-icon" src="img/home/news_1.png" alt="通知">
         </button>
-        <!-- 登入資訊（目前登入者 + 登出） -->
-        <div class="home-userbar">
-          <span class="mi">person</span>
-          <span class="home-userbar-name">王大明</span>
-          <span class="home-userbar-sep"></span>
-          <button class="home-userbar-logout" onclick="KM.logout()">登出</button>
+        <div class="home-notif-dropdown" id="home-notif-dropdown" style="display:none">
+          <div class="home-notif-hd">最新異動</div>
+          <div class="home-notif-list" id="home-notif-list"></div>
         </div>
       </div>
+      <!-- 登入資訊（目前登入者 + 登出） -->
+      <div class="home-userbar">
+        <span class="mi">person</span>
+        <span class="home-userbar-name">王大明</span>
+        <span class="home-userbar-sep"></span>
+        <button class="home-userbar-logout" onclick="KM.logout()">登出</button>
+      </div>
     </div>
+ </div><!-- /.home-topbar -->
+
+ <!-- 白色面板：上下滿版填滿頂列以下的剩餘高度 -->
+ <div class="home-panel">
+
+  <!-- 置中主內容：標題／全文檢索／功能卡片／公告宣導 -->
+  <div class="home-center">
+    <h1 class="h-title">貿易業務知識資料庫</h1>
 
     <!-- 全文檢索元件（樣式與行為比照內頁搜尋列：放大鏡輸入框＋進階搜尋） -->
     <div class="h-search-row">
@@ -104,7 +118,7 @@
         <input
           type="text"
           id="home-search-input"
-          placeholder="全文檢索：搜尋處分案例、海關答聯單、法規..."
+          placeholder="請輸入關鍵字"
           oninput="KM.homeSearchInput(this.value)"
           onkeydown="if(event.key==='Enter')KM.homeSearchSubmit(false)"
         >
@@ -118,26 +132,13 @@
       </div>
     </div>
 
-    <!-- 功能卡片格線：僅顯示第一期上線的 4 張（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
+    <!-- 功能卡片：僅顯示第一期上線的 4 張，單列並排（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
     <div class="home-grid" id="home-grid"></div><!-- /.home-grid -->
-  </div><!-- /.h-left -->
 
-  <!-- 右欄：最新異動 + 公布欄 -->
-  <div class="h-right">
-
-    <!-- 最新異動（內容由 js/data.js 的 NEWS_ITEMS 動態產生） -->
-    <div style="margin-bottom:22px">
-      <div class="panel-heading">最新異動</div>
-      <div id="news-list"></div>
-    </div>
-
-    <!-- 公布欄（內容由 js/data.js 的 BULLETIN_ITEMS 動態產生，卡片樣式比照最新異動） -->
-    <div>
-      <div class="panel-heading">公布欄</div>
-      <div id="bulletin-list"></div>
-    </div>
-
-  </div><!-- /.h-right -->
+    <!-- 公告／宣導（內容由 js/data.js 的 BULLETIN_ITEMS 動態產生），三欄並排於卡片下方 -->
+    <div class="home-bulletin-row" id="bulletin-list"></div>
+  </div><!-- /.home-center -->
+ </div><!-- /.home-panel -->
 </div><!-- /#home -->
 
 
@@ -1089,7 +1090,7 @@
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
           <div class="page-title" style="padding:8px 0 10px">
-            <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085">edit_document</span>
+            <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085; width: 30px;">edit_document</span>
             新增範本案例
           </div>
         </div>

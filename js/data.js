@@ -55,14 +55,14 @@ const SIDEBAR_ITEMS = [
     label : '民眾意見信箱處理',
     action: 'toast',
     mi    : 'mail',
-    phase1: false,
+    phase1: true,
   },
   {
     key   : 'legal',
     label : '立法/監察院相關',
     action: 'toast',
     icon  : 'M16.25 10.4125C17.3125 10.0375 18.1625 9.1875 18.5375 8.125H22.5L18.75 16.875C18.75 18.95 20.7125 20.625 23.125 20.625C25.5375 20.625 27.5 18.95 27.5 16.875L23.75 8.125H26.25V5.625H18.5375C18.025 4.1625 16.6375 3.125 15 3.125C13.3625 3.125 11.975 4.1625 11.4625 5.625H3.75V8.125H6.25L2.5 16.875C2.5 18.95 4.4625 20.625 6.875 20.625C9.2875 20.625 11.25 18.95 11.25 16.875L7.5 8.125H11.4625C11.8375 9.1875 12.6875 10.0375 13.75 10.4125V24.375H2.5V26.875H27.5V24.375H16.25V10.4125ZM25.4625 16.875H20.7875L23.125 11.425L25.4625 16.875ZM9.2125 16.875H4.5375L6.875 11.425L9.2125 16.875ZM15 8.125C14.3125 8.125 13.75 7.5625 13.75 6.875C13.75 6.1875 14.3125 5.625 15 5.625C15.6875 5.625 16.25 6.1875 16.25 6.875C16.25 7.5625 15.6875 8.125 15 8.125Z',
-    phase1: true,
+    phase1: false,
   },
   {
     key   : 'history',
@@ -74,17 +74,18 @@ const SIDEBAR_ITEMS = [
 ];
 
 // ─────────────────────────────────────────────────────────
-//  首頁卡片（home-grid；目前只上線 phase1:true 這 4 張，2 欄併排顯示）
+//  首頁卡片（home-grid；目前只上線 phase1:true 這 4 張，單列並排顯示）
+//  icon 為 img/home/ 底下的插圖；未上線項目暫無專屬插圖，沿用視覺相近的既有插圖搭配（比照完整 8 張卡片 mockup）
 // ─────────────────────────────────────────────────────────
 const HOME_CARDS = [
-  { mi: 'post_add',               alt: '申請專案輸入',           title: '申請專案輸入',             sub: '新增／查詢專案輸入申請案件',     featured: false, action: 'toast',   phase1: false },
-  { icon: 'pending_actions.svg',  alt: '處分案例',               title: '處分案例',                 sub: '違規產地標示不實',               featured: true,  action: 'goApp',    phase1: true  },
-  { icon: 'anchor.svg',           alt: '海關答聯單',             title: '海關答聯單',               sub: '通關疑義公文與白聯單查詢',       featured: false, action: 'goCustoms',phase1: true  },
-  { icon: 'balance.svg',          alt: '貿易法規重要函文/函釋',   title: '貿易法規重要函文／函釋',   sub: '重要法規函釋彙整查詢',           featured: false, action: 'toast',   phase1: false },
-  { icon: 'record_voice_over.svg',alt: '聲明異議',               title: '聲明異議／訴願／行政訴訟', sub: '行政救濟案件查詢',               featured: false, action: 'toast',   phase1: true  },
-  { mi: 'mail',                   alt: '民眾意見信箱處理',       title: '民眾意見信箱處理',         sub: '民眾陳情及意見回覆紀錄',         featured: false, action: 'toast',   phase1: false },
-  { mi: 'question_answer',        alt: '立法院質詢書面及回應',   title: '立法院質詢書面及回應',     sub: '書面質詢與回應彙整',             featured: false, action: 'toast',   phase1: true  },
-  { mi: 'star',                   alt: '重要大事記',             title: '重要大事記',               sub: '重大政策與事件時間軸',           featured: false, action: 'toast',   phase1: false },
+  { icon: 'home/icon-005.png',    alt: '申請專案輸入',           title: '申請專案輸入',             sub: '新增／查詢專案輸入申請案件',     action: 'toast',   phase1: false },
+  { icon: 'home/icon-001.png',    alt: '處分案例',               title: '處分案例',                 sub: '違規產地標示不實',               action: 'goApp',    phase1: true  },
+  { icon: 'home/icon-002.png',    alt: '海關答聯單',             title: '海關答聯單',               sub: '通關疑義公文與白聯單查詢',       action: 'goCustoms',phase1: true  },
+  { icon: 'home/icon-002.png',    alt: '貿易法規重要函文/函釋',   title: '貿易法規重要函文／函釋',   sub: '重要法規函釋彙整查詢',           action: 'toast',   phase1: false },
+  { icon: 'home/icon-003.png',    alt: '聲明異議',               title: '聲明異議、訴願與行政訴訟', sub: '行政救濟案件查詢',               action: 'toast',   phase1: true  },
+  { icon: 'home/icon-004.png',    alt: '民眾意見信箱處理',       title: '民眾意見信箱處理',         sub: '處理程序、參考回覆',             action: 'toast',   phase1: true  },
+  { icon: 'home/icon-003.png',    alt: '立法院質詢書面及回應',   title: '立法院質詢書面及回應',     sub: '書面質詢與回應彙整',             action: 'toast',   phase1: false },
+  { icon: 'home/icon-004.png',    alt: '重要大事記',             title: '重要大事記',               sub: '重大政策與事件時間軸',           action: 'toast',   phase1: false },
 ];
 
 // ─────────────────────────────────────────────────────────

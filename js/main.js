@@ -131,6 +131,18 @@ document.addEventListener('click', e => {
 //  Home — 首頁全文檢索（樣式與行為比照 #app 頁搜尋列）+ 卡片顯示階段（4／8 張）切換
 // ─────────────────────────────────────────────────────────
 const Home = {
+  /** 首頁功能卡片顯示模式：'4'＝第一期上線、'8'＝完整卡片（含未上線項目供比對） */
+  cardMode: '4',
+
+  /** 切換卡片顯示模式並重新渲染卡片格線 */
+  setCardMode(mode) {
+    this.cardMode = mode;
+    document.querySelectorAll('#home-card-toggle .home-card-toggle-btn').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.mode === mode);
+    });
+    Render.homeCards();
+  },
+
   /** 全文檢索輸入變化：只切換清除按鈕顯示，實際篩選在導向 #app 後才觸發 */
   onSearchInput(v) {
     $('home-search-clear-btn')?.classList.toggle('is-visible', !!v.trim());
@@ -152,7 +164,25 @@ const Home = {
     Search.onInput(kw);
     if (openAdvanced) Modal.open('modal-adv');
   },
+
+  /** 通知鈴鐺：切換「最新異動」下拉面板顯示，並依開合切換鈴鐺圖示（一般／按下態） */
+  toggleNotif() {
+    const dropdown = $('home-notif-dropdown');
+    const icon = $('home-notif-icon');
+    if (!dropdown) return;
+    const willOpen = dropdown.style.display === 'none';
+    dropdown.style.display = willOpen ? 'block' : 'none';
+    if (icon) icon.src = `img/home/${willOpen ? 'news_hover' : 'news_1'}.png`;
+  },
 };
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.home-notif')) return;
+  const dropdown = $('home-notif-dropdown');
+  const icon = $('home-notif-icon');
+  if (dropdown) dropdown.style.display = 'none';
+  if (icon) icon.src = 'img/home/news_1.png';
+});
 
 // ─────────────────────────────────────────────────────────
 //  Nav — 頁面切換
@@ -2627,43 +2657,47 @@ const Render = {
     });
   },
 
-  /** 首頁功能卡片：只顯示第一期上線的 4 張，2 欄併排，副標題顯示灰色小字說明 */
+  /** 首頁功能卡片：依 Home.cardMode 顯示第一期上線的 4 張或完整 8 張；外框線＋實心箭頭鈕僅為 hover 效果（非固定樣態） */
   homeCards() {
     const el = $('home-grid');
     if (!el) return;
-    const cards = HOME_CARDS.filter(c => c.phase1);
-    el.classList.add('home-grid--2col');
-    el.innerHTML = cards.map(c => `<div class="card${c.featured ? ' feat' : ''}" onclick="KM.${c.action}()">
-        <div class="card-ico">
-          ${c.icon ? `<img src="img/${c.icon}" alt="${esc(c.alt)}">` : `<span class="mi">${c.mi}</span>`}
-        </div>
-        <div class="card-arrow">→</div>
+    const cards = Home.cardMode === '8' ? HOME_CARDS : HOME_CARDS.filter(c => c.phase1);
+    el.innerHTML = cards.map(c => `<div class="card" onclick="KM.${c.action}()">
         <div class="card-title">${esc(c.title)}</div>
         ${c.sub ? `<div class="card-sub">${esc(c.sub)}</div>` : ''}
-      </div>`).join('');
-  },
-
-  /** 首頁最新異動：灰底標籤顯示所屬模組名稱（NEWS_ITEMS 的 tag 欄位） */
-  news() {
-    const el = $('news-list');
-    if (!el) return;
-    el.innerHTML = NEWS_ITEMS.map(n => `<div class="news-card">
-        <div class="news-row">
-          <span class="news-tag">${esc(n.tag)}</span>
-          <span class="news-date">${esc(n.date)}</span>
+        <div class="card-bottom">
+          <div class="card-ico">
+            ${c.icon ? `<img src="img/${c.icon}" alt="${esc(c.alt)}">` : `<span class="mi">${c.mi}</span>`}
+          </div>
+          <div class="card-arrow">
+            <img class="card-arrow-default" src="img/home/arrow.png" alt="">
+            <img class="card-arrow-hover" src="img/home/arrow_h.png" alt="">
+          </div>
         </div>
-        <div class="news-title">${esc(n.title)}</div>
-        <div class="news-body">${esc(n.body)}</div>
       </div>`).join('');
   },
 
-  /** 首頁公布欄（取代常用連結，卡片樣式比照最新異動） */
+  /** 首頁通知鈴鐺下拉面板：顯示最新異動（NEWS_ITEMS），標籤顯示所屬模組名稱 */
+  news() {
+    const el = $('home-notif-list');
+    if (!el) return;
+    el.innerHTML = NEWS_ITEMS.map(n => `<div class="home-notif-item">
+        <div class="home-notif-row">
+          <span class="home-notif-tag">${esc(n.tag)}</span>
+          <span class="home-notif-date">${esc(n.date)}</span>
+        </div>
+        <div class="home-notif-title">${esc(n.title)}</div>
+        <div class="home-notif-body">${esc(n.body)}</div>
+      </div>`).join('');
+  },
+
+  /** 首頁公布欄（三欄並排於卡片下方） */
   bulletin() {
     const el = $('bulletin-list');
     if (!el) return;
     el.innerHTML = BULLETIN_ITEMS.map(b => `<div class="news-card">
         <div class="news-row">
-          <span class="news-tag">${esc(b.tag)}</span>
+          <span class="news-tag${b.tag === '宣導' ? ' news-tag--info' : ''}">${esc(b.tag)}</span>
           <span class="news-date">${esc(b.date)}</span>
         </div>
         <div class="news-title">${esc(b.title)}</div>
@@ -3120,6 +3154,8 @@ window.KM = {
   homeSearchInput : v  => Home.onSearchInput(v),
   homeSearchClear : () => Home.clearSearch(),
   homeSearchSubmit: adv => Home.submitSearch(adv),
+  toggleHomeNotif : () => Home.toggleNotif(),
+  setHomeCardMode : mode => Home.setCardMode(mode),
 
   // Nav
   goApp         : () => Nav.goApp(),
