@@ -3,43 +3,59 @@
 //  Design Tokens — 國貿署 KM 系統
 // ============================================================
 
+// ── 顏色 Token ────────────────────────────────────────────
+// 所有顏色皆改為指向 CSS 自訂屬性（定義於 _base.scss :root，
+// 替代主題定義於 _themes.scss），以支援執行期配色切換。
+// 實際色值不要寫在這裡 —— 這裡只負責把 SCSS 變數「轉接」成 CSS 變數，
+// 讓既有大量 $primary / $bdr / $tx-main… 等既有用法不需要逐一修改。
+
 // ── 品牌漸層 ──────────────────────────────────────────────
-$grad-start : #2C8085;
-$grad-end   : #3145A5;
+$grad-start : var(--grad-start);
+$grad-end   : var(--grad-end);
 $grad-h     : linear-gradient(90deg, $grad-start 0%, $grad-end 100%);   // 水平
 $grad-v     : linear-gradient(180deg, $grad-start 0%, $grad-end 100%);  // 垂直
-$grad-diag  : linear-gradient(150deg, #EEF3FA, #E5EDF6);                // 首頁背景
+$grad-diag  : linear-gradient(150deg, var(--grad-diag-start), var(--grad-diag-end)); // 首頁背景
 
 // ── 文字色 ────────────────────────────────────────────────
-$tx-main    : #2F3D50;
-$tx-mid     : #566578;
-$tx-light   : #8898AA;
-$tx-white   : #ffffff;
+$tx-main    : var(--tx-main);
+$tx-mid     : var(--tx-mid);
+$tx-light   : var(--tx-light);
+$tx-white   : var(--bg-white);
 
 // ── 背景 ──────────────────────────────────────────────────
-$bg-page    : #F0F4F9;
-$bg-app     : #EDF5F7;  // App 頁面背景（Figma: #edf5f7）
-$bg-white   : #ffffff;
+$bg-page    : var(--bg-page);
+$bg-app     : var(--bg-app);  // App 頁面背景（Figma: #edf5f7）
+$bg-white   : var(--bg-white);
+$bg-tree    : var(--bg-tree);
 
 // ── 邊框 ──────────────────────────────────────────────────
-$bdr        : #D8E2EE;
-$bdr-focus  : #2457A7;
+$bdr        : var(--bdr);
+$bdr-focus  : var(--bdr-focus);
 
 // ── 語意色 ────────────────────────────────────────────────
-$primary    : #0F3F85;  // 主要藍（Figma: #0f3f85）
-$blue       : #2457A7;
-$navy       : #1B3263;
-$teal       : #2C8086;
-$green      : #16806D;  // Figma: #16806d
-$red        : #FF4D4D;  // Figma: #ff4d4d
-$amber      : #E8911A;
-$hl         : #FEF08A;  // Figma: #fef08a
+$primary       : var(--primary);   // 主要藍（Figma: #0f3f85）
+$primary-hover : var(--primary-hover);
+$blue          : var(--blue);
+$navy          : var(--navy);
+$teal          : var(--teal);
+$green         : var(--green);  // Figma: #16806d
+$red           : var(--red);    // Figma: #ff4d4d
+$amber         : var(--amber);
+$hl            : var(--hl);     // Figma: #fef08a
 
 // ── Tag 背景 ──────────────────────────────────────────────
-$tag-new-bg : #EDF7F6;  // Figma: #edf7f6
-$tag-lt-bg  : #E6F5EE;
-$tag-hv-bg  : #FFEAEA;
-$tag-hv-bdr : #FFCCCC;
+$tag-new-bg : var(--tag-new-bg);  // Figma: #edf7f6
+$tag-lt-bg  : var(--tag-lt-bg);
+$tag-hv-bg  : var(--tag-hv-bg);
+$tag-hv-bdr : var(--tag-hv-bdr);
+
+// ── 其他常用中性 Token（原本散落各檔的字面 hex，統一收斂於此）───
+$case-card-bdr   : var(--case-card-bdr);
+$input-bdr       : var(--input-bdr);
+$checkbox-bdr    : var(--checkbox-bdr);
+$placeholder     : var(--placeholder);
+$hover-tint      : var(--hover-tint);
+$neutral-inactive: var(--neutral-inactive);
 
 // ── 陰影 ──────────────────────────────────────────────────
 $sh1 : 0 1px 4px rgba(44, 63, 90, 0.09);
@@ -56,7 +72,7 @@ $r-pill: 20px;
 // ── 尺寸 ──────────────────────────────────────────────────
 $topbar-h    : 56px;
 $sidebar-w   : 240px;   // Figma: 240px
-$tree-w      : 300px;   // Figma: 300px
+$tree-w      : 260px;
 $side-panel-w: 560px;
 $footer-h    : 26px;
 

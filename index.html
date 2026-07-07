@@ -33,7 +33,7 @@
       align-items : center;
       min-width   : 20px;
       min-height  : 20px;
-      width: 22px;
+      width: auto;
       user-select : none;
     }
   </style>
@@ -82,9 +82,10 @@
     <div class="h-title-row">
       <h1 class="h-title">貿易業務知識資料庫</h1>
       <div class="h-title-row-right">
+        <div class="theme-switcher" id="theme-switcher-home"></div>
         <button class="home-pending-btn" onclick="KM.goPendingReview()">
           <span class="mi">pending_actions</span>
-          待審<span class="pending-count-badge">6</span>
+          待審<span class="pending-count-badge">5</span>
         </button>
         <!-- 登入資訊（目前登入者 + 登出） -->
         <div class="home-userbar">
@@ -96,11 +97,32 @@
       </div>
     </div>
 
-    <!-- 功能卡片格線（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
+    <!-- 全文檢索元件（樣式與行為比照內頁搜尋列：放大鏡輸入框＋進階搜尋） -->
+    <div class="h-search-row">
+      <div class="search-input-box">
+        <img src="img/s_1.png" class="search-ico-left" alt="搜尋">
+        <input
+          type="text"
+          id="home-search-input"
+          placeholder="全文檢索：搜尋處分案例、海關答聯單、法規..."
+          oninput="KM.homeSearchInput(this.value)"
+          onkeydown="if(event.key==='Enter')KM.homeSearchSubmit(false)"
+        >
+        <button class="search-clear-btn" id="home-search-clear-btn" onclick="KM.homeSearchClear()" aria-label="清除搜尋">
+          <span class="mi">close</span>
+        </button>
+        <span class="search-divider"></span>
+        <button class="filter-btn" onclick="KM.homeSearchSubmit(true)" aria-label="進階搜尋">
+          <img src="img/s_2.png" alt="進階搜尋">
+        </button>
+      </div>
+    </div>
+
+    <!-- 功能卡片格線：僅顯示第一期上線的 4 張（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
     <div class="home-grid" id="home-grid"></div><!-- /.home-grid -->
   </div><!-- /.h-left -->
 
-  <!-- 右欄：最新異動 + 常用連結 -->
+  <!-- 右欄：最新異動 + 公布欄 -->
   <div class="h-right">
 
     <!-- 最新異動（內容由 js/data.js 的 NEWS_ITEMS 動態產生） -->
@@ -109,10 +131,10 @@
       <div id="news-list"></div>
     </div>
 
-    <!-- 常用連結（內容由 js/data.js 的 QUICK_LINKS 動態產生） -->
+    <!-- 公布欄（內容由 js/data.js 的 BULLETIN_ITEMS 動態產生，卡片樣式比照最新異動） -->
     <div>
-      <div class="panel-heading">常用連結</div>
-      <div class="quick-box" id="quick-links"></div>
+      <div class="panel-heading">公布欄</div>
+      <div id="bulletin-list"></div>
     </div>
 
   </div><!-- /.h-right -->
@@ -146,14 +168,19 @@
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
-        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
+        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
       </nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <span>待審表單詳情</span>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <span>待審表單詳情</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="back-btn-lg" onclick="KM.goHome()">＜ 返回</button>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
@@ -165,9 +192,8 @@
               </svg>
               待審表單詳情
             </div>
-            <div style="font-size:13px;color:#8898AA;padding-left:2px">共 <span id="pending-review-count">6</span> 筆待審項目</div>
+            <div style="font-size:13px;color:#8898AA;padding-left:2px">共 <span id="pending-review-count">5</span> 筆待審項目</div>
           </div>
-          <button class="back-btn-lg" onclick="KM.goHome()">＜ 返回首頁</button>
         </div>
       </div>
 
@@ -176,57 +202,23 @@
         <!-- 全部審核完成時顯示（兩個分類皆清空才出現） -->
         <div id="pending-review-empty" class="nc-empty-hint" style="display:none;text-align:center;padding:60px 0;font-size:14px">目前沒有待審表單</div>
 
-        <!-- ── 處分案例 ── -->
+        <!-- ── 處分案例：審核「新增案例」送出的案例（非流程），資料驅動，內容由 PendingReview._renderCasesRows()
+             （js/data.js 的 CASES_DATA，status==='pending'）動態產生 ── -->
         <div class="pending-group" data-group="cases">
           <div class="pending-group-hd">
-            <h3>處分案例 <span class="pending-group-count">3</span> 件</h3>
+            <h3>處分案例 <span class="pending-group-count">2</span> 件</h3>
           </div>
           <div class="pending-table-card">
-            <div class="pending-table-hd">
-              <span>日期</span>
-              <span>流程名稱</span>
+            <div class="pending-table-hd pending-table-hd--cases">
+              <span>提交日期</span>
+              <span>案例</span>
               <span>提交人</span>
-              <span>版本</span>
+              <span>對應樣態／流程</span>
+              <span class="pending-col-status">狀態</span>
               <span class="pending-col-actions">功能</span>
             </div>
 
             <div class="pending-review-list">
-
-              <div class="pending-row" onclick="KM.flowSelectRow(this)">
-                <span class="pending-date">2025/12/08</span>
-                <span class="pending-name">一般處理流程</span>
-                <span class="pending-submitter">王小華</span>
-                <span class="pending-version">v3.1</span>
-                <div class="pending-actions">
-                  <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
-                </div>
-              </div>
-
-              <div class="pending-row" onclick="KM.flowSelectRow(this)">
-                <span class="pending-date">2025/12/10</span>
-                <span class="pending-name">特殊處理流程</span>
-                <span class="pending-submitter">陳美玲</span>
-                <span class="pending-version">v2.1</span>
-                <div class="pending-actions">
-                  <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
-                </div>
-              </div>
-
-              <div class="pending-row" onclick="KM.flowSelectRow(this)">
-                <span class="pending-date">2025/12/13</span>
-                <span class="pending-name">鞋類處理流程</span>
-                <span class="pending-submitter">張淑芬</span>
-                <span class="pending-version">v1.1</span>
-                <div class="pending-actions">
-                  <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
-                </div>
-              </div>
 
               <!-- 此分類審核完成時顯示 -->
               <div class="pending-group-empty nc-empty-hint" style="display:none;text-align:center;padding:30px 0;font-size:13px">此分類目前沒有待審表單</div>
@@ -259,6 +251,7 @@
               <span>流程名稱</span>
               <span>提交人</span>
               <span>版本</span>
+              <span class="pending-col-status">狀態</span>
               <span class="pending-col-actions">功能</span>
             </div>
 
@@ -269,11 +262,20 @@
                 <span class="pending-name">標準答聯流程</span>
                 <span class="pending-submitter">林志強</span>
                 <span class="pending-version">v1.1</span>
+                <span class="pending-status-pill pending-status-pill--reject">退回</span>
                 <div class="pending-actions">
                   <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
+                  <button class="btn-edit-flow" onclick="event.stopPropagation();KM.pendingToggleSignoff('customs-1')"><span class="mi">history</span>簽核紀錄</button>
                 </div>
+              </div>
+              <!-- 退回後的簽核資訊：淺橘色色塊，點擊上方「簽核紀錄」按鈕後向下展開，滿版顯示 -->
+              <div class="pending-signoff-block" id="pending-signoff-customs-1">
+                <table class="review-signoff-table">
+                  <thead><tr><th>序號</th><th>簽核者</th><th>意見</th><th>簽核時間</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>王大明</td><td>文件內容不完整，請補充後重新送審。</td><td>2025/12/10 09:40</td></tr>
+                  </tbody>
+                </table>
               </div>
 
               <div class="pending-row" onclick="KM.flowSelectRow(this)">
@@ -281,10 +283,9 @@
                 <span class="pending-name">加急答聯流程</span>
                 <span class="pending-submitter">吳建宏</span>
                 <span class="pending-version">v1.0</span>
+                <span class="pending-status-pill">待審</span>
                 <div class="pending-actions">
                   <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
                 </div>
               </div>
 
@@ -293,10 +294,9 @@
                 <span class="pending-name">CITES 案件答聯流程</span>
                 <span class="pending-submitter">黃國強</span>
                 <span class="pending-version">v1.0</span>
+                <span class="pending-status-pill">待審</span>
                 <div class="pending-actions">
                   <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowReviewView(true, this)"><span class="mi">search</span>檢視</button>
-                  <button class="btn-edit-flow btn-edit-flow--reject" onclick="event.stopPropagation();KM.pendingReject(this)"><span class="mi">close</span>退回</button>
-                  <button class="btn-edit-flow btn-edit-flow--approve" onclick="event.stopPropagation();KM.pendingApprove(this)"><span class="mi">check</span>同意</button>
                 </div>
               </div>
 
@@ -358,17 +358,33 @@
       <span class="topbar-sysname">業務管理知識庫</span>
     </div>
     <nav class="topbar-nav">
-      <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
+      <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
     </nav>
   </nav>
 
     <!-- ── Main ────────────────────────────────────────── -->
     <main class="main" id="main-content">
-      <!-- 麵包屑 -->
-        <div class="breadcrumb">
-          <a onclick="KM.goHome()">首頁</a>
-          <span>›</span>
-          <span>處分案範例</span>
+      <!-- 麵包屑（含共用功能按鈕：處理流程／新增案例／一鍵下載，不再屬於個別樣態） -->
+        <div class="breadcrumb breadcrumb--split">
+          <div class="breadcrumb-trail">
+            <a onclick="KM.goHome()">首頁</a>
+            <span>›</span>
+            <span>處分案例</span>
+          </div>
+          <div class="breadcrumb-actions">
+            <button class="btn btn--blue-fill" onclick="KM.goFlowList('cases')">
+              <span class="mi">account_tree</span>
+              處理流程
+            </button>
+            <button class="btn btn--gradient" onclick="KM.goNewCase()">
+              <span class="mi">add</span>
+              新增案例
+            </button>
+            <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
+              <span class="mi">download</span>
+              一鍵下載
+            </button>
+          </div>
         </div>
       <!-- Sub-header -->
       <div class="sub-header">
@@ -387,7 +403,7 @@
               </defs>
               <path d="M20 15.625C16.55 15.625 13.75 18.425 13.75 21.875C13.75 25.325 16.55 28.125 20 28.125C23.45 28.125 26.25 25.325 26.25 21.875C26.25 18.425 23.45 15.625 20 15.625ZM22.0625 24.8125L19.375 22.125V18.125H20.625V21.6125L22.9375 23.925L22.0625 24.8125ZM21.25 4.375H17.275C16.75 2.925 15.375 1.875 13.75 1.875C12.125 1.875 10.75 2.925 10.225 4.375H6.25C4.875 4.375 3.75 5.5 3.75 6.875V25.625C3.75 27 4.875 28.125 6.25 28.125H13.8875C13.15 27.4125 12.55 26.5625 12.1125 25.625H6.25V6.875H8.75V10.625H18.75V6.875H21.25V13.225C22.1375 13.35 22.975 13.6125 23.75 13.975V6.875C23.75 5.5 22.625 4.375 21.25 4.375ZM13.75 6.875C13.0625 6.875 12.5 6.3125 12.5 5.625C12.5 4.9375 13.0625 4.375 13.75 4.375C14.4375 4.375 15 4.9375 15 5.625C15 6.3125 14.4375 6.875 13.75 6.875Z" fill="url(#pageIconGrad)"/>
             </svg>
-            處分案範例
+            處分案例
           </div>
 
 
@@ -423,402 +439,77 @@
       <!-- Main inner -->
       <div class="main-inner">
 
-        <!-- ── Tree Panel ──────────────────────────────── -->
-        <div class="tree-panel">
-          <div class="tree-heading">
-            <i><img src="img/si_l.png" alt=""></i>
-            <span>處分案樣態</span>
-            <i><img src="img/si_r.png" alt=""></i>
+        <!-- ── Tree Panel（單選式樹狀導覽：出口/進口 pill 切換 → 分類（附 icon）→ 產品子項） ── -->
+        <div class="tree-panel case-nav">
+          <div class="case-nav-tabs">
+            <button class="case-nav-tab is-active" id="case-nav-tab-ex" onclick="KM.caseNavSwitchDirection('ex')">出口<span class="case-nav-tab-count" id="case-nav-tab-ex-count"></span></button>
+            <button class="case-nav-tab" id="case-nav-tab-im" onclick="KM.caseNavSwitchDirection('im')">進口<span class="case-nav-tab-count" id="case-nav-tab-im-count"></span></button>
           </div>
 
-          <!-- Tabs -->
-          <div class="tree-tabs">
-            <button
-              class="tree-tab is-active"
-              id="tab-export"
-              onclick="KM.switchTab('ex')"
-            >出口（11）</button>
-            <button
-              class="tree-tab is-inactive"
-              id="tab-import"
-              onclick="KM.switchTab('im')"
-            >進口（9）</button>
-          </div>
+          <div class="case-nav-section-label">主要類別</div>
 
-          <!-- 出口清單 -->
-          <!-- 出口清單（內容由 js/data.js 的 TREE_EXPORT_ITEMS 動態產生） -->
-          <div id="tree-export"></div>
-
-          <!-- 進口清單（內容由 js/data.js 的 TREE_IMPORT_ITEMS 動態產生） -->
-          <div id="tree-import" style="display:none"></div>
+          <!-- 內容由 CaseNav.render()（js/data.js 的 CASE_TREE）動態產生 -->
+          <div id="case-nav-body"></div>
 
         </div><!-- /.tree-panel -->
 
         <!-- ── Cases Panel ─────────────────────────────── -->
         <div class="cases-panel">
 
-          <!-- Header -->
+          <!-- Header：標題＋排序依據／案例標籤篩選，共同操作按鈕已移至上方麵包屑列（見 .breadcrumb-actions） -->
           <div class="cases-header">
             <div class="cases-title">
               <span class="mi">folder_open</span>
-              <span id="section-title">未依規定標示產地：未見標示</span>
+              <span id="section-title">處分案例清單</span>
             </div>
-            <div class="btn-group">
-              <button class="btn btn--blue-fill" onclick="KM.goFlowList('cases')">
-                <span class="mi">account_tree</span>
-                處理流程
-              </button>
-              <button class="btn btn--gradient" onclick="KM.goNewCase()">
-                <span class="mi">add</span>
-                新增範本/案例
-              </button>
-              <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
-                <span class="mi">download</span>
-                一鍵下載
-              </button>
+            <div class="cases-header-controls">
+              <div class="cases-header-control">
+                <label>排序依據</label>
+                <select id="case-sort-field" onchange="KM.caseSortFieldChange(this.value)">
+                  <option value="updateDate">更新時間</option>
+                  <option value="date">處分日期</option>
+                </select>
+              </div>
+              <div class="cases-header-control">
+                <label>案例標籤</label>
+                <select id="case-tag-filter" onchange="KM.caseTagFilterChange(this.value)">
+                  <option value="">全部標籤</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <!-- ── Case Card 1（從輕）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 食品 產地標示不實 出口貿易限制 OOO食品公司 貿易法 從輕 12萬 高頻治具線 泰國" data-category="ex-1">
-            <div class="tag-row">
-              <span class="tag tag--new">更新日期 114.11.25</span>
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 12 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704321號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月25日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO食品公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">食品</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口高頻治具線等貨品1批至泰國，產地標示不實，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）12萬元罰鍰，請查照。</div>
-            <!-- Snippet（搜尋時顯示） -->
-            <div class="snippet-block" id="snippet-1">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …於本季監測報告中發現，部分報關行針對<mark id="kw-mark-1">出口貿易限制</mark>之產地標示存在模糊地帶，導致通關延宕。經查本案出口貨品為高頻治具線等貨品，業者於報關時未確實標示產地，致使海關無法即時核實，建議各分關加強查驗，並請業者於出貨前落實產地標示自我檢核機制…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704321號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704321號-2</span><span class="attach-pill-desc">OOOOO調查資料</span></span></span>
-            </div>
-            <div class="link-row">
-              <span class="row-label">關聯案例：</span>
-              <span class="link-pill" style="cursor:pointer" onclick="event.stopPropagation();KM.openRelatedCustomsFromCase(this.closest('.case-card'))"><span class="mi">link</span> OOO關聯答聯單</span>
-            </div>
-          </div><!-- /.case-card -->
+          <!-- 案例清單：資料驅動（CaseList，資料來源 js/data.js 的 CASES_DATA），表格化＋分頁＋欄位排序 -->
+          <div class="case-table-wrap">
+            <table class="case-table">
+              <thead>
+                <tr>
+                  <th class="case-th-expand">明細</th>
+                  <th class="is-sortable" onclick="KM.caseSortBy('docNo')">發文字號<span class="sort-ico" data-sort-ico="docNo"></span></th>
+                  <th class="is-sortable" onclick="KM.caseSortBy('date')">處分日期<span class="sort-ico" data-sort-ico="date"></span></th>
+                  <th class="is-sortable" onclick="KM.caseSortBy('target')">處分對象<span class="sort-ico" data-sort-ico="target"></span></th>
+                  <th>案例標籤</th>
+                  <th>貨品</th>
+                  <th class="is-sortable" onclick="KM.caseSortBy('updateDate')">更新日期<span class="sort-ico" data-sort-ico="updateDate"></span></th>
+                  <th class="case-th-actions">功能</th>
+                </tr>
+              </thead>
+              <tbody id="case-table-body"></tbody>
+            </table>
+            <div class="case-table-empty" id="case-table-empty" style="display:none">尚無符合條件的案例</div>
+          </div>
 
-          <!-- ── Case Card 1-2（示意）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 紡織品 未依規定標示產地 未見標示 貿易法 從輕 8萬 OOO紡織公司 越南" data-category="ex-1">
-            <div class="tag-row">
-              <span class="tag tag--new">更新日期 114.11.20</span>
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 8 萬</span>
+          <div class="case-pagination" id="case-pagination">
+            <div class="case-pager-btns" id="case-pager-btns"></div>
+            <div class="case-page-size-wrap">
+              <span class="case-page-size-label">每頁顯示</span>
+              <select class="case-page-size-select" id="case-page-size" onchange="KM.caseChangePageSize(this.value)">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
             </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704108號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月20日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO紡織公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">紡織品</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口紡織品1批至越南，未依規定標示產地，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）8萬元罰鍰，請查照。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …查驗時發現貨品包裝<mark class="kw-mark">未見標示</mark>原產地字樣，未依規定標示產地，依規定處以罰鍰。本案經調查局函轉本署複核後確認違規事實明確，業者於收受處分書後已表示將加強內部報關流程教育訓練，避免類似情形再次發生…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704108號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 1-3（示意）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 五金零件 未依規定標示產地 未見標示 貿易法 從輕 6萬 OOO五金公司 印尼" data-category="ex-1">
-            <div class="tag-row">
-              <span class="tag tag--new">更新日期 114.11.18</span>
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 6 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704095號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月18日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO五金公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">五金零件</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口五金零件1批至印尼，未依規定標示產地，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）6萬元罰鍰，請查照。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …抽驗貨品外包裝<mark class="kw-mark">未見標示</mark>產地字樣，依未依規定標示產地相關規定處分。該批五金零件原訂出口至印尼客戶，因產地標示欠缺，經海關通知補正後始放行，本署考量業者係初次違規且已配合改善，依從輕原則裁處罰鍰…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704095號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 1-4（示意）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 玩具 未依規定標示產地 未見標示 貿易法 從重 15萬 OOO玩具公司 菲律賓" data-category="ex-1">
-            <div class="tag-row">
-              <span class="tag tag--hv">從重</span>
-              <span class="tag tag--hpe">處以罰緩 15 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704072號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月12日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO玩具公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">玩具</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口玩具1批至菲律賓，未依規定標示產地且經查獲有再犯情形，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）15萬元罰鍰，請查照。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …二次查驗均<mark class="kw-mark">未見標示</mark>產地，情節較重，依從重原則處分。本案業者前次違規後未確實改善作業流程，致再次發生相同情形，本署審酌其有再犯情事，依貿易法相關規定加重裁罰額度，並將列入後續加強查核對象…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704072號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 1-5（示意）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 家用電器 未依規定標示產地 未見標示 貿易法 從輕 5萬 OOO電器公司 馬來西亞" data-category="ex-1">
-            <div class="tag-row">
-              <span class="tag tag--new">更新日期 114.11.08</span>
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 5 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704051號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月08日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO電器公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">家用電器</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">**貴公司（統一編號：__________，代表人：________）報運出口家用電器1批至馬來西亞，未依規定標示產地，違反貿易法第17條第2款規定，依同法第28條第1項第6款規定處以新臺幣（下同）5萬元罰鍰，請查照。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …貨品本體及外箱皆<mark class="kw-mark">未見標示</mark>產地，依規定處以罰鍰並命限期改正。本案經海關查驗後通知業者於十日內補正產地標示，業者已配合提出改正計畫，本署將持續追蹤後續出口報單之標示情形…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704051號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 2（從重）───────────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 服飾紡織品 實質轉型 產地標示 輸美 貿易法 從重 60萬 MADE IN CHINA MADE IN TAIWAN" data-category="ex-3">
-            <div class="tag-row">
-              <span class="tag tag--hv">從重</span>
-              <span class="tag tag--hpe">依項次3，各裁處60萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114704321號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年11月25日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">OOO食品公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">食品</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">輸美貨品2批第1批貨品本身均車縫 Made in Taiwan 標籤，內包裝及外箱亦有 Made in Taiwan 字樣，但未達實質轉型第2批貨品之外箱標示 MADE IN TAIWAN，惟比對進口資料，貴公司自承貨品實為 MADE IN CHINA貨品本身、內包裝、外箱標示不實，有檢附輸美國貨品原產地聲明書。</div>
-            <div class="snippet-block" id="snippet-2">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …貨品外箱標示<mark id="kw-mark-2">出口貿易限制</mark>相關規定，惟實際原產地為 MADE IN CHINA，違反產地標示規定。經本署調閱進口報單及生產紀錄比對後確認該2批貨品均未達實質轉型門檻，貴公司雖檢附原產地聲明書，惟與實際查核結果不符，依法從重裁處…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704321號-1</span><span class="attach-pill-desc">OOO聲明書</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114704321號-2</span><span class="attach-pill-desc">OOOOO調查資料</span></span></span>
-            </div>
-            <div class="link-row">
-              <span class="row-label">關聯案例：</span>
-              <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 3（進口／從輕）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="進口 電子產品 印刷電路板 產地標示不實 從輕 3萬 ABC科技 越南 貿易法" data-category="im-2">
-            <div class="tag-row">
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 3 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114703105號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年09月12日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">ABC科技股份有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">電子產品（印刷電路板）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司報運進口印刷電路板1批，申報產地為越南，惟查驗結果產地標示不實，實際製造地為中國大陸，違反產地標示規定，依貿易法第28條第1項第6款規定處以新臺幣3萬元罰鍰。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …進口電子產品<mark class="kw-mark">產地標示不實</mark>之案例日趨增加，業者應確實申報實際製造地。本案經海關會同本署人員查核印刷電路板實際生產線後，確認製造地為中國大陸而非申報之越南，貴公司表示係供應商提供資料有誤，惟仍應負申報不實之責…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114703105號-1</span><span class="attach-pill-desc">進口報單影本</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114703105號-2</span><span class="attach-pill-desc">產地證明文件</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 4（出口／從重）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 農產品 茶葉 出口貿易限制 從重 30萬 XYZ農業 日本 貿易法 管制" data-category="ex-8">
-            <div class="tag-row">
-              <span class="tag tag--hv">從重</span>
-              <span class="tag tag--hpe">處以罰緩 30 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114706788號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年10月03日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">XYZ農業出口有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反出口貿易限制規定，貿易法第13條、第28條第1項第3款</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">農產品（高山茶葉）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司報運出口高山茶葉至日本，涉及出口貿易限制管制貨品，未依規定申請出口許可，違反貿易法第13條規定，依同法第28條第1項第3款從重裁處新臺幣30萬元罰鍰，並限制出口資格6個月。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …違反<mark class="kw-mark">出口貿易限制</mark>相關規定，未取得出口許可即報運出口，情節較重。本案高山茶葉屬限制輸出貨品表列管項目，貴公司於申報前未先向本署申請輸出許可，且於海關查驗時亦未能提出相關證明文件，爰依規定從重裁處並限制其出口資格…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114706788號-1</span><span class="attach-pill-desc">出口許可申請文件</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114706788號-2</span><span class="attach-pill-desc">行政裁量基準表</span></span></span>
-            </div>
-            <div class="link-row">
-              <span class="row-label">關聯案例：</span>
-              <span class="link-pill"><span class="mi">link</span> 相關管制貨品裁罰案</span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 5（進口／從輕）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="進口 醫療器材 出口貿易限制 從輕 9萬 全康醫療 德國 貿易法 許可" data-category="im-1">
-            <div class="tag-row">
-              <span class="tag tag--new">更新日期 114.12.01</span>
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 9 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114708234號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年12月01日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">全康醫療器材股份有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">涉及出口貿易限制，貿易法第13條、第28條第1項第3款</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">醫療器材（手術設備零件）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司自德國進口手術設備零件，其中部分品項涉及出口貿易限制管制清單，未依規定申請進口許可，惟事後主動補辦相關手續，依從輕原則裁處新臺幣9萬元罰鍰。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …涉及<mark class="kw-mark">出口貿易限制</mark>管制清單品項，業者事後主動補辦，依從輕原則處理。貴公司於進口手術設備零件後始發現部分品項列屬管制清單，隨即主動向本署申請補辦輸入許可並配合提供完整交易文件，因態度良好且無延誤通關情事，故予從輕議處…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114708234號-1</span><span class="attach-pill-desc">進口許可補辦資料</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 6（出口／從重）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 紡織品 成衣 實質轉型 產地標示 從重 45萬 美洲服飾 美國 貿易法 MADE IN TAIWAN" data-category="ex-3">
-            <div class="tag-row">
-              <span class="tag tag--hv">從重</span>
-              <span class="tag tag--hpe">依項次2，各裁處45萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114705512號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年10月28日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">美洲服飾貿易有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款及實質轉型規定，第28條第1項第6款</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">紡織品（針織成衣）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司報運出口針織成衣2批至美國，外箱及標籤標示 MADE IN TAIWAN，惟實際未達實質轉型，產地標示不實，且屬加強管理貨品，依法從重裁處每批新臺幣45萬元罰鍰。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …紡織品<mark class="kw-mark">實質轉型</mark>認定標準，需符合稅則號別改變或加工程序等要件之一。本案經查貴公司針織成衣僅於國內進行包裝及標籤貼附，並未從事裁剪、縫製等實質加工程序，與「原產地證明書及加工證明書管理辦法」所定實質轉型要件不符，依法從重裁處…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114705512號-1</span><span class="attach-pill-desc">實質轉型認定書</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114705512號-2</span><span class="attach-pill-desc">產地查核報告</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 7（進口／從輕）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="進口 化學品 原料 產地標示不實 出口貿易限制 從輕 6萬 永達化工 馬來西亞 貿易法" data-category="im-2">
-            <div class="tag-row">
-              <span class="tag tag--lt">從輕</span>
-              <span class="tag tag--pe">處以罰緩 6 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114702987號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年08月15日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">永達化工原料股份有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款規定，第28條第1項第6款規定</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">化學品（工業用溶劑）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司報運進口工業用溶劑，申報產地為馬來西亞，惟經查核產地標示不實，係由他國轉口，違反貿易法第17條第2款，因屬首次違規，依從輕原則裁處新臺幣6萬元罰鍰。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …進口化學品<mark class="kw-mark">產地標示</mark>不實，轉口貨品應確實申報實際產地，不得以中間國為產地。本案工業用溶劑經查實際產製地另有其國，貴公司因經銷商提供之文件未明確標示原始產地，致申報時誤植為轉口地馬來西亞，惟尚無故意虛報情事，依從輕原則裁處…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114702987號-1</span><span class="attach-pill-desc">原產地聲明書</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114702987號-2</span><span class="attach-pill-desc">轉口證明文件</span></span></span>
-            </div>
-          </div><!-- /.case-card -->
-
-          <!-- ── Case Card 8（出口／從重）──────────────── -->
-          <div class="case-card" onclick="KM.openCaseDetail(this)" data-text="出口 鋼鐵製品 實質轉型 從重 90萬 宏鋼鐵業 歐盟 貿易法 加強管理 反規避" data-category="ex-2">
-            <div class="tag-row">
-              <span class="tag tag--hv">從重</span>
-              <span class="tag tag--hpe">處以罰緩 90 萬</span>
-            </div>
-            <div class="case-meta">
-              <div class="meta-row"><span class="meta-key">發文字號：</span><span class="meta-val">貿管理字第114701456號</span></div>
-              <div class="meta-row"><span class="meta-key">處分日期：</span><span class="meta-val">中華民國114年07月22日</span></div>
-              <div class="meta-row"><span class="meta-key">處分對象：</span><span class="meta-val">宏鋼鐵業股份有限公司</span></div>
-              <div class="meta-row"><span class="meta-key">涉及法規：</span><span class="meta-val">違反貿易法第17條第2款及加強管理規定，第28條第1項第6款</span></div>
-              <div class="meta-row"><span class="meta-key">關鍵貨品：</span><span class="meta-val">鋼鐵製品（熱軋鋼捲）</span></div>
-            </div>
-            <hr class="meta-divider">
-            <div class="section-label">案情摘要</div>
-            <div class="case-summary">貴公司報運出口熱軋鋼捲至歐盟，涉及反規避調查，產品未達實質轉型標準，且屬158項加強管理鋼鐵貨品，違反貿易法第17條第2款規定，依加重條款裁處新臺幣90萬元罰鍰，情節重大。</div>
-            <div class="snippet-block">
-              <div class="snippet-block-label">符合搜尋結果內文</div>
-              …鋼鐵製品<mark class="kw-mark">實質轉型</mark>認定需符合製程要件，反規避調查案件依加重條款處理。本案熱軋鋼捲經歐盟反規避調查單位提出疑義，本署會同財政部關務署查核後確認貴公司僅進行表面處理及裁切，未達實質轉型標準，且該品項屬158項加強管理鋼鐵貨品，爰依加重條款從重裁處…
-            </div>
-            <div class="attach-row">
-              <span class="row-label">相關附件：</span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114701456號-1</span><span class="attach-pill-desc">歐盟反規避調查文件</span></span></span>
-              <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)"><span class="mi">attach_file</span><span class="attach-pill-text"><span class="attach-pill-no">貿管理字第114701456號-2</span><span class="attach-pill-desc">鋼鐵加強管理清單</span></span></span>
-            </div>
-            <div class="link-row">
-              <span class="row-label">關聯案例：</span>
-              <span class="link-pill"><span class="mi">link</span> 鋼鐵類加強管理歷史案例</span>
-            </div>
-          </div><!-- /.case-card -->
+          </div>
 
         </div><!-- /.cases-panel -->
       </div><!-- /.main-inner -->
@@ -850,13 +541,23 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
     </nav>
     <main class="main">
-      <div class="breadcrumb" id="case-detail-breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a onclick="KM.goApp()">處分案件</a><span>›</span>
-        <span>未依規定標示產地：未見標示</span>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail" id="case-detail-breadcrumb">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a onclick="KM.goApp()">處分案件</a><span>›</span>
+          <span>未依規定標示產地：未見標示</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="back-btn-lg" id="case-detail-back-btn" onclick="KM.backToCaseList()">＜ 返回</button>
+          <!-- 審核人員視角：由「待審」頁面點擊檢視待審核案例時顯示，取代一般瀏覽情境 -->
+          <div id="case-review-actions" style="display:none;gap:8px">
+            <button class="btn-edit-flow btn-edit-flow--reject" onclick="KM.caseReviewReject()"><span class="mi">close</span>退回</button>
+            <button class="btn-edit-flow btn-edit-flow--approve" onclick="KM.caseReviewApprove()"><span class="mi">check</span>同意</button>
+          </div>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
@@ -867,7 +568,6 @@
             </svg>
             <span id="case-detail-title-text">貿管理字第114704321號 — 案例完整詳情</span>
           </div>
-          <button class="back-btn-lg" id="case-detail-back-btn" onclick="KM.backToCaseList()">＜ 返回列表</button>
         </div>
       </div>
       <div class="detail-body">
@@ -879,11 +579,34 @@
           <div class="dmb-item"><span class="dmb-key">處分日期：</span><span class="dmb-val" id="case-detail-date">中華民國114年11月25日</span></div>
           <div class="dmb-sep"></div>
           <div class="dmb-item"><span class="dmb-key">處分對象：</span><span class="dmb-val" id="case-detail-target">OOO食品公司</span></div>
+          <div class="dmb-sep"></div>
+          <div class="dmb-item"><span class="dmb-key">更新日期：</span><span class="dmb-val" id="case-detail-updatedate">114.11.25</span></div>
+          <div class="dmb-sep"></div>
+          <div class="dmb-item"><span class="dmb-key">罰款：</span><span class="dmb-val" id="case-detail-penalty">處以罰緩 12 萬</span></div>
+        </div>
+
+        <!-- 相關附件／關聯案例：比照海關答聯單詳情頁的樣式，放在標題（基本資料）下方 -->
+        <div class="detail-attach-bar" style="border-top:1px solid #EEF0F4;padding-top:10px">
+          <span>相關附件：</span>
+          <span id="case-detail-attach-list"><span style="color:var(--tx-light);font-size:12.5px">尚無附件</span></span>
+        </div>
+        <div class="detail-attach-bar" style="border-top:1px solid #EEF0F4;padding-top:10px;padding-bottom:10px">
+          <span>關聯案例：</span>
+          <span id="case-detail-related"><span style="color:var(--tx-light)">無關聯案例</span></span>
         </div>
 
         <div style="display:grid;grid-template-columns:4fr 1fr;gap:20px;align-items:start">
 
-          <!-- 左（8）：主要公文 -->
+          <!-- 左（8）：主要公文，上方多一列處理流程 -->
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+          <!-- 對應處理流程：顯示名稱＋版號，點選可檢視流程內容（僅有對應流程時顯示） -->
+          <div id="case-detail-flow-row" class="case-detail-flow-row" style="display:none" onclick="KM.caseGoFlow()">
+            <span class="mi">account_tree</span>
+            <span>處理流程：<strong id="case-detail-flow-text"></strong></span>
+            <span class="mi case-detail-flow-arrow">chevron_right</span>
+          </div>
+
           <div class="doc-card">
             <div class="doc-section-hd">主旨</div>
             <div class="doc-body-text">
@@ -914,57 +637,49 @@
             </div>
           </div>
 
-          <!-- 右（2）：細節資訊（sticky）-->
+          </div><!-- /左欄 -->
+
+          <!-- 右（2）：細節資訊（sticky）— 處理流程移到左側上方，關聯案例／相關附件移到標題下方，這裡只留案件資訊／案例審核 -->
           <div style="width: 100%;min-width: 240px;position:sticky;top:16px;display:flex;flex-direction:column;gap:14px">
             <div class="doc-card" style="padding:16px">
-              <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">案件資訊</div>
+              <!-- 點擊整列可收合／展開下方案件資訊內容 -->
+              <div class="case-info-hd" onclick="KM.toggleCaseInfo()">
+                <div class="doc-badge doc-badge--sent">案件資訊</div>
+                <span class="mi case-info-chevron" id="case-info-chevron">chevron_right</span>
+              </div>
+              <div id="case-info-body">
               <div style="display:flex;flex-direction:column;gap:6px;font-size:14px">
-                <div style="color:#8898AA;font-weight:600">處分對象</div>
-                <div style="color:#2F3D50">OOO食品公司</div>
-                <div style="color:#8898AA;font-weight:600;margin-top:4px">涉及法規</div>
-                <div style="color:#2F3D50;line-height:1.5">違反貿易法第17條第2款，第28條第1項第6款</div>
-                <div style="color:#8898AA;font-weight:600;margin-top:4px">關鍵貨品</div>
-                <div style="color:#2F3D50">食品</div>
-                <div style="color:#8898AA;font-weight:600;margin-top:4px">進出口別</div>
-                <div style="color:#2F3D50">出口</div>
+                <div style="color:var(--tx-light);font-weight:600">處分對象</div>
+                <div style="color:var(--tx-main)" id="case-detail-target2">OOO食品公司</div>
+                <div style="color:var(--tx-light);font-weight:600;margin-top:4px">涉及法規</div>
+                <div style="color:var(--tx-main);line-height:1.5" id="case-detail-law">違反貿易法第17條第2款，第28條第1項第6款</div>
+                <div style="color:var(--tx-light);font-weight:600;margin-top:4px">關鍵貨品</div>
+                <div style="color:var(--tx-main)" id="case-detail-goods">食品</div>
+                <div style="color:var(--tx-light);font-weight:600;margin-top:4px">進出口別</div>
+                <div style="color:var(--tx-main)" id="case-detail-io">出口</div>
+                <div style="color:var(--tx-light);font-weight:600;margin-top:4px">對應樣態</div>
+                <div style="color:var(--tx-main)" id="case-detail-cat-path">產品 &gt; 產地標示不實</div>
               </div>
-              <div class="tag-row" style="margin-top:12px;padding-top:10px;border-top:1px solid #EEE;margin-bottom:0;flex-wrap:wrap;gap:5px">
-                <span class="tag tag--new">更新日期 114.11.25</span>
-                <span class="tag tag--lt">從輕</span>
-                <span class="tag tag--pe">罰緩 12 萬</span>
+              <div class="tag-row" id="case-detail-tags" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr);margin-bottom:0;flex-wrap:wrap;gap:5px"></div>
+              </div><!-- /#case-info-body -->
+            </div>
+            <!-- 案例審核：僅由「待審」頁面點擊檢視待審核案例時顯示（Nav._caseReviewMode） -->
+            <div class="doc-card" id="case-review-card" style="padding:16px;display:none">
+              <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">案例審核</div>
+              <!-- 案例先前已被退回過時，這裡整區隱藏：不再需要輸入意見，上方麵包屑也只留返回按鈕（見 KM.goCaseReview／CaseDetail.render） -->
+              <div id="case-review-comment-wrap">
+                <label class="nc-label" style="margin-bottom:6px;display:block">審核意見<span id="case-review-required-hint" style="font-weight:400;color:var(--red)">（退回時必填）</span></label>
+                <textarea class="nc-textarea" id="case-review-comment" rows="3" placeholder="請輸入審核意見…" oninput="KM.caseReviewCommentInput(this.value)" style="margin-bottom:12px"></textarea>
+              </div>
+              <div id="case-signoff-table-wrap" style="display:none">
+                <div class="nc-form-hd" style="font-size:12px;margin-bottom:6px">簽核紀錄</div>
+                <table class="review-signoff-table">
+                  <thead><tr><th>序號</th><th>簽核者</th><th>意見</th><th>簽核時間</th></tr></thead>
+                  <tbody id="case-signoff-tbody"></tbody>
+                </table>
               </div>
             </div>
-            <div class="doc-card" style="padding:16px">
-              <div class="attach-card-hd">
-                <div class="doc-badge doc-badge--customs">相關附件</div>
-                <button class="attach-bulk-btn" onclick="KM.toast()"><span class="mi">download</span>批量下載</button>
-              </div>
-              <div class="attach-list">
-                <div class="attach-list-item">
-                  <span class="mi">attach_file</span>
-                  <span class="attach-list-text">
-                    <span class="attach-pill-no">貿管理字第114704321號-1</span>
-                    <span class="attach-pill-desc">OOO聲明書.pdf</span>
-                  </span>
-                  <button class="attach-dl-btn" onclick="KM.toast()" title="下載"><span class="mi">download</span></button>
-                </div>
-                <div class="attach-list-item">
-                  <span class="mi">attach_file</span>
-                  <span class="attach-list-text">
-                    <span class="attach-pill-no">貿管理字第114704321號-2</span>
-                    <span class="attach-pill-desc">OOOOO調查資料.pdf</span>
-                  </span>
-                  <button class="attach-dl-btn" onclick="KM.toast()" title="下載"><span class="mi">download</span></button>
-                </div>
-              </div>
-            </div>
-            <div class="doc-card" style="padding:16px">
-              <div class="doc-badge doc-badge--sent" style="margin-bottom:10px">關聯案例</div>
-              <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
-                <span class="link-pill"><span class="mi">link</span> OOO關聯答聯單</span>
-              </div>
-            </div>
-          </div>
+          </div><!-- /右側細節欄 -->
 
         </div>
       </div>
@@ -994,13 +709,21 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
     </nav>
     <main class="main">
-      <div class="breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a id="flow-breadcrumb-mid" onclick="KM.goApp()">處分案件</a><span>›</span>
-        <span id="flow-breadcrumb-title">未依規定標示產地</span>
+      <!-- 麵包屑＝功能列：頁面級操作（返回／複製流程／新增流程）都放在 .breadcrumb-actions，不再另外放一列 -->
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a id="flow-breadcrumb-mid" onclick="KM.goApp()">處分案件</a><span>›</span>
+          <span id="flow-breadcrumb-title">未依規定標示產地</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="back-btn-lg" id="flow-back-btn" onclick="KM.goApp()">返回</button>
+          <button class="btn btn--gray-outline" id="flow-copy-btn" onclick="KM.flowCopy()" style="display:none">複製流程</button>
+          <button class="btn btn--gradient" onclick="KM.goFlowEdit()">＋ 新增流程</button>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
@@ -1011,19 +734,58 @@
             </svg>
             <span id="flow-page-title-text">未依規定標示產地、輸美、一般產地標示不實</span>
           </div>
-          <button class="back-btn-lg" id="flow-back-btn" onclick="KM.goApp()">返回</button>
         </div>
       </div>
       <div class="detail-body">
-        <div class="flow-list-hd">
-          <h3>流程清單</h3>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn--gray-outline" onclick="KM.flowCopy()" style="display:none">複製流程</button>
-            <button class="btn btn--gradient" onclick="KM.goFlowEdit()">＋ 新增流程</button>
-          </div>
-        </div>
+        <div class="main-inner" id="flow-main-inner">
 
-        <div id="flow-group-list">
+          <!-- ── 左側樹狀導覽（僅處分案例流程總覽使用；海關答聯單維持原本無導覽版型） ── -->
+          <div class="tree-panel flow-nav" id="flow-nav-panel">
+            <div class="case-nav-tabs">
+              <button class="case-nav-tab is-active" id="flow-nav-tab-ex" onclick="KM.flowNavSwitchDirection('ex')">出口</button>
+              <button class="case-nav-tab" id="flow-nav-tab-im" onclick="KM.flowNavSwitchDirection('im')">進口</button>
+            </div>
+            <div class="case-nav-section-label">主要類別</div>
+            <!-- 內容由 FlowNav.render()（js/data.js 的 CASE_TREE 樣態＋對應 FLOWS_DATA）動態產生 -->
+            <div id="flow-nav-body"></div>
+          </div><!-- /.tree-panel -->
+
+          <div class="flow-panel">
+            <div class="flow-list-hd">
+              <h3 id="flow-list-hd-title">流程清單</h3>
+              <div class="cases-header-controls">
+                <div class="cases-header-control">
+                  <label>異動日期</label>
+                  <select id="flow-sort-field" onchange="KM.flowSortFieldChange(this.value)">
+                    <option value="desc">新到舊</option>
+                    <option value="asc">舊到新</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 處分案例：表格化，資料驅動，內容由 FlowList.render()（js/data.js 的 FLOWS_DATA）動態產生 -->
+            <div id="flow-group-list-cases">
+              <div class="flow-table-wrap">
+                <table class="flow-table">
+                  <thead>
+                    <tr>
+                      <th class="flow-th-expand"></th>
+                      <th>名稱</th>
+                      <th>樣態</th>
+                      <th>版本</th>
+                      <th>異動日期</th>
+                      <th class="flow-th-actions">功能</th>
+                    </tr>
+                  </thead>
+                  <tbody id="flow-table-body"></tbody>
+                </table>
+                <div class="flow-table-empty" id="flow-table-empty" style="display:none">尚無符合條件的流程</div>
+              </div>
+            </div>
+
+            <!-- 海關答聯單：固定 3 組流程，維持原本寫死內容與行為 -->
+            <div id="flow-group-list-customs">
 
         <!-- 流程 1 -->
         <div class="flow-group" id="flow-group-1">
@@ -1109,8 +871,11 @@
           </div>
         </div>
 
-        </div><!-- /#flow-group-list -->
+        </div><!-- /#flow-group-list-customs -->
 
+          </div><!-- /.flow-panel -->
+
+        </div><!-- /.main-inner -->
       </div><!-- /.detail-body -->
     </main>
   </div><!-- /.app-right -->
@@ -1139,13 +904,27 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
     </nav>
     <main class="main">
-      <div class="breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a id="flow-edit-breadcrumb-mid" onclick="KM.goApp()">處分案件</a><span>›</span>
-        <a id="flow-edit-breadcrumb-title" onclick="KM.goFlowList()">未依規定標示產地</a>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a id="flow-edit-breadcrumb-mid" onclick="KM.goApp()">處分案件</a><span>›</span>
+          <a id="flow-edit-breadcrumb-title" onclick="KM.goFlowList()">未依規定標示產地</a>
+        </div>
+        <div class="breadcrumb-actions">
+          <div style="display:flex;gap:8px" id="flow-edit-actions">
+            <button class="back-btn-lg" onclick="KM.goFlowList()">＜ 返回</button>
+            <button class="btn btn--clear" onclick="KM.toast('確認刪除此流程？')">刪除</button>
+            <button class="btn btn--search" onclick="KM.flowSave()">儲存</button>
+          </div>
+          <!-- 審核人員視角：檢視待審核流程時顯示，取代上方編輯按鈕 -->
+          <div style="display:none;gap:8px" id="flow-review-actions">
+            <button class="btn-edit-flow btn-edit-flow--reject" onclick="KM.flowReject()"><span class="mi">close</span>退回</button>
+            <button class="btn-edit-flow btn-edit-flow--approve" onclick="KM.flowApprove()"><span class="mi">check</span>同意</button>
+          </div>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
@@ -1156,29 +935,51 @@
             </svg>
             <span id="flow-edit-page-title-text">未依規定標示產地、輸美、一般產地標示不實</span>
           </div>
-          <div style="display:flex;gap:8px" id="flow-edit-actions">
-            <button class="back-btn-lg" onclick="KM.goFlowList()">＜ 返回列表</button>
-            <button class="btn btn--clear" onclick="KM.toast('確認刪除此流程？')">刪除</button>
-            <button class="btn btn--search" onclick="KM.flowSave()">儲存</button>
-          </div>
-          <!-- 審核人員視角：檢視待審核流程時顯示，取代上方編輯按鈕 -->
-          <div style="display:none;gap:8px" id="flow-review-actions">
-            <button class="btn-edit-flow btn-edit-flow--reject" onclick="KM.flowReject()"><span class="mi">close</span>退回</button>
-            <button class="btn-edit-flow btn-edit-flow--approve" onclick="KM.flowApprove()"><span class="mi">check</span>同意</button>
-          </div>
         </div>
         <!-- 檢視模式提示（編輯模式下隱藏） -->
         <div id="flow-view-banner" style="display:none;background:#FFF8E1;border:1px solid #FFE08A;border-radius:4px;padding:8px 16px;margin-bottom:10px;font-size:13px;color:#7A5B00;align-items:center;gap:6px">
           <span class="mi" style="font-size:16px;color:#B8860B">visibility</span>
           <span style="flex:1;font-weight:600">檢視模式 — 此流程為唯讀，無法編輯或拖移步驟</span>
           <button class="back-btn-lg" id="flow-view-back-btn" onclick="KM.goFlowList()" style="font-size:12px;padding:8px 14px">
-            <span class="mi" style="font-size:14px">arrow_back</span> <span id="flow-view-back-btn-text">返回列表</span>
+            <span class="mi" style="font-size:14px">arrow_back</span> <span id="flow-view-back-btn-text">返回</span>
           </button>
         </div>
-        <div class="flow-title-field">
+        <!-- 編輯既有流程時改顯示下方 .flow-meta-readonly 的唯讀「流程」標籤，此欄位隱藏（僅新增流程時使用） -->
+        <div class="flow-title-field" id="flow-title-field">
           <label>樣稿標題</label>
           <input type="text" value="一般處理流程" id="flow-draft-title" placeholder="輸入流程名稱">
         </div>
+
+        <!-- 處分案例・新增流程：分類（出口/進口＋第二層，必填）與複製來源；編輯既有流程時改顯示唯讀分類標籤 -->
+        <div class="flow-classify-row" id="flow-classify-row" style="display:none">
+          <div class="nc-field">
+            <label class="nc-label is-required">出口／進口</label>
+            <select class="filter-select" id="flow-cat-l1" onchange="KM.flowCatL1Change()">
+              <option value="ex">出口</option>
+              <option value="im">進口</option>
+            </select>
+          </div>
+          <div class="nc-field">
+            <label class="nc-label is-required">對應第二層樣態</label>
+            <select class="filter-select" id="flow-cat-l2" onchange="KM.flowCatL2Change()"></select>
+          </div>
+          <div class="nc-field" id="flow-cat-l3-field" style="display:none">
+            <label class="nc-label is-required">對應第三層樣態</label>
+            <select class="filter-select" id="flow-cat-l3" onchange="KM.flowCatL3Change()"></select>
+          </div>
+          <div class="nc-field">
+            <label class="nc-label">從既有流程複製（選填）</label>
+            <select class="filter-select" id="flow-copy-from" onchange="KM.flowCopyFromChange(this.value)">
+              <option value="">不複製，從空白開始</option>
+            </select>
+          </div>
+        </div>
+        <div class="flow-meta-readonly" id="flow-meta-readonly" style="display:none">
+          <span class="flow-meta-chip">樣態：<strong id="flow-meta-category"></strong></span>
+          <span class="flow-meta-chip">流程：<strong id="flow-meta-name"></strong></span>
+          <span class="flow-meta-chip">版本：<strong id="flow-meta-version"></strong></span>
+        </div>
+
       </div>
 
       <!-- 編輯區（左步驟 + 右編輯器）+ 附件區，整體可捲動 -->
@@ -1202,17 +1003,9 @@
               oninput="KM.flowUpdateTitle(this.value)">
           </div>
 
-          <!-- 處分案例：單一富文本編輯器 -->
+          <!-- 處分案例：純文字步驟內容（依需求移除富文本工具列樣式） -->
           <div id="flow-edit-generic">
-            <div class="rich-toolbar">
-              <button title="粗體"><b>B</b></button>
-              <button title="斜體"><i>I</i></button>
-              <button title="底線"><u>U</u></button>
-              <button title="刪除線"><s>S</s></button>
-              <div class="tb-sep"></div>
-              <button title="字色">A</button>
-            </div>
-            <div class="rich-body" id="flow-rich-body" contenteditable="true">
+            <div class="rich-body" id="flow-rich-body" contenteditable="true" oninput="KM.flowUpdateBody(this.innerHTML)">
               <p>接收海關發來之違章案件移送書及相關證明文件，確認案件基本資料是否完整，包括進出口報單號碼、違章事實說明、當事人資料等必要資訊。</p>
               <p>核對移送書所附文件是否齊全，如有缺漏應即通知海關補件，並於系統中建立案件基本檔案。</p>
             </div>
@@ -1275,14 +1068,23 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a onclick="KM.goApp()">處分案例</a><span>›</span>
-        <span>新增範本案例</span>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a onclick="KM.goApp()">處分案例</a><span>›</span>
+          <span>新增範本案例</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="btn btn--clear" onclick="KM.goApp()">返回</button>
+          <button class="btn btn--gray-outline" onclick="KM.ncSave(false)">儲存</button>
+          <button class="btn btn--search" onclick="KM.ncSave(true)">
+            <span class="mi">check</span> 送出
+          </button>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
@@ -1290,19 +1092,12 @@
             <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085">edit_document</span>
             新增範本案例
           </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn--clear" onclick="KM.goApp()">取消</button>
-            <button class="btn btn--gray-outline" onclick="KM.ncSave(false)">儲存草稿</button>
-            <button class="btn btn--search" onclick="KM.ncSave(true)">
-              <span class="mi">check</span> 發布案例
-            </button>
-          </div>
         </div>
       </div>
 
       <div class="nc-body">
 
-        <!-- 分類選擇列（固定在表單頂部） -->
+        <!-- 分類選擇列（固定在表單頂部）：出口/進口 → 第二層（產品/商標/CITES/違規）→ 第三層（僅產品）→ 對應處理流程 -->
         <div class="nc-classify-bar">
           <div class="nc-classify-tabs">
             <button class="nc-type-btn is-active" id="nc-tab-ex" onclick="KM.ncSwitchType('ex')">出口</button>
@@ -1310,19 +1105,16 @@
           </div>
           <div class="nc-classify-sep"></div>
           <div class="nc-classify-cat">
-            <label class="filter-label" style="white-space:nowrap">處分案樣態</label>
-            <select class="filter-select" id="nc-category">
-              <option value="">請選擇樣態</option>
-              <option>未依規定標示產地：未見標示</option>
-              <option>產地標示不實(1)：他國產製或國貨標成他國</option>
-              <option>產地標示不實(2)：他國產製標成臺灣（加強管理）</option>
-              <option>產地標示不實(3)：他國產製標成臺灣（其他）</option>
-              <option>足以使人誤認產地</option>
-              <option>CITES</option>
-              <option>商標/仿冒(侵權)</option>
-              <option>管制貨品(111)</option>
-              <option>其他</option>
-            </select>
+            <label class="filter-label" style="white-space:nowrap">第二層樣態</label>
+            <select class="filter-select" id="nc-cat-l2" onchange="KM.ncCatL2Change()"></select>
+          </div>
+          <div class="nc-classify-cat" id="nc-cat-l3-field" style="display:none">
+            <label class="filter-label" style="white-space:nowrap">第三層樣態</label>
+            <select class="filter-select" id="nc-cat-l3" onchange="KM.ncCatL3Change()"></select>
+          </div>
+          <div class="nc-classify-cat">
+            <label class="filter-label" style="white-space:nowrap">處理流程</label>
+            <select class="filter-select" id="nc-flow"></select>
           </div>
         </div>
 
@@ -1333,23 +1125,12 @@
           <div class="nc-form-hd">基本資料</div>
           <div class="nc-fields-grid">
             <div class="nc-field">
-              <label class="nc-label">發文字號</label>
-              <input type="text" class="nc-input" placeholder="例：貿管理字第114000000號">
+              <label class="nc-label is-required">發文字號</label>
+              <input type="text" class="nc-input" id="nc-docno" placeholder="例：貿管理字第114000000號">
             </div>
             <div class="nc-field">
-              <label class="nc-label">案件日期</label>
+              <label class="nc-label is-required">案件日期</label>
               <input type="text" id="nc-case-date" class="nc-input" placeholder="YYYY/MM/DD" readonly>
-            </div>
-            <div class="nc-field">
-              <label class="nc-label is-required">裁決結果</label>
-              <div class="nc-radio-row">
-                <label class="nc-radio-label">
-                  <input type="radio" name="nc-severity" value="lt"> 從輕
-                </label>
-                <label class="nc-radio-label">
-                  <input type="radio" name="nc-severity" value="hv"> 從重
-                </label>
-              </div>
             </div>
             <div class="nc-field">
               <label class="nc-label">裁罰金額（元）</label>
@@ -1377,26 +1158,25 @@
             </div>
           </div>
 
+          <!-- 案例標籤（多選） -->
+          <div class="nc-field" style="margin-top:16px">
+            <label class="nc-label">案例標籤</label>
+            <div class="tag-area" id="nc-tag-area" onclick="KM.openTagModal('nc-tag-area')" style="cursor:pointer;margin-top:5px">
+              <span style="color:#B0BECA;font-size:12.5px;pointer-events:none">點擊選擇案例標籤（可多選）...</span>
+            </div>
+          </div>
+
           <hr class="meta-divider" style="margin:20px 0">
 
-          <!-- 案情摘要 -->
-          <div class="nc-form-hd">案情摘要</div>
-          <textarea class="nc-textarea" placeholder="請輸入案情摘要，可貼上段落文字…" rows="4"></textarea>
+          <!-- 主旨 -->
+          <div class="nc-form-hd">主旨</div>
+          <input type="text" class="nc-input" id="nc-subject" placeholder="請輸入案件主旨…">
 
           <hr class="meta-divider" style="margin:20px 0">
 
-          <!-- 完整內容 -->
+          <!-- 完整內容（依需求移除富文本工具列樣式，改為純文字內容區） -->
           <div class="nc-form-hd">完整內容</div>
           <div class="nc-editor-wrap">
-            <div class="rich-toolbar">
-              <button title="粗體"><b>B</b></button>
-              <button title="斜體"><i>I</i></button>
-              <button title="底線"><u>U</u></button>
-              <button title="刪除線"><s>S</s></button>
-              <div class="tb-sep"></div>
-              <button title="項目清單">≡</button>
-              <button title="數字清單">≔</button>
-            </div>
             <div class="rich-body" contenteditable="true" style="min-height:180px"></div>
           </div>
 
@@ -1458,27 +1238,29 @@
         </button>
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
-      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
+      <nav class="topbar-nav"><a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a></nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
-        <span>新增答聯單範本/案例</span>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
+          <span>新增答聯單範本/案例</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="btn btn--clear" onclick="KM.goCustoms()">取消</button>
+          <button class="btn btn--gray-outline" onclick="KM.cncSave(false)">儲存草稿</button>
+          <button class="btn btn--search" onclick="KM.cncSave(true)">
+            <span class="mi">check</span> 發布案例
+          </button>
+        </div>
       </div>
       <div class="sub-header" style="padding:0 30px">
         <div class="detail-title-row">
           <div class="page-title" style="padding:8px 0 10px">
             <span class="mi" style="-webkit-text-fill-color:initial;font-size:22px;color:#2C8085">edit_document</span>
             新增答聯單範本/案例
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn--clear" onclick="KM.goCustoms()">取消</button>
-            <button class="btn btn--gray-outline" onclick="KM.cncSave(false)">儲存草稿</button>
-            <button class="btn btn--search" onclick="KM.cncSave(true)">
-              <span class="mi">check</span> 發布案例
-            </button>
           </div>
         </div>
       </div>
@@ -1658,13 +1440,29 @@
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
-        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
+        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
       </nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb">
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail">
           <a onclick="KM.goHome()">首頁</a><span>›</span><span>海關答聯單處理</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="btn btn--blue-fill" onclick="KM.goFlowList('customs')">
+            <span class="mi">account_tree</span>
+            處理流程
+          </button>
+          <button class="btn btn--gradient" onclick="KM.goNewCase('customs')">
+            <span class="mi">add</span>
+            新增範本/案例
+          </button>
+          <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
+            <span class="mi">download</span>
+            一鍵下載
+          </button>
+        </div>
       </div>
       <div class="sub-header">
         <div class="search-row">
@@ -1732,20 +1530,6 @@
             <div class="cases-title">
               <span class="mi">folder_open</span>
               <span id="customs-section-title">專案(擋關)</span>
-            </div>
-            <div class="btn-group">
-              <button class="btn btn--blue-fill" onclick="KM.goFlowList('customs')">
-                <span class="mi">account_tree</span>
-                處理流程
-              </button>
-              <button class="btn btn--gradient" onclick="KM.goNewCase('customs')">
-                <span class="mi">add</span>
-                新增範本/案例
-              </button>
-              <button class="btn btn--gray-outline" onclick="KM.openModal('modal-download')">
-                <span class="mi">download</span>
-                一鍵下載
-              </button>
             </div>
           </div>
 
@@ -1845,15 +1629,20 @@
         <span class="topbar-sysname">業務管理知識庫</span>
       </div>
       <nav class="topbar-nav">
-        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">6</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
+        <a class="topbar-pending-btn" onclick="KM.goPendingReview()"><span class="mi">pending_actions</span> 待審<span class="pending-count-badge">5</span></a><a><span class="mi">person</span> 王大明</a><a>登出</a>
       </nav>
     </nav>
 
     <main class="main">
-      <div class="breadcrumb" id="customs-detail-breadcrumb">
-        <a onclick="KM.goHome()">首頁</a><span>›</span>
-        <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
-        <span>專案(擋關)</span>
+      <div class="breadcrumb breadcrumb--split">
+        <div class="breadcrumb-trail" id="customs-detail-breadcrumb">
+          <a onclick="KM.goHome()">首頁</a><span>›</span>
+          <a onclick="KM.goCustoms()">海關答聯單處理</a><span>›</span>
+          <span>專案(擋關)</span>
+        </div>
+        <div class="breadcrumb-actions">
+          <button class="back-btn-lg" id="customs-detail-back-btn" onclick="KM.backToCustomsList()">＜ 返回</button>
+        </div>
       </div>
       <!-- Sub-header -->
       <div class="sub-header" style="padding:0 30px">
@@ -1865,7 +1654,6 @@
             </svg>
             海關答聯單處理-專案(擋關)
           </div>
-          <button class="back-btn-lg" id="customs-detail-back-btn" onclick="KM.backToCustomsList()">＜ 返回</button>
         </div>
       </div>
 
@@ -2316,6 +2104,27 @@
 
   </div><!-- /.modal -->
 </div><!-- /#modal-law -->
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — 選擇案例標籤（內容由 js/data.js 的 TAG_OPTIONS 動態產生）
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="modal-tags" onclick="KM.overlayClick(event,'modal-tags')">
+  <div class="modal modal--sm">
+
+    <div class="modal-header">
+      <span class="modal-title">選擇案例標籤</span>
+      <button class="modal-close" onclick="KM.closeTagModal()"><span class="mi">close</span></button>
+    </div>
+
+    <div class="law-list" id="tag-list"></div>
+
+    <div class="law-footer">
+      <span class="law-count">已選擇 <strong id="tag-count">0</strong> 個標籤</span>
+      <button class="btn btn--search" onclick="KM.confirmTags()">確認</button>
+    </div>
+
+  </div><!-- /.modal -->
+</div><!-- /#modal-tags -->
 
 
 <!-- ═══════════════════════════════════════════════════════

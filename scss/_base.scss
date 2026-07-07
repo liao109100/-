@@ -13,22 +13,65 @@
   padding: 0;
 }
 
-// CSS Custom Properties（供原生 CSS 使用）
+// CSS Custom Properties — 配色 Token（預設主題：theme-ocean）
+// 這是唯一定義「實際色值」的地方；_variables.scss 內所有 $primary / $bdr 等
+// SCSS 變數都只是轉接到這裡的 CSS 變數。替代主題見 _themes.scss，
+// 透過 :root[data-theme="..."] 覆寫下列 token 即可切換全站配色。
 :root {
-  --grad        : #{$grad-h};
-  --tx-main     : #{$tx-main};
-  --tx-mid      : #{$tx-mid};
-  --tx-light    : #{$tx-light};
-  --bg-page     : #{$bg-page};
-  --bg-white    : #{$bg-white};
-  --bdr         : #{$bdr};
-  --blue        : #{$blue};
-  --teal        : #{$teal};
-  --green       : #{$green};
-  --red         : #{$red};
-  --sh1         : #{$sh1};
-  --sh2         : #{$sh2};
-  --sh3         : #{$sh3};
+  // 品牌漸層
+  --grad-start      : #2C8085;
+  --grad-end        : #3145A5;
+  --grad-diag-start : #EEF3FA;
+  --grad-diag-end   : #E5EDF6;
+  --grad            : linear-gradient(90deg, var(--grad-start) 0%, var(--grad-end) 100%);
+
+  // 語意色
+  --primary       : #0F3F85;
+  --primary-rgb   : 15, 63, 133;
+  --primary-hover : #082D63;
+  --blue          : #2457A7;
+  --blue-rgb      : 36, 87, 167;
+  --navy          : #1B3263;
+  --teal          : #2C8086;
+  --teal-rgb      : 44, 128, 134;
+  --green         : #16806D;
+  --red           : #FF4D4D;
+  --amber         : #E8911A;
+  --hl            : #FEF08A;
+
+  // 文字色
+  --tx-main  : #2F3D50;
+  --tx-mid   : #566578;
+  --tx-light : #8898AA;
+
+  // 背景
+  --bg-page  : #F0F4F9;
+  --bg-app   : #EDF5F7;
+  --bg-white : #FFFFFF;
+  --bg-tree  : #EBF1F7;
+
+  // 邊框
+  --bdr       : #D8E2EE;
+  --bdr-focus : #2457A7;
+
+  // Tag 背景
+  --tag-new-bg : #EDF7F6;
+  --tag-lt-bg  : #E6F5EE;
+  --tag-hv-bg  : #FFEAEA;
+  --tag-hv-bdr : #FFCCCC;
+
+  // 其他中性 Token（統一收斂原本散落字面 hex）
+  --case-card-bdr    : #CBCBCB;
+  --input-bdr        : #CDD8E8;
+  --checkbox-bdr     : #C5D0DE;
+  --placeholder      : #B0BECA;
+  --hover-tint       : #F5F9FF;
+  --neutral-inactive : #E1E1E1;
+
+  // 陰影（不隨主題變化，仍以中性色調為基準）
+  --sh1 : 0 1px 4px rgba(44, 63, 90, 0.09);
+  --sh2 : 0 4px 18px rgba(44, 63, 90, 0.14);
+  --sh3 : 0 10px 36px rgba(44, 63, 90, 0.20);
 }
 
 html {
@@ -42,6 +85,13 @@ body {
   font-size     : $fs-base;
   line-height   : $lh-base;
   padding-bottom: $footer-h;
+}
+
+// 全站表格通用原則：欄位內容一律垂直置中（瀏覽器預設 th/td 是 vertical-align:baseline，
+// 混搭圖示、按鈕、多行文字時容易讓同一列高低不齊）。之後新增任何 <table> 都會自動套用，
+// 不需要在個別表格樣式裡重複宣告。
+table {
+  th, td { vertical-align: middle; }
 }
 
 // ── 全站共用 Copyright footer ───────────────────────────
@@ -65,12 +115,12 @@ body {
 // 捲軸
 ::-webkit-scrollbar        { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: #C5D0DE; border-radius: 2px; }
+::-webkit-scrollbar-thumb  { background: var(--checkbox-bdr); border-radius: 2px; }
 
 // ── Accessibility ──────────────────────────────────────────────
 // 1. Focus ring：鍵盤焦點明顯可見（WCAG 2.1 AA）
 :focus-visible {
-  outline       : 3px solid #2457A7;
+  outline       : 3px solid var(--blue);
   outline-offset: 2px;
   border-radius : 4px;
 }
@@ -80,7 +130,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   outline    : none;
-  box-shadow : 0 0 0 3px rgba(36, 87, 167, 0.25);
+  box-shadow : 0 0 0 3px rgba(var(--blue-rgb), 0.25);
 }
 
 // ── Checkbox & Radio 統一規範 ───────────────────────────────────
@@ -95,24 +145,24 @@ input[type='radio'] {
   width              : 20px;
   height             : 20px;
   min-width          : 20px;
-  background         : #fff;
-  border             : 1.5px solid #C5D0DE;
+  background         : var(--bg-white);
+  border             : 1.5px solid var(--checkbox-bdr);
   cursor             : pointer;
   vertical-align     : middle;
   position           : relative;
   flex-shrink        : 0;
   transition         : background $ease-fast, border-color $ease-fast;
 
-  &:hover:not(:disabled)  { border-color: #2C8086; }
+  &:hover:not(:disabled)  { border-color: var(--teal); }
 
   &:checked,
-  &:indeterminate          { background: #2C8086; border-color: #2C8086; }
+  &:indeterminate          { background: var(--teal); border-color: var(--teal); }
 
   &:disabled               { opacity: 0.45; cursor: not-allowed; }
 
   // checkbox / radio 的 focus-ring 用 outline（不用 box-shadow）
   &:focus-visible {
-    outline       : 3px solid rgba(44, 128, 134, 0.30);
+    outline       : 3px solid rgba(var(--teal-rgb), 0.30);
     outline-offset: 2px;
     box-shadow    : none;
   }
@@ -129,7 +179,7 @@ input[type='checkbox'] {
     left        : 6px;
     width       : 5px;
     height      : 10px;
-    border      : 2.5px solid #fff;
+    border      : 2.5px solid var(--bg-white);
     border-top  : none;
     border-left : none;
     transform   : rotate(45deg);
@@ -143,7 +193,7 @@ input[type='checkbox'] {
     left       : 4px;
     right      : 4px;
     height     : 2px;
-    background : #fff;
+    background : var(--bg-white);
     transform  : translateY(-50%);
   }
 }
@@ -154,14 +204,14 @@ input[type='radio'] {
   border-radius: 50%;
 
   &:not(:checked) {
-    background : #fff;
+    background : var(--bg-white);
     box-shadow : none;
   }
 
   &:checked {
-    background : #2C8086;
-    border-color: #2C8086;
-    box-shadow : inset 0 0 0 5px #fff;
+    background : var(--teal);
+    border-color: var(--teal);
+    box-shadow : inset 0 0 0 5px var(--bg-white);
   }
 }
 
@@ -170,7 +220,7 @@ input[type='radio'] {
   position      : absolute;
   top           : -100%;
   left          : 16px;
-  background    : #0F3F85;
+  background    : var(--primary);
   color         : white;
   padding       : 8px 16px;
   border-radius : 0 0 6px 6px;

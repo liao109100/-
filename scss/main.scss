@@ -9,6 +9,8 @@
 
 @use 'variables';   // Design tokens（SCSS 變數）
 @use 'base';        // Reset + :root CSS vars + 動畫
+@use 'themes';      // 替代配色主題（data-theme 覆寫）
+@use 'raw-tints';   // 自動收斂的一次性裝飾色 token（不隨主題切換）
 @use 'home';        // 首頁（Home Dashboard）
 @use 'layout';      // App 佈局（Topbar / Sidebar / Main / Search）
 @use 'components';  // Tree / Cards / Side Panel / Modals / Buttons

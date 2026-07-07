@@ -234,7 +234,7 @@
   line-height  : 1.4;
 
   &:hover {
-    background: #F0F5FC;
+    background: var(--raw-f0f5fc);
     color     : $tx-main;
   }
 
@@ -285,6 +285,26 @@
   }
 }
 
+// 麵包屑攜帶共用功能按鈕（如處分案例的 處理流程／新增範本案例／一鍵下載）：
+// 麵包屑文字靠左、按鈕群組靠右，兩者不再擠在同一排文字裡
+.breadcrumb--split {
+  justify-content: space-between;
+  gap            : 16px;
+  flex-wrap      : wrap;
+}
+
+.breadcrumb-trail {
+  display    : flex;
+  align-items: center;
+  gap        : 5px;
+}
+
+.breadcrumb-actions {
+  display    : flex;
+  gap        : 8px;
+  flex-shrink: 0;
+}
+
 .page-title {
   display    : flex;
   align-items: center;
@@ -326,7 +346,7 @@
   font-weight : 600;
   padding     : 3px 9px;
   border-radius: 4px;
-  background  : #3A4A6B;
+  background  : var(--raw-3a4a6b);
   color       : white;
   white-space : nowrap;
   flex-shrink : 0;
@@ -354,7 +374,7 @@
   align-items   : center;
   gap           : 8px;
   background    : $bg-white;
-  border        : 1px solid #CBCBCB;
+  border        : 1px solid var(--case-card-bdr);
   border-radius : 50px;
   padding       : 0 12px 0 14px;
   cursor        : text;
@@ -365,7 +385,7 @@
   &:hover,
   &:focus-within {
     border-color: $primary;
-    box-shadow  : 0 0 0 3px rgba(15, 63, 133, 0.08);
+    box-shadow  : 0 0 0 3px rgba(var(--primary-rgb), 0.08);
   }
 
   .search-ico-left {
@@ -385,7 +405,7 @@
     flex      : 1;
     min-width : 0;
 
-    &::placeholder { color: #999; }
+    &::placeholder { color: var(--raw-999999); }
   }
 }
 
@@ -393,7 +413,7 @@
 .search-divider {
   width     : 1px;
   height    : 20px;
-  background: #D8D8D8;
+  background: var(--raw-d8d8d8);
   flex-shrink: 0;
 }
 
@@ -419,7 +439,7 @@
   }
 
   &:hover,
-  &.is-active { background: #F0F0F0; }
+  &.is-active { background: var(--raw-f0f0f0); }
 }
 
 // 清除 ✕ 按鈕
@@ -439,7 +459,7 @@
   transition    : all $ease-fast;
 
   &.is-visible { display: flex; }
-  &:hover      { background: #E5EDF6; color: $tx-main; }
+  &:hover      { background: var(--raw-e5edf6); color: $tx-main; }
 }
 
 

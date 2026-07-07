@@ -30,6 +30,15 @@ const esc = str =>
      .replace(/</g, '&lt;')
      .replace(/>/g, '&gt;');
 
+/** 案例標籤配色：輸美＝淺紅／加重＝淺橘／減輕＝淺綠／初次違規＝淺藍，從輕維持預設灰底 */
+const caseTagClass = tag => {
+  if (tag === '輸美') return 'case-tag-pill--us';
+  if (tag === '加重') return 'case-tag-pill--heavy';
+  if (tag === '減輕') return 'case-tag-pill--reduced';
+  if (tag === '初次違規') return 'case-tag-pill--first';
+  return '';
+};
+
 // ─────────────────────────────────────────────────────────
 //  CardFocus — 記住點擊的卡片，返回列表時回到該卡片位置
 // ─────────────────────────────────────────────────────────
@@ -50,6 +59,102 @@ const CardFocus = {
 };
 
 // ─────────────────────────────────────────────────────────
+//  Theme — 配色主題切換（CSS 變數 data-theme，見 scss/_themes.scss）
+// ─────────────────────────────────────────────────────────
+const THEME_LIST = [
+  { id: 'ocean',  label: '海洋藍（預設）', swatch: ['#0F3F85', '#2C8086'] },
+  { id: 'violet', label: '靛紫',          swatch: ['#40268C', '#6B4FA8'] },
+  { id: 'slate',  label: '石墨藍',        swatch: ['#24344F', '#4A7A75'] },
+];
+const THEME_STORAGE_KEY = 'km-theme';
+
+const Theme = {
+  current: 'ocean',
+
+  init() {
+    this._renderSwitchers();
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    this.set(saved || 'ocean', /*silent*/ true);
+  },
+
+  _renderSwitchers() {
+    document.querySelectorAll('.theme-switcher').forEach(el => {
+      el.innerHTML = `
+        <button type="button" class="theme-switcher-btn" onclick="KM.themeToggleMenu(this)" aria-label="切換配色主題">
+          <span class="mi">palette</span>
+        </button>
+        <div class="theme-menu">
+          ${THEME_LIST.map(t => `
+            <button type="button" class="theme-swatch-btn" data-theme="${t.id}" onclick="KM.setTheme('${t.id}')">
+              <span class="theme-swatch-dots">
+                <span class="theme-swatch-dot" style="background:${t.swatch[0]}"></span>
+                <span class="theme-swatch-dot" style="background:${t.swatch[1]}"></span>
+              </span>
+              <span class="theme-swatch-label">${t.label}</span>
+              <span class="mi theme-swatch-check">check</span>
+            </button>
+          `).join('')}
+        </div>`;
+    });
+  },
+
+  set(id, silent) {
+    if (!THEME_LIST.some(t => t.id === id)) id = 'ocean';
+    this.current = id;
+    if (id === 'ocean') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', id);
+    }
+    localStorage.setItem(THEME_STORAGE_KEY, id);
+    document.querySelectorAll('.theme-swatch-btn').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.theme === id);
+    });
+    if (!silent) Toast.show(`配色已切換：${THEME_LIST.find(t => t.id === id).label}`);
+  },
+
+  toggleMenu(btn) {
+    const menu = btn.parentElement.querySelector('.theme-menu');
+    if (!menu) return;
+    const willOpen = !menu.classList.contains('is-open');
+    document.querySelectorAll('.theme-menu.is-open').forEach(m => m.classList.remove('is-open'));
+    if (willOpen) menu.classList.add('is-open');
+  },
+};
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.theme-switcher')) return;
+  document.querySelectorAll('.theme-menu.is-open').forEach(m => m.classList.remove('is-open'));
+});
+
+// ─────────────────────────────────────────────────────────
+//  Home — 首頁全文檢索（樣式與行為比照 #app 頁搜尋列）+ 卡片顯示階段（4／8 張）切換
+// ─────────────────────────────────────────────────────────
+const Home = {
+  /** 全文檢索輸入變化：只切換清除按鈕顯示，實際篩選在導向 #app 後才觸發 */
+  onSearchInput(v) {
+    $('home-search-clear-btn')?.classList.toggle('is-visible', !!v.trim());
+  },
+
+  clearSearch() {
+    const input = $('home-search-input');
+    if (input) input.value = '';
+    this.onSearchInput('');
+  },
+
+  /** 送出搜尋：導向處分案例列表，帶入關鍵字並套用既有的 Search 篩選邏輯；
+   *  openAdvanced 為 true 時（點擊放大鏡旁的進階搜尋鈕）額外開啟進階搜尋 modal */
+  submitSearch(openAdvanced) {
+    const kw = ($('home-search-input')?.value || '').trim();
+    Nav.goApp();
+    const appInput = $('search-input');
+    if (appInput) appInput.value = kw;
+    Search.onInput(kw);
+    if (openAdvanced) Modal.open('modal-adv');
+  },
+};
+
+// ─────────────────────────────────────────────────────────
 //  Nav — 頁面切換
 // ─────────────────────────────────────────────────────────
 const SCREENS = ['home', 'app', 'app-flow-list', 'app-flow-edit', 'app-case-detail', 'app-customs', 'app-customs-detail', 'app-new-case', 'app-customs-new-case', 'app-pending-review'];
@@ -62,7 +167,7 @@ const Nav = {
 
   goApp() {
     this._show('app');
-    Tree.switchTab('ex');  // 每次進入主功能都預設顯示第一個樣態為選中狀態
+    CaseNav.init();  // 每次進入主功能都重置為預設導覽狀態
   },
 
   goHome() {
@@ -137,7 +242,7 @@ const Nav = {
 
     const btn = $(backBtnId);
     if (btn) {
-      btn.textContent = '＜ 返回樣態列表';
+      btn.textContent = '＜ 返回';
       btn.onclick = () => this._backInTrail();
     }
   },
@@ -207,7 +312,7 @@ const Nav = {
       target.breadcrumbId, target.backBtnId,
       trail, target.title,
       origin.backFn ?? origin.cardFn,
-      origin.backLabel ?? `＜ 返回${origin.cardLabel}`,
+      origin.backLabel ?? '＜ 返回',
     );
   },
 
@@ -273,7 +378,7 @@ const Nav = {
         catLabel : this._caseCatLabel, catFn: () => this.goApp(),
         cardLabel: this._caseTitle, cardFn: () => this._returnToCaseFromCustoms(),
         // 連結是直接點在列表卡片上（沒有先開過該案例的詳情頁），所以返回鈕回到列表並聚焦該卡片，而非該案例的詳情頁
-        backFn: () => this.backToCaseList(), backLabel: '＜ 返回處分案例列表',
+        backFn: () => this.backToCaseList(), backLabel: '＜ 返回',
       },
       {
         screenId: 'app-customs-detail',
@@ -293,17 +398,13 @@ const Nav = {
       CardFocus.remember(cardEl);
     }
     // mock 資料只有一筆完整案例可連結，固定指向該案例作為示範，避免沿用上一次瀏覽過的其他案例殘留狀態
-    this._caseDocNo = '貿管理字第114704321號';
-    this._caseDate = '中華民國114年11月25日';
-    this._caseTarget = 'OOO食品公司';
-    this._caseCatLabel = '未依規定標示產地：未見標示';
-    this._caseTitle = this._caseDocNo;
+    this._loadCaseMeta('case-1');
     this.crossNavigate(
       {
         mainLabel: '海關答聯單', mainFn: () => this.goCustoms(),
         catLabel : this._customsCatLabel, catFn: () => this.goCustoms(),
         cardLabel: this._customsTitle, cardFn: () => this._returnToCustomsFromCase(),
-        backFn: () => this.backToCustomsList(), backLabel: '＜ 返回海關答聯單列表',
+        backFn: () => this.backToCustomsList(), backLabel: '＜ 返回',
       },
       {
         screenId: 'app-case-detail',
@@ -320,22 +421,13 @@ const Nav = {
     CardFocus.restore();
   },
 
-  /** 從案例卡片的 meta-row 取出指定欄位（如「發文字號」）的值 */
-  _readCardMeta(el, key) {
-    const rows = el?.querySelectorAll('.meta-row') ?? [];
-    for (const row of rows) {
-      const k = row.querySelector('.meta-key')?.textContent.replace('：', '');
-      if (k === key) return row.querySelector('.meta-val')?.textContent ?? '';
-    }
-    return '';
-  },
-
+  _caseId: 'case-1',
   _caseDocNo: '貿管理字第114704321號',
   _caseDate : '中華民國114年11月25日',
   _caseTarget: 'OOO食品公司',
   _caseCatLabel: '未依規定標示產地：未見標示',
 
-  /** 把目前的 _caseDocNo/_caseDate/_caseTarget 寫進案例詳情頁的內容欄位（一般進入與跨主要功能進入都共用） */
+  /** 把目前的案例資料寫進案例詳情頁的內容欄位（一般進入與跨主要功能進入都共用） */
   _syncCaseDetailContent() {
     const titleEl = $('case-detail-title-text');
     if (titleEl) titleEl.textContent = `${this._caseDocNo} — 案例完整詳情`;
@@ -345,6 +437,7 @@ const Nav = {
     if (dateEl) dateEl.textContent = this._caseDate;
     const targetEl = $('case-detail-target');
     if (targetEl) targetEl.textContent = this._caseTarget;
+    if (typeof CaseDetail !== 'undefined') CaseDetail.render(this._caseId);
   },
 
   goCaseDetail() {
@@ -354,23 +447,67 @@ const Nav = {
     this._show('app-case-detail');
   },
 
-  /** 從案例卡片（無論在列表頁或詳情頁）讀出該卡片的中繼資料，供麵包屑/標題綁定使用 */
+  /** 從案例清單列（tr[data-case-id]）讀出該案例的資料（CASES_DATA），供麵包屑/標題/詳情頁綁定使用；
+   *  el 為 null 時（例如從詳情頁本身觸發的跨頁連結）沿用目前已載入的狀態，不重新讀取 */
   _loadCaseMeta(el) {
-    this._caseDocNo = this._readCardMeta(el, '發文字號') || this._caseDocNo;
-    this._caseDate = this._readCardMeta(el, '處分日期') || this._caseDate;
-    this._caseTarget = this._readCardMeta(el, '處分對象') || this._caseTarget;
-    const allCats = [...TREE_EXPORT_ITEMS, ...TREE_IMPORT_ITEMS];
-    this._caseCatLabel = allCats.find(c => c.cat === el?.dataset.category)?.label || '案例完整詳情';
+    const id = el?.dataset?.caseId || (typeof el === 'string' ? el : null);
+    const c = id ? caseById(id) : null;
+    if (!c) return;
+    this._caseId = c.id;
+    this._caseDocNo = c.docNo;
+    this._caseDate = c.date;
+    this._caseTarget = c.target;
+    this._caseCatLabel = caseTreePath(c.categoryId) || '案例完整詳情';
     // 麵包屑最後一層與頁面標題綁定，顯示發文字號；樣態（分類）仍保留為上一層
     this._caseTitle = this._caseDocNo;
   },
 
   openCaseDetail(el) {
+    this._caseReviewMode = false;
     CardFocus.remember(el);
     this._loadCaseMeta(el);
     this._setCrumbRoot('處分案例', () => this.goApp());
     this._pushCrumb(this._caseCatLabel, () => this.goApp());
     this.goCaseDetail();
+    this._toggleCaseReviewUI(false);
+  },
+
+  /** 是否正在審核待審核案例（由「待審」頁面點擊檢視進入） */
+  _caseReviewMode: false,
+
+  /** 從待審清單點擊「檢視」進入案例審核：麵包屑固定回「待審表單詳情」，不走一般的樣態分類路徑 */
+  goCaseReview(caseId) {
+    this._caseReviewMode = true;
+    this._loadCaseMeta(caseId);
+    SidePanel.close();
+
+    const trailEl = $('case-detail-breadcrumb');
+    if (trailEl) {
+      trailEl.innerHTML = '';
+      const home = document.createElement('a'); home.textContent = '首頁'; home.onclick = () => this.goHome();
+      const mid = document.createElement('a'); mid.textContent = '待審表單詳情'; mid.onclick = () => this.goPendingReview();
+      const cur = document.createElement('span'); cur.textContent = this._caseTitle;
+      trailEl.append(home, this._crumbSep(), mid, this._crumbSep(), cur);
+    }
+    const backBtn = $('case-detail-back-btn');
+    if (backBtn) { backBtn.textContent = '＜ 返回'; backBtn.onclick = () => this.goPendingReview(); }
+
+    // 先做基本的顯示/隱藏，再讓 _syncCaseDetailContent()（內部呼叫 CaseDetail.render()）依
+    // 該案例是否「先前已被退回過」做更精確的覆寫，避免這裡的無條件顯示蓋掉那邊的判斷
+    this._toggleCaseReviewUI(true);
+    this._syncCaseDetailContent();
+    this._show('app-case-detail');
+  },
+
+  /** 切換案例審核模式的 UI：審核卡片（意見輸入＋簽核紀錄）與麵包屑列的退回／同意按鈕 */
+  _toggleCaseReviewUI(isReview) {
+    const card = $('case-review-card');
+    if (card) card.style.display = isReview ? '' : 'none';
+    const actions = $('case-review-actions');
+    if (actions) actions.style.display = isReview ? 'flex' : 'none';
+    const commentInput = $('case-review-comment');
+    if (commentInput) commentInput.value = '';
+    if (typeof CaseReview !== 'undefined') CaseReview.comment = '';
   },
 
   backToCaseList() {
@@ -383,15 +520,20 @@ const Nav = {
   _flowSource: 'cases',
   /** 是否由「待審表單詳情」的檢視進入：是的話麵包屑與返回都要回待審清單，而非該分類的流程列表 */
   _reviewFromPending: false,
+  /** 目前正在編輯／檢視的流程 id 與版本字串（僅處分案例；海關答聯單不適用，維持 null） */
+  _currentFlowId: null,
+  _currentVersion: null,
 
   _syncFlowBreadcrumb() {
     const isCustoms = this._flowSource === 'customs';
     const fromPending = this._reviewFromPending;
     const midLabel  = fromPending ? '待審表單詳情' : (isCustoms ? '海關答聯單處理' : '處分案件');
     const goMid     = fromPending ? () => this.goPendingReview() : (() => isCustoms ? this.goCustoms() : this.goApp());
+    // 處分案例的流程列表已改為總覽頁（不再對應特定分類），標題固定顯示「處理流程列表」；
+    // 海關答聯單維持原本跟著所選分類走的動態標題。
     const titleText = isCustoms
       ? ($('customs-section-title')?.textContent ?? '')
-      : ($('section-title')?.textContent ?? '');
+      : '處理流程列表';
 
     const mid = $('flow-breadcrumb-mid');
     if (mid) { mid.textContent = midLabel; mid.onclick = goMid; }
@@ -410,32 +552,35 @@ const Nav = {
     if (pageTitleEdit) pageTitleEdit.textContent = titleText;
 
     const viewBackBtn = $('flow-view-back-btn');
-    if (viewBackBtn) viewBackBtn.onclick = goMid;
+    if (viewBackBtn) viewBackBtn.onclick = fromPending ? goMid : () => this.goFlowList();
     const viewBackBtnText = $('flow-view-back-btn-text');
-    if (viewBackBtnText) viewBackBtnText.textContent = fromPending ? '返回待審表單詳情' : '返回列表';
+    if (viewBackBtnText) viewBackBtnText.textContent = '返回';
 
     // 側欄 active 項目要跟著「從哪個主要功能進來」走，而非固定指向處分案例
     const sidebarKey = isCustoms ? 'customs' : 'cases';
     Render.setSidebarActive('app-flow-list', sidebarKey);
     Render.setSidebarActive('app-flow-edit', sidebarKey);
 
-    // 流程清單名稱（案例 vs 海關答聯單，命名邏輯不同）
-    const names = isCustoms
-      ? ['標準答聯流程', '加急答聯流程（擋關案件）', 'CITES 案件答聯流程']
-      : ['一般處理流程', '特殊處理流程', '鞋類處理流程'];
-    ['flow-1-name', 'flow-1-draft-name', 'flow-1-archive-name', 'flow-1-review-name'].forEach(id => {
-      const el = $(id);
-      if (el) el.textContent = names[0];
-    });
-    const n2 = $('flow-2-name');
-    if (n2) n2.textContent = names[1];
-    const n3 = $('flow-3-name');
-    if (n3) n3.textContent = names[2];
+    // 流程清單容器：cases 走資料驅動（總覽：左側樹狀導覽＋FlowList 表格），customs 維持原本固定 3 組流程、無導覽
+    const listCases = $('flow-group-list-cases');
+    const listCustoms = $('flow-group-list-customs');
+    if (listCases) listCases.style.display = isCustoms ? 'none' : '';
+    if (listCustoms) listCustoms.style.display = isCustoms ? '' : 'none';
+    const navPanel = $('flow-nav-panel');
+    if (navPanel) navPanel.style.display = isCustoms ? 'none' : '';
+    const copyBtn = $('flow-copy-btn');
+    if (copyBtn) copyBtn.style.display = isCustoms ? '' : 'none'; // cases 改在「新增流程」內提供複製，列表按鈕僅 customs 使用
+    // 只重繪，不重置左側導覽選取狀態（重置僅在 goFlowList() 真正進入總覽頁時才做，
+    // 避免從編輯／檢視頁返回列表時，使用者原本選的出口/進口與流程被清空）
+    if (!isCustoms && typeof FlowNav !== 'undefined') FlowNav.render();
   },
 
   goFlowList(source) {
     if (source) this._flowSource = source;
     this._reviewFromPending = false;
+    this._currentFlowId = null;
+    this._currentVersion = null;
+    if (this._flowSource !== 'customs' && typeof FlowNav !== 'undefined') FlowNav.init();
     this._syncFlowBreadcrumb();
     this._show('app-flow-list');
   },
@@ -450,9 +595,12 @@ const Nav = {
     NewCase.init();
   },
 
-  goFlowEdit() {
+  /** 新增流程（flowId 省略）或編輯既有流程／版本（cases 專用；customs 呼叫時 flowId 一律為 undefined，行為不變） */
+  goFlowEdit(flowId, version) {
     // 進入編輯模式 → 確保清除 view mode
     this._reviewFromPending = false;
+    this._currentFlowId = flowId || null;
+    this._currentVersion = version || null;
     const screen = $('app-flow-edit');
     if (screen) screen.classList.remove('is-view-mode', 'is-review-mode');
     const banner = $('flow-view-banner');
@@ -469,8 +617,9 @@ const Nav = {
   },
 
   /** 一般檢視（唯讀，無審核按鈕）*/
-  goFlowView() {
+  goFlowView(flowId, version) {
     this._reviewFromPending = false;
+    if (flowId) { this._currentFlowId = flowId; this._currentVersion = version || null; }
     this._enterFlowViewMode(false);
   },
 
@@ -479,10 +628,11 @@ const Nav = {
    * fromPending：是否由「待審表單詳情」進入；el：被點擊的按鈕，用來判斷所屬的 .pending-group（cases／customs），
    * 確保檢視到的是對應分類的流程內容，而非沿用上一次的 _flowSource。
    */
-  goFlowReviewView(fromPending, el) {
+  goFlowReviewView(fromPending, el, flowId, version) {
     this._reviewFromPending = !!fromPending;
     const group = el?.closest('.pending-group')?.dataset.group;
     if (group) this._flowSource = group;
+    if (flowId) { this._currentFlowId = flowId; this._currentVersion = version || null; }
     this._enterFlowViewMode(true);
   },
 
@@ -510,92 +660,386 @@ const Nav = {
 //  Search — 搜尋列
 // ─────────────────────────────────────────────────────────
 const Search = {
-  /** 輸入事件 */
+  /** 輸入事件：實際篩選交由 CaseList 處理（資料驅動），這裡只負責搜尋列本身的 UI 狀態 */
   onInput(rawValue) {
     const v = rawValue.trim();
     const hasValue = !!v;
-    const kw = v.toLowerCase();
-
     $('search-clear-btn')?.classList.toggle('is-visible', hasValue);
     $('filter-btn')?.classList.toggle('is-active', hasValue);
     $('preset-chip')?.classList.toggle('is-hidden', hasValue);
-
-    // 過濾卡片
-    const cards = document.querySelectorAll('.case-card');
-    let visibleCount = 0;
-    cards.forEach(card => {
-      const text = (card.dataset.text || '').toLowerCase();
-      const match = !hasValue || kw.split(/[,，;；]+/).some(k => k.trim() && text.includes(k.trim()));
-      card.classList.toggle('is-filtered-out', !match);
-      if (match) visibleCount++;
-      card.querySelectorAll('.snippet-block').forEach(s => {
-        s.classList.toggle('is-visible', hasValue && match);
-      });
-    });
-
-    // 更新關鍵字標記
-    const firstKw = v.split(/[,，;；]/)[0].trim() || v;
-    document.querySelectorAll('.kw-mark, [id^="kw-mark-"]').forEach(el => {
-      el.textContent = firstKw;
-    });
-
-    $('result-info')?.classList.toggle('is-visible', hasValue);
-    if (hasValue) {
-      $('result-info').innerHTML =
-        `與「<mark>${esc(v)}</mark>」相符的所有搜尋結果，查詢結果共計 <strong>${visibleCount}</strong> 筆`;
-    }
-
-    TreeCount.refresh();
+    if (typeof CaseList !== 'undefined') CaseList.setKeyword(v);
   },
 
   /** 清除搜尋 */
   clear() {
     const input = $('search-input');
     if (input) input.value = '';
-    document.querySelectorAll('.case-card.is-filtered-out')
-      .forEach(c => c.classList.remove('is-filtered-out'));
     this.onInput('');
   },
 };
 
 // ─────────────────────────────────────────────────────────
-//  FlowEdit — 流程編輯（步驟 DnD + 選取 + 標題同步）
+//  CaseList — 處分案例清單（表格化：分類篩選＋關鍵字搜尋＋欄位排序＋分頁）
+//  資料來源：js/data.js 的 CASES_DATA，取代原本寫死在 HTML 的 12 張 .case-card
 // ─────────────────────────────────────────────────────────
-// ── 流程步驟假資料 ──────────────────────────────────────────────
-const FLOW_STEPS_DATA = [
-  {
-    title: '接收海關發《違章案件移送書》',
-    body: `<p>接收海關發來之違章案件移送書及相關證明文件，確認案件基本資料是否完整，包括進出口報單號碼、違章事實說明、當事人資料等必要資訊。</p><p>核對移送書所附文件是否齊全，如有缺漏應即通知海關補件，並於系統中建立案件基本檔案。</p>`
+// 案例標籤篩選下拉：僅提供這 4 個選項（依需求文件範例：從輕／輸美／減輕／初次違規）
+const CASE_TAG_FILTER_OPTIONS = ['從輕', '輸美', '減輕', '初次違規'];
+
+const CaseList = {
+  _keyword: '',
+  _tagFilter: '',
+  _sortKey: 'date',
+  _sortDir: 'desc',
+  _page: 1,
+  _pageSize: 10,
+  _tagOptionsReady: false,
+
+  setKeyword(kw) {
+    this._keyword = (kw || '').trim();
+    this._page = 1;
+    // 關鍵字會影響 CaseNav 各節點旁的計數，透過它重繪（內部會再呼叫 CaseList.render）
+    if (typeof CaseNav !== 'undefined') CaseNav.render();
+    else this.render();
   },
-  {
-    title: '確認管轄權與違規事實',
-    body: `<p>依貿易法規定確認本署是否具有管轄權，釐清違規行為是否屬於貿易法第17條至第28條所規範之範疇。</p><p>比對進出口報單、產地聲明書及相關文件，確認違規事實是否成立，並記錄違規性質（如產地標示不實、未依規定申報等）。</p><p>如屬管轄爭議案件，應依職務管轄規定移送權責機關，並留存移送紀錄。</p>`
+
+  /** 標題列右側「案例標籤」下拉：篩選只顯示包含該標籤的案例 */
+  setTagFilter(tag) {
+    this._tagFilter = tag || '';
+    this._page = 1;
+    if (typeof CaseNav !== 'undefined') CaseNav.render();
+    else this.render();
   },
-  {
-    title: '發函通知廠商暨回收廠商回覆',
-    body: `<p>依行政程序法第102條規定，以書面通知當事人（廠商）就違規事實及擬處分情形表示意見，給予陳述意見之機會。</p><p>函文應載明：案件概要、違規法條依據、廠商回覆期限（通常為10至14工作日）及聯絡窗口。</p><p>回覆期限屆滿後，彙整廠商所提供之說明文件及抗辯理由，納入後續審查。</p>`
+
+  /** 標題列右側「排序依據」下拉：更新時間／處分日期，預設新到舊 */
+  setSortField(key) {
+    this._sortKey = key;
+    this._sortDir = 'desc';
+    this.render();
   },
-  {
-    title: '核相關資料',
-    body: `<p>就廠商回覆之說明及所附文件，進行實質審核：</p><p><strong>一、</strong> 核對原產地認定標準（實質轉型規定），確認加工程序是否達到實質轉型門檻。</p><p><strong>二、</strong> 比對相關法規規定與歷史案例，判斷本案違規情節輕重。</p><p><strong>三、</strong> 如有需要，得請海關或相關機關提供補充文件，或委請鑑定機構出具意見。</p>`
+
+  changePageSize(size) {
+    this._pageSize = Number(size) || 10;
+    this._page = 1;
+    this.render();
   },
-  {
-    title: '初步處分決策',
-    body: `<p>由承辦人員依審核結果，研擬初步裁處意見，包含：</p><p>● 違規事實認定及適用法條（貿易法第28條第1項各款）</p><p>● 裁處類型：警告、停止輸出入許可、或罰鍰（3萬至300萬元）</p><p>● 從輕或從重量處之建議依據（如主動申報、情節輕微、初犯等）</p><p>初步意見提送組長或科長審閱，如有疑義退回重查或召開案件研討。</p>`
+
+  sortBy(key) {
+    if (this._sortKey === key) {
+      this._sortDir = this._sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this._sortKey = key;
+      this._sortDir = 'asc';
+    }
+    this.render();
   },
-  {
-    title: '送簽審與最終處分決定',
-    body: `<p>完成簽辦文件後，依授權層級送核：</p><p>● 罰鍰30萬元（含）以下：組長核定</p><p>● 罰鍰30萬元以上或涉及停止輸出入：署長或副署長核定</p><p>核定後，如有必要召開裁決委員會，就案件進行集體審議，確保處分決定之合法性與一致性。</p>`
+
+  /** 案例清單只顯示已發布案例；待審核（pending）與草稿（draft）在核准前不會出現在這裡，只會出現在「待審」頁面 */
+  _publishedRows() {
+    return CASES_DATA.filter(c => c.status !== 'pending' && c.status !== 'draft');
   },
-  {
-    title: '發出處分書與結案',
-    body: `<p>依行政程序法第96條規定，製作行政處分書，內容應記載：</p><p><strong>一、</strong> 相對人（廠商）基本資料</p><p><strong>二、</strong> 主文：處分類型與金額</p><p><strong>三、</strong> 事實與理由：違規事實、適用法條、量處依據</p><p><strong>四、</strong> 救濟告知：申請訴願之期限（30日內）及受理機關</p><p>以雙掛號郵寄送達當事人，並於系統中登錄送達回執及結案日期。</p>`
+
+  /** 依 CaseNav 目前選中的節點篩選，不含關鍵字／標籤 */
+  _byCategory() {
+    const rows = this._publishedRows();
+    if (typeof CaseNav === 'undefined') return rows;
+    return rows.filter(c => CaseNav.matches(c));
   },
-  {
-    title: '追蹤後續結果',
-    body: `<p>結案後應追蹤下列事項：</p><p>● <strong>罰鍰繳納</strong>：確認當事人是否於期限內繳納罰鍰，逾期移送行政執行署強制執行。</p><p>● <strong>訴願申請</strong>：如當事人提起訴願，依程序轉送訴願委員會，並配合補充答辯資料。</p><p>● <strong>行政訴訟</strong>：如進入行政訴訟階段，協助法務單位準備訴訟文件。</p><p>● <strong>案例歸檔</strong>：將本案處理結果歸檔，供後續相似案件參考。</p>`
-  }
-];
+
+  _filterByKeyword(rows) {
+    if (!this._keyword) return rows;
+    const kws = this._keyword.toLowerCase().split(/[,，;；]+/).map(k => k.trim()).filter(Boolean);
+    if (!kws.length) return rows;
+    return rows.filter(c => {
+      const text = [c.docNo, c.target, c.law, c.goods, (c.tags || []).join(' '), c.summary || ''].join(' ').toLowerCase();
+      return kws.some(k => text.includes(k));
+    });
+  },
+
+  /** 套用關鍵字＋案例標籤篩選（不含分類），供清單與 CaseNav 計數共用 */
+  _applyNonCategoryFilters(rows) {
+    let out = this._filterByKeyword(rows);
+    if (this._tagFilter) out = out.filter(c => (c.tags || []).includes(this._tagFilter));
+    return out;
+  },
+
+  /** 供 CaseNav 計數使用：只套用關鍵字／標籤篩選（不套用目前選中節點），才能同時算出每個節點各自的數量 */
+  countableRows() {
+    return this._applyNonCategoryFilters(this._publishedRows());
+  },
+
+  _sorted(rows) {
+    const key = this._sortKey;
+    const dir = this._sortDir === 'asc' ? 1 : -1;
+    return [...rows].sort((a, b) => {
+      const av = a[key] || '', bv = b[key] || '';
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  },
+
+  /** 標題列的「案例標籤」下拉只需產生一次選項 */
+  _ensureTagOptions() {
+    if (this._tagOptionsReady) return;
+    const sel = $('case-tag-filter');
+    if (sel) {
+      sel.innerHTML = '<option value="">全部標籤</option>' +
+        CASE_TAG_FILTER_OPTIONS.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      this._tagOptionsReady = true;
+    }
+  },
+
+  _visibleRows() {
+    return this._sorted(this._applyNonCategoryFilters(this._byCategory()));
+  },
+
+  render() {
+    this._ensureTagOptions();
+    const all = this._visibleRows();
+    const totalPages = Math.max(1, Math.ceil(all.length / this._pageSize));
+    if (this._page > totalPages) this._page = totalPages;
+    const start = (this._page - 1) * this._pageSize;
+    const rows = all.slice(start, start + this._pageSize);
+
+    const tbody = $('case-table-body');
+    if (tbody) tbody.innerHTML = rows.map(c => this._rowHtml(c)).join('');
+
+    const empty = $('case-table-empty');
+    if (empty) empty.style.display = all.length ? 'none' : 'block';
+
+    const resultInfo = $('result-info');
+    if (resultInfo) {
+      resultInfo.classList.toggle('is-visible', !!this._keyword);
+      if (this._keyword) {
+        resultInfo.innerHTML = `與「<mark>${esc(this._keyword)}</mark>」相符的所有搜尋結果，查詢結果共計 <strong>${all.length}</strong> 筆`;
+      }
+    }
+
+    this._renderPagination(all.length, totalPages);
+    this._renderSortIcons();
+  },
+
+  /** 每筆案例產生兩列：主要列（點擊任一處展開/收合主旨；只有右側按鈕會開啟明細頁）＋ 展開列（法規／主旨，預設收合） */
+  _rowHtml(c) {
+    return `<tr class="case-row" data-case-id="${c.id}" onclick="KM.caseToggleRow(this)">
+        <td class="case-td-expand"><span class="mi case-row-chevron">chevron_right</span></td>
+        <td class="case-td-docno">${esc(c.docNo)}</td>
+        <td class="case-td-nowrap">${esc((c.date || '').replace('中華民國', ''))}</td>
+        <td>${esc(c.target)}</td>
+        <td><div class="case-td-tags">${(c.tags || []).map(t => `<span class="case-tag-pill ${caseTagClass(t)}">${esc(t)}</span>`).join('')}</div></td>
+        <td>${esc(c.goods)}</td>
+        <td class="case-td-nowrap">${esc(c.updateDate)}</td>
+        <td class="case-td-actions">
+          <button class="case-view-btn" onclick="event.stopPropagation();KM.openCaseDetail(this.closest('tr'))" aria-label="查看明細" title="查看明細">
+            <span class="mi">open_in_new</span>
+          </button>
+        </td>
+      </tr>
+      <tr class="case-row-detail" id="case-row-detail-${c.id}">
+        <td colspan="8">
+          <div class="case-row-detail-inner">
+            <div class="case-row-detail-item">
+              <div class="case-row-detail-icon case-row-detail-icon--law"><span class="mi">gavel</span></div>
+              <div class="case-row-detail-body">
+                <div class="case-row-detail-label">法規<span class="case-row-detail-label-en">STATUTE</span></div>
+                <div class="case-row-detail-val">${esc(c.law || '—')}</div>
+              </div>
+            </div>
+            <div class="case-row-detail-item">
+              <div class="case-row-detail-icon case-row-detail-icon--summary"><span class="mi">description</span></div>
+              <div class="case-row-detail-body">
+                <div class="case-row-detail-label">主旨<span class="case-row-detail-label-en">SUMMARY</span></div>
+                <div class="case-row-detail-val">${esc(c.subject || c.summary || '—')}</div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  },
+
+  /** 展開／收合單一案例列的法規／主旨明細（點擊發文字號另外導向詳情頁，不受此影響） */
+  toggleRow(rowEl) {
+    const id = rowEl.dataset.caseId;
+    const detailRow = document.getElementById(`case-row-detail-${id}`);
+    if (!detailRow) return;
+    const isOpen = detailRow.classList.toggle('is-open');
+    rowEl.classList.toggle('is-expanded', isOpen);
+  },
+
+  _renderSortIcons() {
+    document.querySelectorAll('[data-sort-ico]').forEach(el => {
+      const key = el.dataset.sortIco;
+      el.textContent = key !== this._sortKey ? '' : (this._sortDir === 'asc' ? '▲' : '▼');
+    });
+    // 若目前排序欄位是「排序依據」下拉支援的欄位，同步下拉顯示值（點欄位標題排序時也會跟著對上）
+    const sortFieldSel = $('case-sort-field');
+    if (sortFieldSel && (this._sortKey === 'updateDate' || this._sortKey === 'date')) {
+      sortFieldSel.value = this._sortKey;
+    }
+  },
+
+  /** 頁碼固定顯示（即使只有一頁也顯示「1」，只是前後頁按鈕會停用），不因結果筆數少而整排消失 */
+  _renderPagination(total, totalPages) {
+    const wrap = $('case-pagination');
+    if (wrap) wrap.style.display = total > 0 ? 'flex' : 'none';
+    const pager = $('case-pager-btns');
+    if (!pager) return;
+    pager.innerHTML = '';
+    const mk = (label, page, disabled, active) => {
+      const b = document.createElement('button');
+      b.className = 'pg-btn' + (active ? ' is-active' : '');
+      b.textContent = label;
+      b.disabled = !!disabled;
+      b.onclick = () => { this._page = page; this.render(); };
+      return b;
+    };
+    pager.append(mk('‹', this._page - 1, this._page === 1));
+    for (let p = 1; p <= totalPages; p++) pager.append(mk(String(p), p, false, p === this._page));
+    pager.append(mk('›', this._page + 1, this._page === totalPages));
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+//  CaseDetail — 案例完整詳情頁右側資訊（案件資訊/標籤/處理流程/關聯案例/附件）
+// ─────────────────────────────────────────────────────────
+const CaseDetail = {
+  render(caseId) {
+    const c = caseById(caseId);
+    if (!c) return;
+
+    const targetEl = $('case-detail-target2'); if (targetEl) targetEl.textContent = c.target || '';
+    const lawEl = $('case-detail-law'); if (lawEl) lawEl.textContent = c.law || '';
+    const goodsEl = $('case-detail-goods'); if (goodsEl) goodsEl.textContent = c.goods || '';
+    const ioEl = $('case-detail-io'); if (ioEl) ioEl.textContent = c.categoryId?.startsWith('im-') ? '進口' : '出口';
+    const catPathEl = $('case-detail-cat-path'); if (catPathEl) catPathEl.textContent = caseTreePath(c.categoryId) || '—';
+    const updateDateEl = $('case-detail-updatedate'); if (updateDateEl) updateDateEl.textContent = c.updateDate || '—';
+    const penaltyEl = $('case-detail-penalty'); if (penaltyEl) penaltyEl.textContent = c.penalty || '—';
+
+    // 簽核紀錄（審核同意／退回時寫入，見 CaseReview）：有紀錄才顯示表格
+    const signoffs = c.signoffs || [];
+    const signoffWrap = $('case-signoff-table-wrap');
+    if (signoffWrap) signoffWrap.style.display = signoffs.length ? 'block' : 'none';
+    const signoffTbody = $('case-signoff-tbody');
+    if (signoffTbody) {
+      signoffTbody.innerHTML = signoffs.map(s => `<tr>
+          <td>${s.seq}</td><td>${esc(s.signer)}</td><td>${esc(s.comment)}</td><td>${esc(s.time)}</td>
+        </tr>`).join('');
+    }
+
+    // 已有簽核紀錄＝先前被退回過：這次進入審核頁只能看，不能再同意／退回——
+    // 意見輸入框整區跟麵包屑列的同意／退回按鈕都隱藏，只留「返回」，簽核紀錄表格維持顯示做為退回原因說明
+    if (Nav._caseReviewMode) {
+      const alreadyRejected = signoffs.length > 0;
+      const commentWrap = $('case-review-comment-wrap');
+      if (commentWrap) commentWrap.style.display = alreadyRejected ? 'none' : '';
+      const reviewActions = $('case-review-actions');
+      if (reviewActions) reviewActions.style.display = alreadyRejected ? 'none' : 'flex';
+    }
+
+    const tagsEl = $('case-detail-tags');
+    if (tagsEl) {
+      const pills = [];
+      if (c.updateDate) pills.push(`<span class="tag tag--new">更新日期 ${esc(c.updateDate)}</span>`);
+      (c.tags || []).forEach(t => pills.push(`<span class="tag ${t === '從重' ? 'tag--hv' : 'tag--lt'}">${esc(t)}</span>`));
+      if (c.penalty) pills.push(`<span class="tag tag--pe">${esc(c.penalty)}</span>`);
+      tagsEl.innerHTML = pills.join('');
+    }
+
+    const flow = c.flowId ? flowById(c.flowId) : null;
+    const flowRow = $('case-detail-flow-row');
+    if (flowRow) {
+      flowRow.style.display = flow ? 'flex' : 'none';
+      if (flow) {
+        const v = flowActiveVersion(flow);
+        const textEl = $('case-detail-flow-text');
+        if (textEl) textEl.textContent = `${flow.name} ${v?.version || ''}`;
+      }
+    }
+
+    // 相關附件／關聯案例：比照海關答聯單詳情頁的樣式（.detail-attach-bar + .attach-pill / .link-pill），
+    // 放在標題下方一整列，不再是右側卡片
+    const relatedEl = $('case-detail-related');
+    if (relatedEl) {
+      relatedEl.innerHTML = c.relatedLabel
+        ? `<span class="link-pill" style="cursor:pointer" onclick="KM.openRelatedCustomsFromCase(null)"><span class="mi">link</span> ${esc(c.relatedLabel)}</span>`
+        : '<span style="color:var(--tx-light)">無關聯案例</span>';
+    }
+
+    const attachList = $('case-detail-attach-list');
+    if (attachList) {
+      attachList.innerHTML = (c.attachments || []).map(a => `
+        <span class="attach-pill" onclick="event.stopPropagation();KM.openFileModal(this)">
+          <span class="mi">attach_file</span>
+          <span class="attach-pill-text">
+            <span class="attach-pill-no">${esc(a.no)}</span>
+            <span class="attach-pill-desc">${esc(a.desc)}</span>
+          </span>
+        </span>`).join('') || '<span style="color:var(--tx-light);font-size:12.5px">尚無附件</span>';
+    }
+  },
+
+  /** 點擊「處理流程」列，帶目前現行版本進入流程唯讀檢視 */
+  goFlow() {
+    const c = caseById(Nav._caseId);
+    if (!c?.flowId) return;
+    const flow = flowById(c.flowId);
+    const v = flowActiveVersion(flow);
+    Nav.goFlowView(c.flowId, v?.version);
+  },
+
+  /** 點擊「案件資訊」整列收合／展開下方內容（處分對象／涉及法規／關鍵貨品／進出口別／對應樣態／標籤） */
+  toggleCaseInfo() {
+    const body = $('case-info-body');
+    const chevron = $('case-info-chevron');
+    if (!body) return;
+    const collapsed = body.classList.toggle('is-collapsed');
+    chevron?.classList.toggle('is-collapsed', collapsed);
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+//  CaseReview — 處分案例審核（案例詳情頁的審核模式：意見輸入＋簽核紀錄）
+//  待審清單只提供「檢視」，同意／退回都只能在這裡操作，寫入的 signoffs 供待審
+//  清單下方的淺橘色簽核資訊色塊（PendingReview._renderCasesRows）共用同一份資料。
+// ─────────────────────────────────────────────────────────
+const CaseReview = {
+  comment: '',
+  setComment(val) { this.comment = val; },
+
+  approve() {
+    const c = caseById(Nav._caseId);
+    if (!c) return;
+    recordCaseSignoff(c, this.comment.trim() || '同意發布。', 'approve');
+    c.status = 'published';
+    Toast.show('已同意，案例發布成功');
+    Nav.goPendingReview();
+  },
+
+  reject() {
+    const c = caseById(Nav._caseId);
+    if (!c) return;
+    const comment = this.comment.trim();
+    // 若先前已被退回過，原因已經在簽核紀錄裡了，這次不用強制重填意見
+    const alreadyRejectedBefore = (c.signoffs || []).length > 0;
+    if (!comment && !alreadyRejectedBefore) { Toast.show('請填寫審核意見後再退回'); return; }
+    recordCaseSignoff(c, comment || '退回原因請參考先前簽核紀錄。', 'reject');
+    c.status = 'draft';
+    Toast.show('已退回，請修改後重新送審');
+    Nav.goPendingReview();
+  },
+};
+
+/** 案例簽核紀錄共用寫入邏輯：案例詳情頁的審核模式（唯一能同意／退回的地方，待審清單只提供檢視）呼叫這裡 */
+function recordCaseSignoff(c, comment, action) {
+  c.signoffs = c.signoffs || [];
+  c.signoffs.push({ seq: c.signoffs.length + 1, signer: CURRENT_USER, comment, time: nowTimeStr(), action });
+}
+
+// ─────────────────────────────────────────────────────────
+//  FlowEdit — 流程編輯（步驟 DnD + 選取 + 標題同步）
+//  處分案例的步驟資料改為從 js/data.js 的 FLOWS_DATA 依
+//  Nav._currentFlowId / Nav._currentVersion 動態取用（見 _data()）。
+// ─────────────────────────────────────────────────────────
 
 // 海關答聯單的處理流程是機關間固定的公文往復順序（海關來文 → 產發署研議 → 本署回復），
 // 步驟（階段）數量、順序固定，不可拖曳排序或新增；但同一階段實務上可能有多次往復
@@ -657,15 +1101,34 @@ const FlowEdit = {
   _isCustoms: false,
   /** 海關答聯單：記錄本次編輯session中新增的步驟 idx，渲染時加上 step-card--new 樣式 */
   _newStepIdxs: new Set(),
+  /** 處分案例目前正在編輯／檢視的步驟資料（新增流程時為暫存草稿；編輯既有流程時為該版本 steps 的直接參照） */
+  _workingSteps: null,
+  _workingName: '',
 
-  /** 取得當前資料來源：海關答聯單為固定 3 步驟，處分案例為可自訂 8 步驟 */
+  /** 取得當前資料來源：海關答聯單為固定 3 步驟，處分案例為 _workingSteps */
   _data() {
-    return this._isCustoms ? CUSTOMS_FLOW_STEPS_DATA : FLOW_STEPS_DATA;
+    return this._isCustoms ? CUSTOMS_FLOW_STEPS_DATA : (this._workingSteps || (this._workingSteps = [{ title: '新步驟', body: '<p></p>' }]));
+  },
+
+  /** 依 Nav._currentFlowId／_currentVersion 載入處分案例的工作用步驟資料（新增流程則給空白草稿） */
+  _loadCasesWorkingData() {
+    if (Nav._currentFlowId) {
+      const flow = flowById(Nav._currentFlowId);
+      const v = flowVersion(flow, Nav._currentVersion);
+      Nav._currentVersion = v?.version || Nav._currentVersion;
+      this._workingSteps = v?.steps || [{ title: '新步驟', body: '<p></p>' }];
+      this._workingName = flow?.name || '';
+    } else if (!this._workingSteps || !this._keepDraftOnNextInit) {
+      this._workingSteps = [{ title: '新步驟', body: '<p></p>' }];
+      this._workingName = '';
+    }
+    this._keepDraftOnNextInit = false;
   },
 
   init() {
     this._isCustoms = Nav._flowSource === 'customs';
     this._newStepIdxs = new Set();
+    if (!this._isCustoms) this._loadCasesWorkingData();
     this._renderStepList();
 
     const genericEditor = $('flow-edit-generic');
@@ -689,6 +1152,152 @@ const FlowEdit = {
     const uploadZone = document.querySelector('.flow-attach-section .nc-upload-zone');
     if (uploadZone) uploadZone.style.display = isView ? 'none' : '';
     this._renderFileList();
+
+    this._renderCasesUI();
+  },
+
+  // ── 處分案例專用：分類欄位／複製來源／動作按鈕 ──
+  _renderCasesUI() {
+    const classifyRow = $('flow-classify-row');
+    const metaRow = $('flow-meta-readonly');
+    const titleField = $('flow-title-field');
+    if (this._isCustoms) {
+      if (classifyRow) classifyRow.style.display = 'none';
+      if (metaRow) metaRow.style.display = 'none';
+      this._renderActionButtons();
+      return;
+    }
+
+    const isExisting = !!Nav._currentFlowId;
+    if (classifyRow) classifyRow.style.display = isExisting ? 'none' : 'flex';
+    if (metaRow) metaRow.style.display = isExisting ? 'flex' : 'none';
+    // 編輯既有流程時，名稱已在下方 .flow-meta-readonly 的「流程」標籤唯讀顯示，不需要重複的可編輯標題欄位
+    if (titleField) titleField.style.display = isExisting ? 'none' : '';
+
+    const titleInput = $('flow-draft-title');
+    if (!isExisting) {
+      const l1Sel = $('flow-cat-l1');
+      if (l1Sel && !l1Sel.value) l1Sel.value = 'ex';
+      this._renderL2Options(l1Sel?.value || 'ex');
+      this._syncL3();
+      this._renderCopyFromOptions();
+      if (titleInput) titleInput.value = this._workingName || '';
+    } else {
+      const flow = flowById(Nav._currentFlowId);
+      const v = flowVersion(flow, Nav._currentVersion);
+      const catEl = $('flow-meta-category');
+      if (catEl) catEl.textContent = flow ? caseTreePath(flow.category.l2) : '';
+      const nameEl = $('flow-meta-name');
+      if (nameEl) nameEl.textContent = flow?.name || '';
+      const verEl = $('flow-meta-version');
+      if (verEl) verEl.textContent = v?.version || '';
+      if (titleInput) titleInput.value = flow?.name || '';
+      const l1Sel = $('flow-cat-l1'); if (l1Sel && flow) l1Sel.value = flow.category.l1;
+      if (flow) this._renderL2Options(flow.category.l1);
+      // 流程的 category.l2 目前存的是最深一層（產品類為第三層 id），這裡拆回「第二層值」＋「第三層值」
+      // 分別回填隱藏中的 classify-row（分類列此時是隱藏的，僅供 commitCasesEdit() 讀值用，避免存檔時遺失分類）
+      const { l2: l2Base, l3: l3Val } = flow ? this._resolveL2L3(flow.category.l1, flow.category.l2) : { l2: '', l3: '' };
+      const l2Sel = $('flow-cat-l2'); if (l2Sel && flow) l2Sel.value = l2Base;
+      this._syncL3();
+      const l3Sel = $('flow-cat-l3'); if (l3Sel && l3Val) l3Sel.value = l3Val;
+    }
+
+    this._renderActionButtons();
+  },
+
+  _renderL2Options(l1) {
+    const sel = $('flow-cat-l2');
+    if (!sel) return;
+    const opts = caseTreeL2Options(l1);
+    sel.innerHTML = '<option value="">請選擇</option>' + opts.map(o => `<option value="${o.cat}">${esc(o.label)}</option>`).join('');
+  },
+
+  /** 找出某分類 id 的「所屬第二層」與「若本身即為第三層則帶出其值」，供回填 L2/L3 選單使用 */
+  _resolveL2L3(l1, categoryId) {
+    for (const node of CASE_TREE[l1]) {
+      if (node.cat === categoryId) return { l2: node.cat, l3: '' };
+      const child = node.children?.find(c => c.cat === categoryId);
+      if (child) return { l2: node.cat, l3: child.cat };
+    }
+    return { l2: categoryId, l3: '' };
+  },
+
+  onCatL1Change() {
+    this._renderL2Options($('flow-cat-l1')?.value || 'ex');
+    this._syncL3();
+    this._renderCopyFromOptions();
+  },
+
+  onCatL2Change() {
+    this._syncL3();
+    this._renderCopyFromOptions();
+  },
+
+  onCatL3Change() {
+    this._renderCopyFromOptions();
+  },
+
+  /** 第二層選到「產品」時才顯示第三層選單（僅產品有第三層，比照 CASE_TREE／新增案例表單的邏輯） */
+  _syncL3() {
+    const l1 = $('flow-cat-l1')?.value || 'ex';
+    const l2 = $('flow-cat-l2')?.value || '';
+    const l3Field = $('flow-cat-l3-field');
+    const l3Sel = $('flow-cat-l3');
+    const isProduct = l2 === `${l1}-product`;
+    if (l3Field) l3Field.style.display = isProduct ? 'flex' : 'none';
+    if (!l3Sel) return;
+    if (!isProduct) { l3Sel.innerHTML = ''; return; }
+    const node = CASE_TREE[l1].find(n => n.cat === l2);
+    l3Sel.innerHTML = (node?.children || []).map(c => `<option value="${c.cat}">${esc(c.label)}</option>`).join('');
+  },
+
+  /** 依目前分類（優先第三層，否則第二層）帶出可複製的既有流程 */
+  _renderCopyFromOptions() {
+    const sel = $('flow-copy-from');
+    if (!sel) return;
+    const l1 = $('flow-cat-l1')?.value || 'ex';
+    const l2Base = $('flow-cat-l2')?.value || '';
+    const l3 = ($('flow-cat-l3-field')?.style.display !== 'none') ? $('flow-cat-l3')?.value : '';
+    const catId = l3 || l2Base;
+    const candidates = FLOWS_DATA.filter(f => f.category.l1 === l1 && (!catId || f.category.l2 === catId));
+    sel.innerHTML = '<option value="">不複製，從空白開始</option>' +
+      candidates.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join('');
+  },
+
+  onCopyFromChange(flowId) {
+    if (!flowId) {
+      this._workingSteps = [{ title: '新步驟', body: '<p></p>' }];
+    } else {
+      const src = flowById(flowId);
+      const v = flowActiveVersion(src);
+      this._workingSteps = v ? JSON.parse(JSON.stringify(v.steps)) : [{ title: '新步驟', body: '<p></p>' }];
+      const titleInput = $('flow-draft-title');
+      if (titleInput && !titleInput.value.trim() && src) titleInput.value = `${src.name}（複本）`;
+      Toast.show(`已複製「${src?.name}」的步驟內容，可再自行調整`);
+    }
+    this._keepDraftOnNextInit = true;
+    this._renderStepList();
+    this.bindDrag();
+    const first = document.querySelector('#flow-step-list .step-card');
+    if (first) this.selectStep(first);
+  },
+
+  _renderActionButtons() {
+    const wrap = $('flow-edit-actions');
+    if (!wrap) return;
+    if (this._isCustoms) {
+      wrap.innerHTML = `
+        <button class="back-btn-lg" onclick="KM.goFlowList()">＜ 返回</button>
+        <button class="btn btn--clear" onclick="KM.toast('確認刪除此流程？')">刪除</button>
+        <button class="btn btn--search" onclick="KM.flowSave()">儲存</button>`;
+      return;
+    }
+    const isExisting = !!Nav._currentFlowId;
+    wrap.innerHTML = `
+      <button class="back-btn-lg" onclick="KM.goFlowList('cases')">＜ 返回</button>
+      ${isExisting ? `<button class="btn btn--clear" onclick="KM.flowVoid()">作廢</button>` : ''}
+      <button class="btn btn--outline" onclick="KM.flowCasesCommit('draft')">儲存</button>
+      <button class="btn btn--search" onclick="KM.flowCasesCommit('active')">發布</button>`;
   },
 
   /** 依資料來源重建左側步驟清單（編輯模式皆可拖曳排序，含海關答聯單） */
@@ -795,10 +1404,20 @@ const FlowEdit = {
   updateTitle(val) {
     const active = document.querySelector('#flow-step-list .step-card.is-active');
     if (active) active.querySelector('.step-title-sm').textContent = val;
+    const idx = parseInt(active?.dataset.idx ?? '', 10);
     if (this._isCustoms) {
-      const idx = parseInt(active?.dataset.idx ?? '', 10);
       if (Number.isInteger(idx) && CUSTOMS_FLOW_STEPS_DATA[idx]) CUSTOMS_FLOW_STEPS_DATA[idx].title = val;
+    } else if (Number.isInteger(idx) && this._workingSteps[idx]) {
+      this._workingSteps[idx].title = val;
     }
+  },
+
+  /** 處分案例：步驟內文編輯即時寫回 _workingSteps（海關答聯單不適用，其內文在各筆來文/回文的 textarea 內） */
+  updateBody(html) {
+    if (this._isCustoms) return;
+    const active = document.querySelector('#flow-step-list .step-card.is-active');
+    const idx = parseInt(active?.dataset.idx ?? '', 10);
+    if (Number.isInteger(idx) && this._workingSteps[idx]) this._workingSteps[idx].body = html;
   },
 
   /** 取得目前步驟的文件清單（海關答聯單專用） */
@@ -997,10 +1616,19 @@ const FlowEdit = {
 };
 
 // ─────────────────────────────────────────────────────────
-//  FlowList — 流程清單（草稿 / 發佈 / 預設）
+//  FlowList — 流程清單
+//  cases（處分案例）：資料驅動，來源為 js/data.js 的 FLOWS_DATA。
+//  customs（海關答聯單）：沿用原本固定 3 組流程的 DOM 操作邏輯，未變更。
 // ─────────────────────────────────────────────────────────
-// 目前選中的 flow-row（供複製用）
+// 目前選中的 flow-row（供 customs 複製用）
 let _selectedFlowRow = null;
+const CURRENT_USER = '王大明';
+const nowDateStr = () => new Date().toLocaleDateString('zh-TW').replace(/\//g, '/');
+const nowTimeStr = () => {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
 
 const FlowList = {
   /** 點擊 flow-row 選中效果 */
@@ -1010,6 +1638,7 @@ const FlowList = {
     _selectedFlowRow = el;
   },
 
+  // ── customs：舊有邏輯，完全未變更 ──────────────────────────
   save() {
     Nav.goFlowList();
     const draftRow = $('flow-draft-row');
@@ -1021,7 +1650,7 @@ const FlowList = {
     Toast.show('草稿已儲存，已送出審核');
   },
 
-  /** 審核人員：同意 → 視同發佈，關閉審核列 */
+  /** 審核人員：同意 / 退回（僅海關答聯單使用；處分案例流程不需審核，無此路徑） */
   approve() {
     this.publish();
     const reviewRow = $('flow-review-row');
@@ -1030,7 +1659,6 @@ const FlowList = {
     Toast.show('已同意，流程發佈成功');
   },
 
-  /** 審核人員：退回 → 關閉審核列，草稿保留待修改 */
   reject() {
     const reviewRow = $('flow-review-row');
     if (reviewRow) reviewRow.style.display = 'none';
@@ -1040,6 +1668,7 @@ const FlowList = {
     Toast.show('已退回，請修改後重新送審');
   },
 
+  /** 發布（僅海關答聯單使用） */
   publish() {
     const draft   = $('flow-draft-row');
     const archive = $('flow-1-archive');
@@ -1052,8 +1681,15 @@ const FlowList = {
     Toast.show('發佈成功！流程已更新至 v3.1');
   },
 
-  /** 啟用／停用，各流程獨立切換，互不影響 */
+  /** 啟用／停用。cases：id 為 flow.id 字串；customs：id 為數字，沿用舊邏輯 */
   toggleEnabled(id) {
+    if (Nav._flowSource === 'cases') {
+      const flow = flowById(id);
+      if (!flow) return;
+      flow.enabled = !flow.enabled;
+      this.render();
+      return;
+    }
     const t = $(`toggle-${id}`);
     if (!t) return;
     const isOn = t.classList.toggle('is-on');
@@ -1061,9 +1697,9 @@ const FlowList = {
     if (label) label.textContent = isOn ? '啟用' : '停用';
   },
 
-  /** 複製選中（或第一個）的流程，附加到清單最下方 */
+  /** 複製選中（或第一個）的流程，附加到清單最下方（僅 customs；cases 改在「新增流程」內提供複製來源選單） */
   copy() {
-    const list   = $('flow-group-list');
+    const list   = $('flow-group-list-customs');
     const source = _selectedFlowRow?.closest('.flow-group') || list?.querySelector('.flow-group');
     if (!source || !list) { Toast.show('請先點選要複製的流程'); return; }
 
@@ -1095,9 +1731,264 @@ const FlowList = {
     Toast.show('已複製流程，顯示於清單末端');
   },
 
-  /** 進入檢視模式（唯讀） */
+  /** 進入檢視模式（唯讀，僅 customs 使用；cases 改由列表按鈕直接帶 flowId/version 呼叫 KM.goFlowView） */
   view() {
     Nav.goFlowView();
+  },
+
+  /** 目前開啟中的版本作廢（cases 專用，於流程編輯頁的「作廢」按鈕呼叫） */
+  voidCurrent() {
+    const flow = flowById(Nav._currentFlowId);
+    const v = flowVersion(flow, Nav._currentVersion);
+    if (!flow || !v) return;
+    v.status = 'void';
+    Toast.show(`已作廢版本 ${v.version}`);
+    Nav.goFlowList('cases');
+  },
+
+  /** cases 專用：新增流程或編輯既有流程的「儲存」／「發布」，流程不需他人審核，皆為自行操作：
+   *  儲存＝存成草稿版本（不影響現行 active 版本，可繼續編輯）；發布＝直接成為新的現行版本（前一現行版本轉舊版本）。 */
+  commitCasesEdit(targetStatus) {
+    const name = ($('flow-draft-title')?.value || '').trim();
+    if (!name) { Toast.show('請輸入流程名稱'); return; }
+    const l1 = $('flow-cat-l1')?.value;
+    const l2Base = $('flow-cat-l2')?.value;
+    if (!l1 || !l2Base) { Toast.show('請選擇對應第二層樣態'); return; }
+    const isProduct = l2Base === `${l1}-product`;
+    const l3 = ($('flow-cat-l3-field')?.style.display !== 'none') ? $('flow-cat-l3')?.value : '';
+    if (isProduct && !l3) { Toast.show('請選擇對應第三層樣態'); return; }
+    const l2 = l3 || l2Base; // 實際寫入 flow.category.l2 的分類 id：產品類為第三層，其餘維持第二層
+    const steps = FlowEdit._workingSteps || [{ title: '新步驟', body: '<p></p>' }];
+
+    if (Nav._currentFlowId) {
+      const flow = flowById(Nav._currentFlowId);
+      if (!flow) return;
+      flow.name = name;
+      flow.category = { l1, l2 };
+      if (targetStatus === 'active') {
+        // 發布：現行版本轉舊版本，若先前存過草稿則一併移除（已併入這次發布）
+        flow.versions = flow.versions.filter(v => v.status !== 'draft');
+        flow.versions.forEach(v => { if (v.status === 'active') v.status = 'archived'; });
+        const newVersion = flowNextVersionFor(flow);
+        flow.versions.unshift({ version: newVersion, status: 'active', date: nowDateStr(), submitter: CURRENT_USER, steps, signoffs: [] });
+        Nav._currentVersion = newVersion;
+      } else {
+        // 儲存草稿：更新既有草稿內容，沒有的話新增一筆；現行 active 版本維持不動
+        let draft = flow.versions.find(v => v.status === 'draft');
+        if (draft) {
+          draft.steps = steps;
+          draft.date = nowDateStr();
+        } else {
+          draft = { version: flowNextVersionFor(flow), status: 'draft', date: nowDateStr(), submitter: CURRENT_USER, steps, signoffs: [] };
+          flow.versions.unshift(draft);
+        }
+        Nav._currentVersion = draft.version;
+      }
+    } else {
+      const id = 'flow-' + Date.now();
+      FLOWS_DATA.push({
+        id, name, enabled: true,
+        category: { l1, l2 },
+        versions: [{ version: 'v1.0', status: targetStatus, date: nowDateStr(), submitter: CURRENT_USER, steps, signoffs: [] }],
+      });
+      Nav._currentFlowId = id;
+    }
+    Toast.show(targetStatus === 'active' ? '發布成功！流程已上線' : '草稿已儲存');
+    Nav.goFlowList('cases');
+  },
+
+  /** 流程總覽表格：目前展開「舊版本」區塊的流程 id 集合（流程不需審核，僅 active／archived 兩種版本狀態） */
+  _expanded: new Set(),
+  /** 標題右側「排序依據」：異動日期新到舊／舊到新 */
+  _sortDir: 'desc',
+
+  toggleExpand(flowId) {
+    if (this._expanded.has(flowId)) this._expanded.delete(flowId); else this._expanded.add(flowId);
+    this.render();
+  },
+
+  setSortDir(dir) {
+    this._sortDir = dir === 'asc' ? 'asc' : 'desc';
+    this.render();
+  },
+
+  /** 每列僅顯示現行（active）版本；舊版本點擊左側箭頭展開，欄位比照現行版本列、整列灰色顯示，僅提供「檢視」 */
+  _rowHtml(flow) {
+    const active = flowActiveVersion(flow);
+    const archived = flow.versions.filter(v => v !== active);
+    const catLabel = caseTreePath(flow.category.l2);
+    const expanded = this._expanded.has(flow.id);
+
+    const chevron = archived.length
+      ? `<span class="mi flow-row-chevron" onclick="event.stopPropagation();KM.flowToggleExpand('${flow.id}')">chevron_right</span>`
+      : '';
+
+    const mainRow = `<tr class="flow-row-main${expanded ? ' is-expanded' : ''}" data-flow-id="${flow.id}">
+        <td class="flow-td-expand">${chevron}</td>
+        <td class="flow-td-name">${esc(flow.name)}</td>
+        <td>${esc(catLabel)}</td>
+        <td class="flow-td-nowrap">${esc(active.version)}</td>
+        <td class="flow-td-nowrap">${esc(active.date)}</td>
+        <td class="flow-td-actions">
+          <button class="btn-edit-flow btn-edit-flow--primary" onclick="event.stopPropagation();KM.goFlowEdit('${flow.id}','${active.version}')"><span class="mi">edit</span>編輯</button>
+          <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowView('${flow.id}','${active.version}')"><span class="mi">search</span>檢視</button>
+          <div class="flow-toggle-wrap" onclick="event.stopPropagation()">
+            <div class="toggle-track${flow.enabled ? ' is-on' : ''}" onclick="KM.flowToggleEnabled('${flow.id}')"></div>
+            <span class="flow-toggle-label">${flow.enabled ? '啟用' : '停用'}</span>
+          </div>
+        </td>
+      </tr>`;
+
+    const archiveRows = archived.map(v => `<tr class="flow-row-archive${expanded ? ' is-open' : ''}">
+        <td class="flow-td-expand"></td>
+        <td class="flow-td-name">${esc(flow.name)}</td>
+        <td>${esc(catLabel)}</td>
+        <td class="flow-td-nowrap">${esc(v.version)}</td>
+        <td class="flow-td-nowrap">${esc(v.date)}</td>
+        <td class="flow-td-actions">
+          <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goFlowView('${flow.id}','${v.version}')"><span class="mi">search</span>檢視</button>
+        </td>
+      </tr>`).join('');
+
+    return mainRow + archiveRows;
+  },
+
+  /** cases 專用：依左側 FlowNav 目前選中的出口/進口＋流程，再套用標題列的排序，重繪表格 */
+  render() {
+    const tbody = $('flow-table-body');
+    if (!tbody) return;
+
+    let flows = FLOWS_DATA.filter(f => (typeof FlowNav === 'undefined') || FlowNav.matches(f));
+    flows = [...flows].sort((a, b) => {
+      const da = flowActiveVersion(a)?.date || '';
+      const db = flowActiveVersion(b)?.date || '';
+      return this._sortDir === 'asc' ? da.localeCompare(db) : db.localeCompare(da);
+    });
+
+    tbody.innerHTML = flows.map(f => this._rowHtml(f)).join('');
+    const empty = $('flow-table-empty');
+    if (empty) empty.style.display = flows.length ? 'none' : 'block';
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+//  FlowNav — 處理流程總覽左側樹狀導覽：出口/進口 pill 切換 → 四大類別（灰字，
+//  僅作視覺分組，不可點選）→ 該類別下的個別流程（可點選，篩選右側表格只顯示該流程）。
+//  結構比照 CaseNav，但第二層固定為 CASE_TREE 的四大類別，不會有第三層。
+// ─────────────────────────────────────────────────────────
+const FlowNav = {
+  direction: 'ex',
+  selected: null, // null＝顯示該方向全部流程；否則為選中的分類 id（第二層或第三層皆可）
+  expanded: new Set(['product']),
+
+  init() {
+    this.direction = 'ex';
+    this.expanded = new Set(['product']);
+    this.selected = null;
+    if (typeof FlowList !== 'undefined') FlowList._sortDir = 'desc';
+    this._syncTabs();
+    this._syncTitle();
+    this.render();
+  },
+
+  switchDirection(dir) {
+    this.direction = dir;
+    this.selected = null;
+    this.expanded = new Set(['product']);
+    this._syncTabs();
+    this._syncTitle();
+    this.render();
+  },
+
+  _syncTabs() {
+    $('flow-nav-tab-ex')?.classList.toggle('is-active', this.direction === 'ex');
+    $('flow-nav-tab-im')?.classList.toggle('is-active', this.direction === 'im');
+  },
+
+  /** 右側「流程清單」標題跟著目前選中的節點走，未選取時顯示預設文字（比照 CaseNav 的 _syncTitle） */
+  _syncTitle() {
+    const titleEl = $('flow-list-hd-title');
+    if (!titleEl) return;
+    titleEl.textContent = this.selected ? (this._labelFor(this.selected) || '流程清單') : '流程清單';
+  },
+
+  _labelFor(catId) {
+    for (const node of CASE_TREE[this.direction]) {
+      if (node.cat === catId) return node.label;
+      const child = node.children?.find(c => c.cat === catId);
+      if (child) return child.label;
+    }
+    return '';
+  },
+
+  /** 點擊第二層或第三層節點：與 CaseNav 一致，選中群組本身會涵蓋其下所有子項的流程 */
+  select(catId) {
+    this.selected = catId;
+    this._syncTitle();
+    this.render();
+  },
+
+  toggleExpand(bareKey, ev) {
+    ev?.stopPropagation();
+    if (this.expanded.has(bareKey)) this.expanded.delete(bareKey); else this.expanded.add(bareKey);
+    this.render();
+  },
+
+  /** 供 FlowList 使用：是否顯示此流程（方向需相符；未選取時顯示全部，選中第二層則涵蓋其下第三層，選中第三層則只顯示該子項） */
+  matches(flow) {
+    if (flow.category.l1 !== this.direction) return false;
+    const sel = this.selected;
+    if (!sel) return true;
+    return flow.category.l2 === sel || flow.category.l2.startsWith(sel + '-');
+  },
+
+  _countFor(catId) {
+    return FLOWS_DATA.filter(f => f.category.l1 === this.direction && (f.category.l2 === catId || f.category.l2.startsWith(catId + '-'))).length;
+  },
+
+  render() {
+    this._syncTabs();
+    const body = $('flow-nav-body');
+    if (body) body.innerHTML = CASE_TREE[this.direction].map(n => this._nodeHtml(n)).join('');
+    if (typeof FlowList !== 'undefined') FlowList.render();
+  },
+
+  /** 節點渲染邏輯與 CaseNav._nodeHtml 完全一致（「產品」有第三層子項，其餘三類沒有），
+   *  差別只在計數與篩選對象改為 FLOWS_DATA 的流程，而非案例。 */
+  _nodeHtml(n) {
+    const bareKey = n.cat.split('-')[1];
+    const icon = CASE_NAV_ICONS[bareKey] || 'folder';
+    const count = this._countFor(n.cat);
+
+    if (!n.children) {
+      const isActive = this.selected === n.cat;
+      return `<div class="case-nav-item${isActive ? ' is-active' : ''}" onclick="KM.flowNavSelect('${n.cat}')">
+          <span class="mi case-nav-item-ico">${icon}</span>
+          <span class="case-nav-item-label">${esc(n.label)}</span>
+          <span class="case-nav-item-count">${count}</span>
+        </div>`;
+    }
+
+    const expanded = this.expanded.has(bareKey);
+    const isGroupActive = this.selected === n.cat || n.children.some(c => c.cat === this.selected);
+    return `<div class="case-nav-group${expanded ? ' is-expanded' : ''}">
+        <div class="case-nav-item case-nav-item--parent${isGroupActive ? ' is-active' : ''}" onclick="KM.flowNavSelect('${n.cat}')">
+          <span class="mi case-nav-item-ico">${icon}</span>
+          <span class="case-nav-item-label">${esc(n.label)}</span>
+          <span class="case-nav-item-count">${count}</span>
+          <span class="mi case-nav-item-chevron" onclick="KM.flowNavToggleExpand('${bareKey}',event)">chevron_right</span>
+        </div>
+        <div class="case-nav-children">
+          ${n.children.map(c => {
+            const active = this.selected === c.cat;
+            const childCount = this._countFor(c.cat);
+            return `<div class="case-nav-child${active ? ' is-active' : ''}" onclick="KM.flowNavSelect('${c.cat}')">
+                <span class="case-nav-child-label">${esc(c.label)}</span>
+                <span class="case-nav-item-count">${childCount}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
   },
 };
 
@@ -1111,6 +2002,7 @@ const PendingReview = {
   _minForPagination: 10,
 
   init() {
+    this._renderCasesRows();
     this._currentPage = {};
     document.querySelectorAll('.pending-group').forEach(g => {
       this._currentPage[g.dataset.group] = 1;
@@ -1119,26 +2011,68 @@ const PendingReview = {
     this._syncOverall();
   },
 
+  /** 「處分案例」分類：資料驅動，列出 CASES_DATA 中所有 status 為 pending 的案例（審核案例，非流程） */
+  /** 待審清單只提供「檢視」，同意／退回只能在案例審核詳情頁（KM.goCaseReview）操作。
+   *  仍在 pending 狀態卻已有簽核紀錄的案例，代表曾被退回過，功能欄多一顆「簽核紀錄」按鈕，
+   *  點擊後向下展開淺橘色色塊，滿版顯示完整簽核資訊（序號／簽核者／意見／簽核時間）。 */
+  _renderCasesRows() {
+    const list = document.querySelector('.pending-group[data-group="cases"] .pending-review-list');
+    const emptyHint = list?.querySelector('.pending-group-empty');
+    if (!list || !emptyHint) return;
+    list.querySelectorAll('.pending-row, .pending-signoff-block').forEach(r => r.remove());
+
+    CASES_DATA.filter(c => c.status === 'pending').forEach(c => {
+      const flow = c.flowId ? flowById(c.flowId) : null;
+      const catPath = caseTreePath(c.categoryId);
+      const flowText = flow ? `／${esc(flow.name)}` : '';
+      const signoffs = c.signoffs || [];
+      const wasRejected = signoffs.length > 0;
+      const signoffBtn = wasRejected
+        ? `<button class="btn-edit-flow" onclick="event.stopPropagation();KM.pendingToggleSignoff('${c.id}')"><span class="mi">history</span>簽核紀錄</button>`
+        : '';
+      const row = document.createElement('div');
+      row.className = 'pending-row';
+      row.dataset.caseId = c.id;
+      row.setAttribute('onclick', 'KM.flowSelectRow(this)');
+      row.innerHTML = `
+        <span class="pending-date">${esc(c.submitDate || '')}</span>
+        <span class="pending-name">${esc(c.docNo)}</span>
+        <span class="pending-submitter">${esc(c.submitter || '')}</span>
+        <span class="pending-flow">${esc(catPath)}${flowText}</span>
+        <span class="pending-status-pill${wasRejected ? ' pending-status-pill--reject' : ''}">${wasRejected ? '退回' : '待審'}</span>
+        <div class="pending-actions">
+          <button class="btn-edit-flow" onclick="event.stopPropagation();KM.goCaseReview(this)"><span class="mi">search</span>檢視</button>
+          ${signoffBtn}
+        </div>`;
+      list.insertBefore(row, emptyHint);
+
+      if (signoffs.length) {
+        const block = document.createElement('div');
+        block.className = 'pending-signoff-block';
+        block.id = `pending-signoff-${c.id}`;
+        block.innerHTML = `
+          <table class="review-signoff-table">
+            <thead><tr><th>序號</th><th>簽核者</th><th>意見</th><th>簽核時間</th></tr></thead>
+            <tbody>
+              ${signoffs.map(s => `<tr>
+                  <td>${s.seq}</td><td>${esc(s.signer)}</td><td>${esc(s.comment)}</td><td>${esc(s.time)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
+        list.insertBefore(block, emptyHint);
+      }
+    });
+  },
+
+  /** 展開／收合某一筆的簽核紀錄色塊；id 為案例 id 或海關答聯單示範用的固定字串 */
+  toggleSignoff(id) {
+    document.getElementById(`pending-signoff-${id}`)?.classList.toggle('is-open');
+  },
+
   changePageSize(group, size) {
     this._pageSize = Number(size) || 10;
     this._currentPage[group] = 1;
     this._renderGroup(group);
-  },
-
-  approve(el) {
-    const group = el.closest('.pending-group')?.dataset.group;
-    el.closest('.pending-row')?.remove();
-    Toast.show('已同意，流程發佈成功');
-    this._renderGroup(group);
-    this._syncOverall();
-  },
-
-  reject(el) {
-    const group = el.closest('.pending-group')?.dataset.group;
-    el.closest('.pending-row')?.remove();
-    Toast.show('已退回，請修改後重新送審');
-    this._renderGroup(group);
-    this._syncOverall();
   },
 
   /** 更新整體待審徽章數量、各分類件數標示，及全部清空時的提示 */
@@ -1203,78 +2137,132 @@ const PendingReview = {
 };
 
 // ─────────────────────────────────────────────────────────
-//  TreeCount — 樹狀計數（依可見卡片動態更新）
+//  CaseNav — 處分案例左側樹狀導覽（單選）：出口/進口 pill 切換 → 分類（附 icon，
+//  可展開）→ 產品子項。取代先前的 checkbox 多選篩選面板（CaseFilter）。
+//  每個選項旁的數字為「該節點（含其子項）目前有多少筆案例符合」，會隨搜尋
+//  關鍵字即時更新，比照原本樹狀導覽的計數方式。
 // ─────────────────────────────────────────────────────────
-const TreeCount = {
-  refresh() {
-    // 計算每個 data-category 的可見卡片數
-    const counts = {};
-    document.querySelectorAll('#app .case-card').forEach(card => {
-      if (card.classList.contains('is-filtered-out')) return;
-      const cat = card.dataset.category;
-      if (cat) counts[cat] = (counts[cat] || 0) + 1;
-    });
+const CASE_NAV_ICONS = { product: 'inventory_2', trademark: 'verified', cites: 'description', violation: 'gavel' };
 
-    // 更新每個 tree-item 的 tree-count
-    document.querySelectorAll('#app .tree-item[data-cat]').forEach(item => {
-      const cat = item.dataset.cat;
-      const n = counts[cat] || 0;
-      const span = item.querySelector('.tree-count');
-      if (span) span.textContent = n;
-    });
+const CaseNav = {
+  direction: 'ex',
+  selected: 'ex-product-1',
+  expanded: new Set(['product']),
 
-    // 計算 Tab 總計（出口 = ex-* 之和，進口 = im-* 之和）
-    const exTotal = Object.entries(counts)
-      .filter(([k]) => k.startsWith('ex-'))
-      .reduce((s, [, v]) => s + v, 0);
-    const imTotal = Object.entries(counts)
-      .filter(([k]) => k.startsWith('im-'))
-      .reduce((s, [, v]) => s + v, 0);
-
-    const tabEx = $('tab-export');
-    const tabIm = $('tab-import');
-    if (tabEx) tabEx.textContent = `出口（${exTotal}）`;
-    if (tabIm) tabIm.textContent = `進口（${imTotal}）`;
+  /** 每次進入處分案例頁時重置為預設導覽狀態（比照原本樹狀導覽的預設選中項目） */
+  init() {
+    this.direction = 'ex';
+    this.expanded = new Set(['product']);
+    this.selected = 'ex-product-1';
+    this._syncTabs();
+    this._syncTitle();
+    this.render();
   },
-};
 
-// ─────────────────────────────────────────────────────────
-//  Tree — 樹狀選單
-// ─────────────────────────────────────────────────────────
-const Tree = {
-  /** 切換出口 / 進口 Tab，自動選中第一個項目 */
-  switchTab(type) {
-    const tEx = $('tree-export');
-    const tIm = $('tree-import');
-    const bEx = $('tab-export');
-    const bIm = $('tab-import');
+  switchDirection(dir) {
+    this.direction = dir;
+    // 切換方向時，預設選中該方向第一個節點（若有子項則選其第一個子項）
+    const first = CASE_TREE[dir][0];
+    this.selected = first.children ? first.children[0].cat : first.cat;
+    this.expanded = new Set([first.cat.split('-')[1]]);
+    this._syncTabs();
+    this._syncTitle();
+    this.render();
+  },
 
-    const isExport = type === 'ex';
-    tEx.style.display = isExport ? '' : 'none';
-    tIm.style.display = isExport ? 'none' : '';
-    bEx.className = 'tree-tab ' + (isExport ? 'is-active' : 'is-inactive');
-    bIm.className = 'tree-tab ' + (isExport ? 'is-inactive' : 'is-active');
+  _syncTabs() {
+    $('case-nav-tab-ex')?.classList.toggle('is-active', this.direction === 'ex');
+    $('case-nav-tab-im')?.classList.toggle('is-active', this.direction === 'im');
+    const exCount = $('case-nav-tab-ex-count');
+    if (exCount) exCount.textContent = this._countFor('ex');
+    const imCount = $('case-nav-tab-im-count');
+    if (imCount) imCount.textContent = this._countFor('im');
+  },
 
-    // 自動選中新 Tab 的第一個項目，確保右側不為空
-    const activeList = isExport ? tEx : tIm;
-    const first = activeList?.querySelector('.tree-item');
-    if (first) {
-      const title = first.querySelector('span:not(.tree-count):not(.tree-folder)')?.textContent.trim() || '';
-      this.select(first, title);
+  /** 目前選中節點的顯示名稱（群組本身或第三層子項皆可） */
+  _labelFor(catId) {
+    for (const node of CASE_TREE[this.direction]) {
+      if (node.cat === catId) return node.label;
+      const child = node.children?.find(c => c.cat === catId);
+      if (child) return child.label;
     }
+    return '';
   },
 
-  /** 選取樹狀項目，更新右側標題並只顯示該樣態的卡片 */
-  select(el, title) {
-    document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('is-active'));
-    el.classList.add('is-active');
-    $('section-title').textContent = title;
-    SidePanel.close();
+  /** 右側案例清單標題跟著目前選中的節點走，比照原本樹狀導覽的行為 */
+  _syncTitle() {
+    const titleEl = $('section-title');
+    const label = this._labelFor(this.selected);
+    if (titleEl && label) titleEl.textContent = label;
+  },
 
-    const cat = el.dataset.cat;
-    document.querySelectorAll('#app .case-card').forEach(card => {
-      card.classList.toggle('is-category-hidden', !!cat && card.dataset.category !== cat);
-    });
+  select(catId) {
+    this.selected = catId;
+    this._syncTitle();
+    SidePanel.close();
+    this.render();
+  },
+
+  toggleExpand(bareKey, ev) {
+    ev?.stopPropagation();
+    if (this.expanded.has(bareKey)) this.expanded.delete(bareKey); else this.expanded.add(bareKey);
+    this.render();
+  },
+
+  /** 供 CaseList 使用：目前選中的節點若為群組（如「產品」）比對前綴，否則精準比對 */
+  matches(c) {
+    const sel = this.selected;
+    return c.categoryId === sel || c.categoryId.startsWith(sel + '-');
+  },
+
+  _countFor(catId) {
+    const rows = (typeof CaseList !== 'undefined') ? CaseList.countableRows() : CASES_DATA;
+    return rows.filter(c => c.categoryId === catId || c.categoryId.startsWith(catId + '-')).length;
+  },
+
+  render() {
+    this._syncTabs(); // 搜尋關鍵字改變時，Tab 上的總數也要跟著更新
+    const body = $('case-nav-body');
+    if (body) body.innerHTML = CASE_TREE[this.direction].map(n => this._nodeHtml(n)).join('');
+    if (typeof CaseList !== 'undefined') CaseList.render();
+  },
+
+  _nodeHtml(n) {
+    const bareKey = n.cat.split('-')[1];
+    const icon = CASE_NAV_ICONS[bareKey] || 'folder';
+    const count = this._countFor(n.cat);
+
+    if (!n.children) {
+      const isActive = this.selected === n.cat;
+      return `<div class="case-nav-item${isActive ? ' is-active' : ''}" onclick="KM.caseNavSelect('${n.cat}')">
+          <span class="mi case-nav-item-ico">${icon}</span>
+          <span class="case-nav-item-label">${esc(n.label)}</span>
+          <span class="case-nav-item-count">${count}</span>
+          <span class="mi case-nav-item-chevron">chevron_right</span>
+        </div>`;
+    }
+
+    const expanded = this.expanded.has(bareKey);
+    // 選到第三層子項時，第二層父節點（如「產品」）的樣式要保留 active，不能因為選取焦點移到子項就消失
+    const isGroupActive = this.selected === n.cat || n.children.some(c => c.cat === this.selected);
+    return `<div class="case-nav-group${expanded ? ' is-expanded' : ''}">
+        <div class="case-nav-item case-nav-item--parent${isGroupActive ? ' is-active' : ''}" onclick="KM.caseNavSelect('${n.cat}')">
+          <span class="mi case-nav-item-ico">${icon}</span>
+          <span class="case-nav-item-label">${esc(n.label)}</span>
+          <span class="case-nav-item-count">${count}</span>
+          <span class="mi case-nav-item-chevron" onclick="KM.caseNavToggleExpand('${bareKey}',event)">chevron_right</span>
+        </div>
+        <div class="case-nav-children">
+          ${n.children.map(c => {
+            const active = this.selected === c.cat;
+            const childCount = this._countFor(c.cat);
+            return `<div class="case-nav-child${active ? ' is-active' : ''}" onclick="KM.caseNavSelect('${c.cat}')">
+                <span class="case-nav-child-label">${esc(c.label)}</span>
+                <span class="case-nav-item-count">${childCount}</span>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
   },
 };
 
@@ -1382,18 +2370,15 @@ const Modal = {
     const input = $('search-input');
     if (input) {
       input.value = kw;
-      Search.onInput(kw);
+      Search.onInput(kw); // 內部會呼叫 CaseNav.render() 重新計算各節點旁的計數
     }
-    // ④⑤ TreeCount.refresh() 已在 Search.onInput 末尾呼叫
-    // 自動切換到結果較多的 Tab
+    // 自動切換到結果較多的「案件方向」Tab
     const counts = {};
-    document.querySelectorAll('#app .case-card:not(.is-filtered-out)').forEach(c => {
-      const cat = c.dataset.category || '';
-      const tab = cat.startsWith('im-') ? 'im' : 'ex';
-      counts[tab] = (counts[tab] || 0) + 1;
+    (typeof CaseList !== 'undefined' ? CaseList.countableRows() : []).forEach(c => {
+      const dir = c.categoryId.startsWith('im-') ? 'im' : 'ex';
+      counts[dir] = (counts[dir] || 0) + 1;
     });
-    if ((counts.im || 0) > (counts.ex || 0)) Tree.switchTab('im');
-    else Tree.switchTab('ex');
+    CaseNav.switchDirection((counts.im || 0) > (counts.ex || 0) ? 'im' : 'ex');
   },
 
   // ── 法規選擇 Modal ─────────────────────────────────────
@@ -1462,6 +2447,57 @@ const Modal = {
     const count = document.querySelectorAll('#law-list .law-item.is-checked').length;
     const el = $('law-count');
     if (el) el.textContent = count;
+  },
+
+  // ── 案例標籤選擇 Modal（新增案例：多選，來源 TAG_OPTIONS）──
+  _tagTagsId: 'nc-tag-area',
+
+  openTags(tagsId) {
+    this._tagTagsId = tagsId || 'nc-tag-area';
+    const existing = new Set([...document.querySelectorAll(`#${this._tagTagsId} .filter-tag`)].map(t => t.dataset.value));
+    const list = $('tag-list');
+    if (list) {
+      list.innerHTML = TAG_OPTIONS.map(t => `
+        <div class="law-item${existing.has(t) ? ' is-checked' : ''}" onclick="KM.toggleTagItem(this)">
+          <input type="checkbox" ${existing.has(t) ? 'checked' : ''}>
+          <label>${esc(t)}</label>
+        </div>`).join('');
+    }
+    this._updateTagCount();
+    this.open('modal-tags');
+  },
+
+  toggleTagItem(item) {
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('is-checked', cb.checked);
+    this._updateTagCount();
+  },
+
+  _updateTagCount() {
+    const count = document.querySelectorAll('#tag-list .law-item.is-checked').length;
+    const el = $('tag-count');
+    if (el) el.textContent = count;
+  },
+
+  closeTags() {
+    this.close('modal-tags');
+  },
+
+  confirmTags() {
+    const tagArea = $(this._tagTagsId);
+    if (tagArea) {
+      const selected = [...document.querySelectorAll('#tag-list .law-item.is-checked')].map(item => item.querySelector('label')?.textContent.trim() || '');
+      if (selected.length) {
+        tagArea.innerHTML = selected.map((text, i) => {
+          const tagId = `case-tag-${this._tagTagsId}-${i}`;
+          return `<span class="filter-tag" id="${tagId}" data-value="${esc(text)}">${esc(text)}<button class="filter-tag-remove" onclick="event.stopPropagation();KM.removeFilterTag('${tagId}')"><span class="mi">close</span></button></span>`;
+        }).join('');
+      } else {
+        tagArea.innerHTML = '<span style="color:var(--placeholder);font-size:12.5px;pointer-events:none">點擊選擇案例標籤（可多選）...</span>';
+      }
+    }
+    this.close('modal-tags');
   },
 
   // ② 日期區間選擇器切換
@@ -1564,7 +2600,7 @@ const Render = {
       if (!logo) return;
 
       const activeKey = scr.dataset.sidebar;
-      const html = SIDEBAR_ITEMS.map(item => {
+      const html = SIDEBAR_ITEMS.filter(item => item.phase1).map(item => {
         const isActive = item.key === activeKey;
         const cls = 'sidebar-item' + (isActive ? ' is-active' : '');
         const iconHtml = item.icon
@@ -1591,11 +2627,13 @@ const Render = {
     });
   },
 
-  /** 首頁功能卡片 */
+  /** 首頁功能卡片：只顯示第一期上線的 4 張，2 欄併排，副標題顯示灰色小字說明 */
   homeCards() {
     const el = $('home-grid');
     if (!el) return;
-    el.innerHTML = HOME_CARDS.map(c => `<div class="card${c.featured ? ' feat' : ''}" onclick="KM.${c.action}()">
+    const cards = HOME_CARDS.filter(c => c.phase1);
+    el.classList.add('home-grid--2col');
+    el.innerHTML = cards.map(c => `<div class="card${c.featured ? ' feat' : ''}" onclick="KM.${c.action}()">
         <div class="card-ico">
           ${c.icon ? `<img src="img/${c.icon}" alt="${esc(c.alt)}">` : `<span class="mi">${c.mi}</span>`}
         </div>
@@ -1605,7 +2643,7 @@ const Render = {
       </div>`).join('');
   },
 
-  /** 首頁最新異動 */
+  /** 首頁最新異動：灰底標籤顯示所屬模組名稱（NEWS_ITEMS 的 tag 欄位） */
   news() {
     const el = $('news-list');
     if (!el) return;
@@ -1619,36 +2657,23 @@ const Render = {
       </div>`).join('');
   },
 
-  /** 首頁常用連結 */
-  quickLinks() {
-    const el = $('quick-links');
+  /** 首頁公布欄（取代常用連結，卡片樣式比照最新異動） */
+  bulletin() {
+    const el = $('bulletin-list');
     if (!el) return;
-    el.innerHTML = QUICK_LINKS.map(q => `<div class="quick-item">
-          <img src="img/${q.icon}" alt="">
-          ${esc(q.label)}
-        </div>`).join('');
+    el.innerHTML = BULLETIN_ITEMS.map(b => `<div class="news-card">
+        <div class="news-row">
+          <span class="news-tag">${esc(b.tag)}</span>
+          <span class="news-date">${esc(b.date)}</span>
+        </div>
+        <div class="news-title">${esc(b.title)}</div>
+        <div class="news-body">${esc(b.body)}</div>
+      </div>`).join('');
   },
 
-  /** 處分案樣態樹狀清單（出口 / 進口） */
+  /** 處分案例左側樹狀導覽，資料來源 CASE_TREE，實際渲染交給 CaseNav */
   tree() {
-    const treeItem = (item) => {
-      const cls = 'tree-item' + (item.active ? ' is-active' : '');
-      const arg = (item.arg ?? item.label).replace(/'/g, "\\'");
-      return `<div class="${cls}" data-cat="${item.cat}" onclick="KM.selectTree(this,'${arg}')">
-              <span class="tree-folder"></span>
-              <span>${esc(item.label)}</span>
-              <span class="tree-count">0</span>
-            </div>`;
-    };
-
-    const exEl = $('tree-export');
-    const imEl = $('tree-import');
-    if (exEl) exEl.innerHTML = TREE_EXPORT_ITEMS.map(treeItem).join('');
-    if (imEl) imEl.innerHTML = TREE_IMPORT_ITEMS.map(treeItem).join('');
-
-    // 套用預設選中項目的卡片篩選（比照點擊樹狀項目的行為，避免初始進入時右側顯示所有樣態的卡片）
-    const active = document.querySelector('#app .tree-item.is-active');
-    if (active) Tree.select(active, active.querySelector('span:not(.tree-count):not(.tree-folder)')?.textContent.trim() || '');
+    if (typeof CaseNav !== 'undefined') CaseNav.init();
   },
 
   /** 於 init() 開頭呼叫，產生所有共用內容 */
@@ -1656,7 +2681,7 @@ const Render = {
     this.sidebars();
     this.homeCards();
     this.news();
-    this.quickLinks();
+    this.bulletin();
     this.tree();
   },
 };
@@ -1667,6 +2692,7 @@ const Render = {
 function init() {
   // ── 動態內容渲染（Sidebar、首頁卡片、樹狀清單…）─────
   Render.all();
+  Theme.init();
 
   // ── 鍵盤 Esc ────────────────────────────────────────
   document.addEventListener('keydown', e => {
@@ -1808,38 +2834,70 @@ const RelatedPicker = {
 // ─────────────────────────────────────────────────────────
 const NewCase = {
   _files: [],
+  _type: 'ex',
 
   init() {
     this._files = [];
     this._renderFileList();
+    this.switchType('ex');
+    const lawArea = $('nc-law-area');
+    if (lawArea) lawArea.innerHTML = '<span class="law-ph" style="color:var(--placeholder);font-size:12.5px;pointer-events:none">點擊選擇涉及法規...</span>';
+    const tagArea = $('nc-tag-area');
+    if (tagArea) tagArea.innerHTML = '<span style="color:var(--placeholder);font-size:12.5px;pointer-events:none">點擊選擇案例標籤（可多選）...</span>';
+    const subject = $('nc-subject'); if (subject) subject.value = '';
+    const docNo = $('nc-docno'); if (docNo) docNo.value = '';
   },
 
-  /** 出口/進口 切換 */
+  /** 出口/進口 切換：重建第二層（產品/商標/CITES/違規）選單 */
   switchType(type) {
+    this._type = type;
     ['nc-tab-ex', 'nc-tab-im'].forEach(id => {
       const el = $(id);
       if (el) el.classList.toggle('is-active',   id === `nc-tab-${type}`);
       if (el) el.classList.toggle('is-inactive', id !== `nc-tab-${type}`);
     });
-    // 更新樣態清單
-    const cats = type === 'ex' ? [
-      '未依規定標示產地：未見標示',
-      '產地標示不實(1)：他國產製或國貨標成他國',
-      '產地標示不實(2)：他國產製標成臺灣（加強管理）',
-      '產地標示不實(3)：他國產製標成臺灣（其他）',
-      '足以使人誤認產地',
-      'CITES',
-      '商標/仿冒(侵權)',
-      '管制貨品(111)',
-      '其他',
-    ] : [
-      '未依規定標示產地',
-      '產地標示不實',
-    ];
-    const sel = $('nc-category');
-    if (!sel) return;
-    sel.innerHTML = '<option value="">請選擇樣態</option>' +
-      cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    const l2Sel = $('nc-cat-l2');
+    if (!l2Sel) return;
+    const opts = caseTreeL2Options(type);
+    l2Sel.innerHTML = '<option value="">請選擇第二層樣態</option>' +
+      opts.map(o => `<option value="${o.cat}">${esc(o.label)}</option>`).join('');
+    this._syncL3();
+    this._syncFlowOptions();
+  },
+
+  /** 第二層變更時：若為「產品」顯示第三層選單，否則隱藏；同步流程選單 */
+  onCatL2Change() {
+    this._syncL3();
+    this._syncFlowOptions();
+  },
+
+  onCatL3Change() {
+    this._syncFlowOptions();
+  },
+
+  _syncL3() {
+    const l2 = $('nc-cat-l2')?.value || '';
+    const l3Field = $('nc-cat-l3-field');
+    const l3Sel = $('nc-cat-l3');
+    const isProduct = l2 === `${this._type}-product`;
+    if (l3Field) l3Field.style.display = isProduct ? 'flex' : 'none';
+    if (!l3Sel) return;
+    if (!isProduct) { l3Sel.innerHTML = ''; return; }
+    const node = CASE_TREE[this._type].find(n => n.cat === l2);
+    l3Sel.innerHTML = (node?.children || []).map(c => `<option value="${c.cat}">${esc(c.label)}</option>`).join('');
+  },
+
+  /** 依目前選定的分類（優先第三層，否則第二層）帶出對應的可選處理流程 */
+  _syncFlowOptions() {
+    const flowSel = $('nc-flow');
+    if (!flowSel) return;
+    const l2 = $('nc-cat-l2')?.value || '';
+    const l3 = ($('nc-cat-l3-field')?.style.display !== 'none') ? $('nc-cat-l3')?.value : '';
+    const catId = l3 || l2;
+    const flows = catId ? flowsForCategory(this._type, catId) : [];
+    flowSel.innerHTML = flows.length
+      ? '<option value="">請選擇處理流程（選填）</option>' + flows.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join('')
+      : '<option value="">此分類尚無對應處理流程</option>';
   },
 
   /** 附件上傳 */
@@ -1891,11 +2949,37 @@ const NewCase = {
     ], { title: '選擇關聯案例', emptyHint: '點擊選擇關聯案例' });
   },
 
-  /** 儲存 / 送出 */
+  /** 儲存 / 送出：必填發文字號、案件日期；分類（第二層，產品需再選第三層）亦為必填 */
   save(publish) {
-    const title = $('nc-category')?.value;
-    if (!title) { Toast.show('請先選擇樣態'); return; }
-    Toast.show(publish ? '案例已發布！' : '草稿已儲存');
+    const docNo = $('nc-docno')?.value.trim();
+    const caseDate = $('nc-case-date')?.value.trim();
+    const l2 = $('nc-cat-l2')?.value;
+    const isProduct = l2 === `${this._type}-product`;
+    const l3 = isProduct ? $('nc-cat-l3')?.value : '';
+
+    if (!docNo) { Toast.show('請輸入發文字號'); return; }
+    if (!caseDate) { Toast.show('請選擇案件日期'); return; }
+    if (!l2) { Toast.show('請選擇第二層樣態'); return; }
+    if (isProduct && !l3) { Toast.show('請選擇第三層樣態'); return; }
+
+    const tags = [...document.querySelectorAll('#nc-tag-area .filter-tag')].map(t => t.dataset.value || t.textContent.replace('×', '').trim());
+    const flowId = $('nc-flow')?.value || null;
+
+    // 送出＝進入待審核（status:'pending'），核准前不會出現在案例清單，只出現在「待審」頁面；
+    // 儲存草稿＝status:'draft'，兩者皆不計入 CaseList._publishedRows()
+    CASES_DATA.unshift({
+      id: 'case-' + Date.now(),
+      docNo, date: caseDate, updateDate: nowDateStr().replace(/\//g, '.'),
+      target: '', law: '', goods: '', tags,
+      categoryId: l3 || l2, flowId,
+      subject: $('nc-subject')?.value.trim() || '',
+      summary: $('nc-subject')?.value.trim() || '',
+      attachments: this._files.map(f => ({ no: docNo, desc: f.name })),
+      status: publish ? 'pending' : 'draft',
+      submitter: CURRENT_USER, submitDate: nowDateStr(), signoffs: [],
+    });
+
+    Toast.show(publish ? '案例已送出，等待審核' : '草稿已儲存');
     Nav.goApp();
   },
 };
@@ -1979,7 +3063,7 @@ const CustomsSearch = {
 
     $('customs-clear')?.classList.toggle('is-visible', hasValue);
 
-    // 過濾卡片（與處分案範例相同邏輯）
+    // 過濾卡片（與處分案例相同邏輯）
     const cards = document.querySelectorAll('#app-customs .customs-card');
     let visible = 0;
     cards.forEach(card => {
@@ -2028,13 +3112,21 @@ const StepView = {
 
 
 window.KM = {
+  // Theme
+  setTheme        : id => Theme.set(id),
+  themeToggleMenu : btn => Theme.toggleMenu(btn),
+
+  // Home（全文檢索）
+  homeSearchInput : v  => Home.onSearchInput(v),
+  homeSearchClear : () => Home.clearSearch(),
+  homeSearchSubmit: adv => Home.submitSearch(adv),
+
   // Nav
   goApp         : () => Nav.goApp(),
   goHome        : () => Nav.goHome(),
   goPendingReview: () => Nav.goPendingReview(),
-  pendingApprove : el => PendingReview.approve(el),
-  pendingReject  : el => PendingReview.reject(el),
   pendingChangePageSize: (group, size) => PendingReview.changePageSize(group, size),
+  pendingToggleSignoff: id => PendingReview.toggleSignoff(id),
   logout        : () => Toast.show('已登出系統'),
   goCustoms      : () => Nav.goCustoms(),
   goCustomsDetail: () => Nav.goCustomsDetail(),
@@ -2043,10 +3135,17 @@ window.KM = {
   goCaseDetail   : () => Nav.goCaseDetail(),
   openCaseDetail : el => Nav.openCaseDetail(el),
   backToCaseList : () => Nav.backToCaseList(),
+  goCaseReview  : el => Nav.goCaseReview(el.closest('.pending-row')?.dataset.caseId),
+  toggleCaseInfo: () => CaseDetail.toggleCaseInfo(),
+  caseReviewCommentInput: val => CaseReview.setComment(val),
+  caseReviewApprove: () => CaseReview.approve(),
+  caseReviewReject : () => CaseReview.reject(),
   openRelatedCustomsFromCase: cardEl => Nav.openRelatedCustomsFromCase(cardEl),
   openRelatedCaseFromCustoms: cardEl => Nav.openRelatedCaseFromCustoms(cardEl),
   goNewCase      : s  => Nav.goNewCase(s),
   ncSwitchType   : t  => NewCase.switchType(t),
+  ncCatL2Change  : () => NewCase.onCatL2Change(),
+  ncCatL3Change  : () => NewCase.onCatL3Change(),
   ncHandleFiles  : el => NewCase.handleFiles(el),
   ncRemoveFile   : i  => NewCase.removeFile(i),
   ncUpdateNote   : (i, v) => NewCase.updateNote(i, v),
@@ -2060,13 +3159,21 @@ window.KM = {
   cncOpenRelated : () => CustomsNewCase.openRelated(),
   cncSave        : p  => CustomsNewCase.save(p),
   goFlowList     : s  => Nav.goFlowList(s),
-  goFlowEdit     : () => Nav.goFlowEdit(),
-  goFlowView     : () => Nav.goFlowView(),
-  goFlowReviewView: (fromPending, el) => Nav.goFlowReviewView(fromPending, el),
+  goFlowEdit     : (flowId, version) => Nav.goFlowEdit(flowId, version),
+  goFlowView     : (flowId, version) => Nav.goFlowView(flowId, version),
+  goFlowReviewView: (fromPending, el, flowId, version) => Nav.goFlowReviewView(fromPending, el, flowId, version),
 
   // Search
   onSearch   : v  => Search.onInput(v),
   clearSearch: () => Search.clear(),
+
+  // Case list（表格：排序／分頁／展開列）
+  caseSortBy        : key  => CaseList.sortBy(key),
+  caseSortFieldChange: key => CaseList.setSortField(key),
+  caseTagFilterChange: tag => CaseList.setTagFilter(tag),
+  caseChangePageSize: size => CaseList.changePageSize(size),
+  caseToggleRow     : rowEl => CaseList.toggleRow(rowEl),
+  caseGoFlow        : () => CaseDetail.goFlow(),
 
   // Customs Search
   customsSearch: v  => CustomsSearch.onInput(v),
@@ -2079,6 +3186,10 @@ window.KM = {
   flowAddStep   : ()     => FlowEdit.addStep(),
   flowSelectStep: card   => FlowEdit.selectStep(card),
   flowUpdateTitle: val   => FlowEdit.updateTitle(val),
+  flowUpdateBody  : html => FlowEdit.updateBody(html),
+  flowCasesCommit : status => FlowList.commitCasesEdit(status),
+  flowToggleExpand: flowId => FlowList.toggleExpand(flowId),
+  flowSortFieldChange: dir => FlowList.setSortDir(dir),
   flowAddDoc        : () => FlowEdit.addDoc(),
   flowRemoveDoc     : i  => FlowEdit.removeDoc(i),
   flowDocUpdate     : (i, field, val) => FlowEdit.updateDocField(i, field, val),
@@ -2094,10 +3205,21 @@ window.KM = {
   flowCopy      : ()     => FlowList.copy(),
   flowView      : ()     => FlowList.view(),
   flowSelectRow : el     => FlowList.selectRow(el),
+  flowVoid      : ()     => FlowList.voidCurrent(),
+  flowCatL1Change     : () => FlowEdit.onCatL1Change(),
+  flowCatL2Change     : () => FlowEdit.onCatL2Change(),
+  flowCatL3Change     : () => FlowEdit.onCatL3Change(),
+  flowCopyFromChange  : val => FlowEdit.onCopyFromChange(val),
 
-  // Tree
-  switchTab: t        => Tree.switchTab(t),
-  selectTree: (el, t) => Tree.select(el, t),
+  // 處分案例左側樹狀導覽（單選：出口/進口 → 分類 → 產品子項）
+  caseNavSwitchDirection: dir => CaseNav.switchDirection(dir),
+  caseNavSelect         : catId => CaseNav.select(catId),
+  caseNavToggleExpand   : (bareKey, ev) => CaseNav.toggleExpand(bareKey, ev),
+
+  // 處理流程總覽左側導覽（出口/進口 → 四大類別 → 個別流程）
+  flowNavSwitchDirection: dir => FlowNav.switchDirection(dir),
+  flowNavSelect         : catId => FlowNav.select(catId),
+  flowNavToggleExpand   : (bareKey, ev) => FlowNav.toggleExpand(bareKey, ev),
   selectCustomsTree: (el, t) => Nav.selectCustomsTree(el, t),
 
   // Sidebar
@@ -2122,6 +3244,10 @@ window.KM = {
   toggleLawItem     : el  => Modal.toggleLawItem(el),
   filterLawList     : q   => Modal.filterLawList(q),
   confirmLaws       : () => Modal.confirmLaws(),
+  openTagModal      : tagsId => Modal.openTags(tagsId),
+  closeTagModal     : () => Modal.closeTags(),
+  toggleTagItem     : el  => Modal.toggleTagItem(el),
+  confirmTags       : () => Modal.confirmTags(),
 
   // Download modal
   dlToggleAll : checked => Download.toggleAll(checked),
@@ -2136,8 +3262,7 @@ window.KM = {
 
 // DOM Ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { init(); TreeCount.refresh(); });
+  document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
-  TreeCount.refresh();
 }

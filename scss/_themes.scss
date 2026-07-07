@@ -1,0 +1,45 @@
+// ============================================================
+//  _themes.scss
+//  替代配色主題 — 覆寫 _base.scss :root 中定義的品牌／互動色 token。
+//
+//  只覆寫「品牌識別色」（primary / primary-hover / blue / navy / teal /
+//  漸層 / focus 邊框），不覆寫語意色（green/red/amber/hl）—— 依 DESIGN.md
+//  的「語意色隔離規則」，green/red 僅能對應裁決結果，不隨配色主題改變；
+//  中性文字／背景／邊框 token 亦維持不變，確保可讀性與版面對比不受影響。
+//
+//  切換方式：JS 將 <html data-theme="..."> 設為下列其中一個值。
+// ============================================================
+
+// ── 主題 2：靛紫 Indigo Violet ──────────────────────────────
+:root[data-theme='violet'] {
+  --primary        : #40268C;
+  --primary-rgb     : 64, 38, 140;
+  --primary-hover  : #2E1A66;
+  --blue           : #5B3FA6;
+  --blue-rgb        : 91, 63, 166;
+  --navy           : #2A1F52;
+  --teal           : #6B4FA8;
+  --teal-rgb        : 107, 79, 168;
+  --grad-start     : #6B4FA8;
+  --grad-end       : #2E1A66;
+  --grad-diag-start: #F1EEFA;
+  --grad-diag-end  : #E9E3F6;
+  --bdr-focus      : #5B3FA6;
+}
+
+// ── 主題 3：石墨藍 Slate Blue ────────────────────────────────
+:root[data-theme='slate'] {
+  --primary        : #24344F;
+  --primary-rgb     : 36, 52, 79;
+  --primary-hover  : #16223A;
+  --blue           : #3D5A80;
+  --blue-rgb        : 61, 90, 128;
+  --navy           : #1A2536;
+  --teal           : #4A7A75;
+  --teal-rgb        : 74, 122, 117;
+  --grad-start     : #4A7A75;
+  --grad-end       : #24344F;
+  --grad-diag-start: #F0F3F2;
+  --grad-diag-end  : #E4EAE8;
+  --bdr-focus      : #3D5A80;
+}

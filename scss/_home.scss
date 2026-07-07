@@ -45,14 +45,14 @@
   padding      : 8px 14px;
   border-radius: $r-pill;
   background   : rgba(255, 255, 255, 1);
-  border       : 1px solid rgba(15, 63, 133, 0.12);
+  border       : 1px solid rgba(var(--primary-rgb), 0.12);
   font-size    : 12.5px;
   color        : $tx-main;
   flex-shrink  : 0;
 
   .mi { font-size: 18px; color: $primary; }
   &:hover{
-    border       : 1px solid #2457A7;
+    border       : 1px solid var(--blue);
   }
 }
 
@@ -155,11 +155,21 @@
   color     : $red;
 }
 
+// ── 全文檢索（標題下方，樣式比照內頁搜尋列）────────────────
+.h-search-row {
+  margin-bottom: 20px;
+}
+
 // ── 功能卡片格線 ────────────────────────────────────────
 .home-grid {
   display              : grid;
   grid-template-columns: repeat(3, 1fr);
   gap                  : 20px;
+
+  // 第一期（4 張）改 2 欄併排，避免 3 欄格線排出 3+1 的畸零排版
+  &.home-grid--2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .card {
@@ -221,7 +231,7 @@
     width         : 28px;
     height        : 28px;
     border-radius : 50%;
-    background    : #F0F5FC;
+    background    : var(--raw-f0f5fc);
     display       : flex;
     align-items   : center;
     justify-content: center;
@@ -288,7 +298,7 @@
   font-weight  : 700;
   padding      : 2px 7px;
   border-radius: $r-pill;
-  background   : #EEF2FA;
+  background   : var(--raw-eef2fa);
   color        : $tx-mid;
 }
 
@@ -320,7 +330,7 @@
 
   &:last-child { border-bottom: none; }
   &:hover      { 
-    background: #F5F8FD; 
+    background: var(--raw-f5f8fd); 
     border: 2px solid $teal;
   }
 

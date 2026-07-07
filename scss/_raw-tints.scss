@@ -1,0 +1,47 @@
+// ============================================================
+//  _raw-tints.scss
+//  自動收斂的一次性裝飾色 token（原本是散落各檔的字面 hex）。
+//  這些屬於無語意的微調底色（hover/stripe/decorative tint），
+//  不隨配色主題切換，所有主題共用同一組數值。
+// ============================================================
+
+:root {
+  --raw-2a8060 : #2a8060;
+  --raw-3a4a6b : #3a4a6b;
+  --raw-64748b : #64748b;
+  --raw-999999 : #999999;
+  --raw-a0b5d8 : #a0b5d8;
+  --raw-b9ccea : #b9ccea;
+  --raw-c2d5ee : #c2d5ee;
+  --raw-c7dcfb : #c7dcfb;
+  --raw-c8d0dc : #c8d0dc;
+  --raw-cbd5e0 : #cbd5e0;
+  --raw-d8d8d8 : #d8d8d8;
+  --raw-e3f5ea : #e3f5ea;
+  --raw-e5edf6 : #e5edf6;
+  --raw-e6f6f5 : #e6f6f5;
+  --raw-e7f0fe : #e7f0fe;
+  --raw-eaf1ff : #eaf1ff;
+  --raw-ebf0f9 : #ebf0f9;
+  --raw-ebf2ff : #ebf2ff;
+  --raw-eef0fa : #eef0fa;
+  --raw-eef2fa : #eef2fa;
+  --raw-eef3fb : #eef3fb;
+  --raw-eef4fb : #eef4fb;
+  --raw-eff3fb : #eff3fb;
+  --raw-f0f0f0 : #f0f0f0;
+  --raw-f0f5fc : #f0f5fc;
+  --raw-f0faf9 : #f0faf9;
+  --raw-f4f7fc : #f4f7fc;
+  --raw-f5f5f5 : #f5f5f5;
+  --raw-f5f8fd : #f5f8fd;
+  --raw-f5fbf9 : #f5fbf9;
+  --raw-f8f9fa : #f8f9fa;
+  --raw-f8fafd : #f8fafd;
+  --raw-fafbfd : #fafbfd;
+  --raw-fafbff : #fafbff;
+  --raw-ffe0b2 : #ffe0b2;
+  --raw-ffeaea : #ffeaea;
+  --raw-fff3e0 : #fff3e0;
+  --raw-fffbf2 : #fffbf2;
+}

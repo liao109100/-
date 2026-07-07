@@ -6,12 +6,12 @@
 @use 'variables' as *;
 
 // ══════════════════════════════════════════════════════════
-//  Tree Panel（Figma: bg-[#ebf1f7] rounded-[10px] w-[300px]）
+//  Tree Panel（Figma: bg-[var(--bg-tree)] rounded-[10px] w-[300px]）
 // ══════════════════════════════════════════════════════════
 .tree-panel {
   width        : $tree-w;    // 300px
   flex-shrink  : 0;
-  background   : #EBF1F7;   // Figma: #ebf1f7
+  background   : var(--bg-tree);   // Figma: var(--bg-tree)
   border       : none;       // 去除 border-right
   border-radius: 10px;       // Figma: rounded-[10px]
   padding      : 20px;       // Figma: p-[20px]
@@ -30,7 +30,7 @@
   justify-content: center;
 }
 
-// Tabs（Figma: 並排不留間距，active = #0f3f85）
+// Tabs（Figma: 並排不留間距，active = var(--primary)）
 .tree-tabs {
   display      : flex;
   gap          : 0;
@@ -55,7 +55,7 @@
   text-align : center;
 
   &.is-active {
-    background   : $primary;  // Figma: #0f3f85
+    background   : $primary;  // Figma: var(--primary)
     color        : white;
     border-radius: 6px 0 0 6px;
     font-weight: 700;
@@ -63,11 +63,11 @@
 
   &.is-inactive {
     background   : $bg-white;
-    color        : #64748B;
+    color        : var(--raw-64748b);
     border-radius: 0 6px 6px 0;
 
     &:hover {
-      background: #F8F9FA;
+      background: var(--raw-f8f9fa);
       color     : $tx-main;
     }
   }
@@ -92,7 +92,7 @@
     color     : $tx-main;
   }
 
-  // Active（Figma: bg-white + border-[#0f3f85] + blue text）
+  // Active（Figma: bg-white + border-[var(--primary)] + blue text）
   &.is-active {
     background  : $bg-white;
     color       : $primary;
@@ -121,6 +121,51 @@
   }
 }
 
+// ── 三層樹：「產品」群組（可展開子項） ────────────────────────
+.tree-group { margin-bottom: 2px; }
+
+.tree-chevron {
+  font-size  : 18px !important;
+  min-width  : 18px !important;
+  min-height : 18px !important;
+  width      : 18px !important;
+  flex-shrink: 0;
+  color      : $tx-light;
+  transition : transform $ease-fast;
+  border-radius: 3px;
+
+  &:hover { color: $primary; background: rgba(var(--primary-rgb), 0.08); }
+}
+
+.tree-group.is-expanded > .tree-group-hd .tree-chevron {
+  transform: rotate(90deg);
+}
+
+.tree-children {
+  display   : none;
+  padding-left: 20px;
+}
+
+.tree-group.is-expanded > .tree-children {
+  display: block;
+}
+
+.tree-item--child {
+  font-size: 14px;
+  padding  : 11px 10px;
+
+  &::before {
+    content      : '';
+    width        : 5px;
+    height       : 5px;
+    border-radius: 50%;
+    background   : $tx-light;
+    flex-shrink  : 0;
+  }
+
+  &.is-active::before { background: $primary; }
+}
+
 .tree-icon,
 .tree-item i {
   flex-shrink    : 0;
@@ -140,7 +185,7 @@
 .tree-count {
   margin-left    : auto;
   flex-shrink    : 0;
-  background     : #E1E1E1;  // Figma: inactive = #e1e1e1
+  background     : var(--neutral-inactive);  // Figma: inactive = var(--neutral-inactive)
   color          : $tx-main;
   font-size      : 11px;
   font-weight    : 700;
@@ -150,6 +195,158 @@
   display        : flex;
   align-items    : center;
   justify-content: center;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Case Nav（處分案例左側樹狀導覽：出口/進口 pill 切換 → 分類（附 icon）→ 產品子項）
+//  單選式導覽，樣式參考附圖的 icon + 展開箭頭 + 縮排連接線設計，配色沿用本系統既有色票。
+// ══════════════════════════════════════════════════════════
+.case-nav-tabs {
+  display      : flex;
+  gap          : 4px;
+  background   : $bg-page;
+  border-radius: $r-pill;
+  padding      : 4px;
+  margin-bottom: 20px;
+}
+
+.case-nav-tab {
+  flex         : 1;
+  padding      : 8px 0;
+  border       : none;
+  border-radius: $r-pill;
+  background   : #fff;
+  color        : $tx-mid;
+  font-size    : 14px;
+  font-weight  : 600;
+  font-family  : inherit;
+  cursor       : pointer;
+  transition   : all $ease-fast;
+
+  .case-nav-tab-count {
+    margin-left: 4px;
+    font-size  : 12px;
+    font-weight: 600;
+    opacity    : 0.75;
+  }
+
+  &.is-active { background: $primary; color: white; }
+  &:not(.is-active):hover { color: $tx-main; }
+}
+
+.case-nav-section-label {
+  font-size    : 12px;
+  font-weight  : 700;
+  color        : $tx-light;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.case-nav-item {
+  display      : flex;
+  align-items  : center;
+  gap          : 10px;
+  padding      : 10px 10px;
+  border-radius: $r-sm;
+  border       : 1.5px solid transparent;
+  cursor       : pointer;
+  margin-bottom: 4px;
+  transition   : all $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.65); }
+
+  &.is-active {
+    background: $bg-white;
+    border-color: $primary;
+
+    .case-nav-item-ico,
+    .case-nav-item-label { color: $primary; }
+  }
+}
+
+.case-nav-item-ico {
+  font-size  : 20px !important;
+  min-width  : 20px !important;
+  color      : $tx-mid;
+  flex-shrink: 0;
+}
+
+.case-nav-item-label {
+  flex       : 1;
+  min-width  : 0;
+  font-size  : 15px;
+  font-weight: 600;
+  color      : $tx-main;
+}
+
+.case-nav-item-count {
+  font-size  : 12px;
+  font-weight: 600;
+  color      : $tx-light;
+  flex-shrink: 0;
+}
+
+.case-nav-item-chevron {
+  font-size  : 18px !important;
+  min-width  : 18px !important;
+  color      : $tx-light;
+  flex-shrink: 0;
+  transition : transform $ease-fast;
+}
+
+// 「產品」群組：預設收合，展開時顯示縮排子項＋箭頭旋轉 90 度
+.case-nav-group {
+  .case-nav-children { display: none; }
+
+  &.is-expanded {
+    .case-nav-children { display: block; }
+    .case-nav-item-chevron { transform: rotate(90deg); }
+  }
+}
+
+.case-nav-children {
+  margin-left  : 20px;
+  padding-left : 14px;
+  margin-bottom: 6px;
+  border-left  : 1.5px solid $bdr;
+}
+
+.case-nav-child {
+  position     : relative;
+  display      : flex;
+  align-items  : center;
+  justify-content: space-between;
+  gap          : 8px;
+  padding      : 8px 10px;
+  border-radius: $r-sm;
+  cursor       : pointer;
+  font-size    : 13.5px;
+  color        : $tx-mid;
+  transition   : background $ease-fast, color $ease-fast;
+
+  &:hover { background: rgba(255, 255, 255, 0.65); }
+
+  &.is-active {
+    color      : $primary;
+    font-weight: 700;
+    background : $bg-white;
+
+    // 左側連接線上疊加一段實色，標示目前選中的子項
+    &::before {
+      content   : '';
+      position  : absolute;
+      left      : -15.5px;
+      top       : 4px;
+      bottom    : 4px;
+      width     : 2px;
+      background: $primary;
+    }
+  }
+}
+
+.case-nav-child-label {
+  flex     : 1;
+  min-width: 0;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -178,11 +375,11 @@
   z-index        : 10;
 }
 
-// Section title（Figma: #0f3f85 bold 24px）
+// Section title（Figma: var(--primary) bold 24px）
 .cases-title {
   font-size  : 22px;
   font-weight: 700;
-  color      : $primary;   // Figma: #0f3f85
+  color      : $primary;   // Figma: var(--primary)
   display    : flex;
   align-items: center;
   gap        : 7px;
@@ -194,6 +391,334 @@
 }
 
 .btn-group { display: flex; gap: 8px; flex-shrink: 0; }
+
+// 案例清單標題右側：排序依據／案例標籤篩選
+.cases-header-controls {
+  display    : flex;
+  align-items: center;
+  gap        : 16px;
+  flex-shrink: 0;
+}
+
+.cases-header-control {
+  display    : flex;
+  align-items: center;
+  gap        : 6px;
+
+  label {
+    font-size  : 12px;
+    color      : $tx-mid;
+    white-space: nowrap;
+  }
+
+  select {
+    padding      : 5px 24px 5px 10px;
+    border       : 1.5px solid $bdr;
+    border-radius: $r-sm;
+    background   : $bg-white;
+    color        : $tx-main;
+    font-size    : 12.5px;
+    font-family  : inherit;
+    cursor       : pointer;
+
+    &:focus-visible { border-color: $primary; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  Case Table（處分案例清單：表格化＋排序＋分頁）
+// ══════════════════════════════════════════════════════════
+.case-table-wrap {
+  overflow-x: auto;
+}
+
+.case-table {
+  width          : 100%;
+  min-width      : 900px; // 欄位較多時保留最小可讀寬度，不足時交由 .case-table-wrap 橫向捲動，避免內容被擠壓
+  border-collapse: collapse;
+  font-size      : 13px;
+
+  th, td {
+    text-align   : left;
+    padding      : 12px 10px;
+    border-bottom: 1px solid $bdr;
+  }
+
+  th {
+    color        : $tx-mid;
+    font-weight  : 700;
+    font-size    : 12px;
+    white-space  : nowrap;
+    background   : $bg-page;
+
+    // 註：th 曾加過 position:sticky 想做表頭吸頂，但和 border-collapse:collapse
+    // 搭配在一起是已知的瀏覽器算版 bug，會讓表頭蓋住第一列資料。上方 .cases-header
+    // 本身已經是 sticky 固定工具列，故表頭這裡改回正常排版，不做二次吸頂。
+
+    &.is-sortable {
+      cursor: pointer;
+      user-select: none;
+      &:hover { color: $primary; }
+    }
+  }
+
+  tbody .case-row {
+    cursor    : pointer;
+    transition: background $ease-fast;
+
+    &:hover { background: $hover-tint; }
+  }
+
+  td { color: $tx-main; }
+}
+
+.case-th-expand,
+.case-td-expand {
+  width        : 56px;
+  padding-left : 14px !important;
+  padding-right: 0 !important;
+}
+
+.case-th-actions,
+.case-td-actions {
+  width     : 50px;
+  text-align: right !important;
+  // 視窗太窄需要橫向捲動時，功能欄固定釘在最右側，捲動時仍可點擊
+  position  : sticky;
+  right     : 0;
+  z-index   : 2;
+  box-shadow: -8px 0 10px -6px rgba(0, 0, 0, 0.25); // 左緣淡陰影，提示此欄已與內容分離釘住
+}
+
+.case-th-actions {
+  background: $bg-page; // 與其餘表頭背景一致
+  z-index   : 6;        // 需高於表頭本身，捲動時才不會被同列其他表頭欄蓋住
+}
+
+.case-td-actions {
+  background: $bg-white; // 預設列背景，hover／展開時另外覆寫，維持與整列一致
+
+  .case-row:hover & { background: $hover-tint; }
+  .case-row.is-expanded & { background: $bg-white; }
+}
+
+.case-view-btn {
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 30px;
+  height         : 30px;
+  padding        : 0;
+  border-radius  : 6px;
+  border         : 1.5px solid $bdr;
+  background     : $bg-white;
+  color          : $tx-mid;
+  cursor         : pointer;
+  transition     : all $ease-fast;
+
+  .mi { font-size: 16px !important; min-width: auto !important; width: auto;}
+
+  &:hover { border-color: $primary; color: $primary; background: $hover-tint; }
+}
+
+.case-row-chevron {
+  font-size  : 18px !important;
+  min-width  : 18px !important;
+  color      : $tx-light;
+  transition : transform $ease-fast;
+}
+
+// 展開時，主要列（父層）本身變成白底＋藍色外框，與其下方純灰底的展開內容做出區隔。
+// 用 box-shadow（inset）畫框而不是 border：table 是 border-collapse:collapse，相鄰列的
+// border 會互相合併，跟上一列（可能是另一筆案例的展開內容，本身有灰色 border-bottom）
+// 搶邊界，即使加粗也可能被判定輸掉而顯示成灰色；box-shadow 不參與 border 合併，畫在
+// 每個儲存格內側，不會被相鄰列影響，四邊都能穩定顯示藍色。
+.case-row.is-expanded {
+  background: $bg-white;
+
+  .case-row-chevron { transform: rotate(90deg); color: $primary; }
+
+  td {
+    box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary;
+  }
+  td:first-child {
+    box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset 1.5px 0 0 0 $primary;
+  }
+  td:last-child {
+    box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset -1.5px 0 0 0 $primary;
+  }
+
+  // 「功能」欄本身是橫向捲動時釘住的欄位，另外有一個提示分離的淡陰影（見 .case-td-actions），
+  // 這裡要跟藍框的 box-shadow 合併寫在同一個宣告，否則後宣告的會直接整個覆蓋掉前者
+  td.case-td-actions {
+    box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset -1.5px 0 0 0 $primary,
+      -8px 0 10px -6px rgba(0, 0, 0, 0.25);
+  }
+}
+
+// 展開列（法規／主旨）：預設收合，點擊主要列後才顯示
+.case-row-detail {
+  display: none;
+
+  &.is-open { display: table-row; }
+
+  > td {
+    background: #fff;
+    cursor    : default;
+  }
+}
+
+.case-row-detail-inner {
+  display       : flex;
+  flex-direction: column;
+  padding       : 6px 0;
+}
+
+.case-row-detail-item {
+  display      : flex;
+  align-items  : flex-start;
+  gap          : 12px;
+  font-size    : 13px;
+  padding      : 12px;
+  border-top   : 1px solid $bdr;
+
+  &:first-child { border-top: none; padding-top: 0; }
+  &:last-child  { padding-bottom: 0; }
+}
+
+// 圖示方塊：法規／主旨各用不同底色區分，比照系統既有的漸層品牌色
+.case-row-detail-icon {
+  flex-shrink    : 0;
+  width          : 30px;
+  height         : 30px;
+  border-radius  : $r-sm;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  color          : white;
+
+  .mi { font-size: 16px !important; min-width: auto !important; }
+
+  &--law     { background: $primary; }
+  &--summary { background: $teal; }
+}
+
+.case-row-detail-body {
+  flex     : 1;
+  min-width: 0;
+}
+
+.case-row-detail-label {
+  display      : flex;
+  align-items  : baseline;
+  gap          : 6px;
+  font-weight  : 700;
+  color        : $tx-main;
+  margin-bottom: 4px;
+}
+
+.case-row-detail-label-en {
+  font-size     : 10px;
+  font-weight   : 700;
+  color         : $tx-light;
+  letter-spacing: 0.5px;
+}
+
+.case-row-detail-val {
+  color      : $tx-mid;
+  line-height: 1.6;
+}
+
+.sort-ico {
+  display    : inline-block;
+  width      : 10px;
+  margin-left: 3px;
+  font-size  : 10px;
+  color      : $primary;
+}
+
+.case-td-docno {
+  color      : $blue;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.case-td-nowrap { white-space: nowrap; }
+
+.case-td-tags {
+  display : flex;
+  flex-wrap: wrap;
+  gap     : 4px;
+}
+
+.case-tag-pill {
+  display      : inline-block;
+  padding      : 2px 9px;
+  border-radius: $r-pill;
+  background   : $bg-page;
+  color        : $tx-mid;
+  font-size    : 11px;
+  font-weight  : 700;
+  white-space  : nowrap;
+
+  // 從輕：維持預設灰底（不需額外色票）
+  // 輸美：淺紅底
+  &--us      { background: var(--raw-ffeaea); color: $red; }
+  // 加重：淺橘底
+  &--heavy   { background: var(--raw-ffe0b2); color: $amber; }
+  // 減輕：淺綠底
+  &--reduced { background: var(--raw-e3f5ea); color: $green; }
+  // 初次違規：淺藍底
+  &--first   { background: var(--raw-e7f0fe); color: $blue; }
+}
+
+.case-table-empty {
+  padding   : 40px 0;
+  text-align: center;
+  color     : $tx-light;
+  font-size : 13px;
+}
+
+.case-pagination {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  gap            : 12px;
+  padding        : 14px 0 4px;
+}
+
+.case-pager-btns {
+  display: flex;
+  gap    : 4px;
+}
+
+.case-page-size-wrap {
+  display    : flex;
+  align-items: center;
+  gap        : 6px;
+  flex-shrink: 0;
+  margin-left: auto; // 確保即使頁碼按鈕消失（只有一頁）時，仍固定貼右
+}
+
+.case-page-size-label {
+  font-size: 12px;
+  color    : $tx-mid;
+  white-space: nowrap;
+}
+
+.case-page-size-select {
+  width        : 56px;
+  padding      : 4px 20px 4px 8px;
+  border       : 1.5px solid $bdr;
+  border-radius: $r-sm;
+  background   : $bg-white;
+  color        : $tx-main;
+  font-size    : 12px;
+  font-family  : inherit;
+  cursor       : pointer;
+
+  &:focus-visible { border-color: $primary; }
+}
 
 // ── Buttons ──────────────────────────────────────────────
 .btn {
@@ -210,34 +735,43 @@
   font-family    : inherit;
   transition     : all 0.13s ease;
 
-  // 處理流程 — 填充藍（Figma: bg-[#0f3f85]）
+  // 處理流程 — 填充藍（Figma: bg-[var(--primary)]）
   &--blue-outline,
   &--blue-fill {
     background: $primary;
     color     : white;
     border    : none;
 
-    &:hover { background: #082d63; }
+    &:hover { background: var(--primary-hover); }
   }
 
-  // + 新增範本/案例 — 填充 teal（Figma: bg-[#2c8086]）
+  // + 新增範本/案例 — 填充 teal（Figma: bg-[var(--teal)]）
   &--gradient {
-    background: #2C8086;
+    background: var(--teal);
     color     : white;
     border    : none;
 
     &:hover { opacity: 0.88; }
   }
 
-  // 一鍵下載 — 深色外框（Figma: border-[#2f3d50]）
+  // 一鍵下載 — 深色外框（Figma: border-[var(--tx-main)]）
   &--gray-outline {
     background: $bg-white;
     color     : $tx-main;
     border    : 1px solid $tx-main;
 
     &:hover {
-      background  : #F5F5F5;
+      background  : var(--raw-f5f5f5);
     }
+  }
+
+  // 次要動作外框（例：流程編輯頁「儲存」，與主要動作的 --search 填色做區隔）
+  &--outline {
+    background: $bg-white;
+    color     : $primary;
+    border    : 1.5px solid $primary;
+
+    &:hover { background: $hover-tint; }
   }
 
   // Modal 清除
@@ -269,7 +803,7 @@
   }
 }
 
-// ── Case Card（Figma: border-[#cbcbcb] px-[30px] py-[20px] rounded-[5px]）
+// ── Case Card（Figma: border-[var(--case-card-bdr)] px-[30px] py-[20px] rounded-[5px]）
 .case-card {
   background   : $bg-white;
   border-radius: 5px;
@@ -277,7 +811,7 @@
   margin-bottom: 12px;
   box-shadow   : none;
   cursor       : pointer;
-  border       : 1px solid #CBCBCB;
+  border       : 1px solid var(--case-card-bdr);
   transition   : box-shadow 0.17s ease, border-color 0.17s ease,
                  background 0.3s ease, opacity 0.18s ease, transform 0.18s ease;
 
@@ -296,7 +830,7 @@
 // 從詳細頁返回列表時，標示「回到原卡片」：淺藍底色 + 實線藍框
 .case-card.is-focus-flash,
 .customs-card.is-focus-flash {
-  background  : #EAF1FF;
+  background  : var(--raw-eaf1ff);
   border      : 2px solid $primary;
 }
 
@@ -318,25 +852,25 @@
   font-weight  : 700;
   white-space  : nowrap;
 
-  // 近期更新（Figma: bg-[#edf7f6] text-[#16806d] rounded-[2px] 矩形）
+  // 近期更新（Figma: bg-[var(--tag-new-bg)] text-[var(--green)] rounded-[2px] 矩形）
   &--new  {
-    background   : $tag-new-bg;   // #EDF7F6
-    color        : $green;         // #16806D
+    background   : $tag-new-bg;   // var(--tag-new-bg)
+    color        : $green;         // var(--green)
     border-radius: 2px;
     padding      : 4px 8px;
     font-weight  : 700;
     font-size    : 12px;
   }
 
-  // 從輕（Figma: bg-[#16806d] white filled pill）
+  // 從輕（Figma: bg-[var(--green)] white filled pill）
   &--lt   {
-    background: $green;    // #16806D filled
+    background: $green;    // var(--green) filled
     color     : white;
   }
 
-  // 從重（Figma: bg-[#ff4d4d] white filled pill）
+  // 從重（Figma: bg-[var(--red)] white filled pill）
   &--hv   {
-    background: $red;      // #FF4D4D filled
+    background: $red;      // var(--red) filled
     color     : white;
     border    : none;
   }
@@ -345,7 +879,7 @@
   &--pe   {
     background: none;
     padding   : 0;
-    color     : $green;    // #16806D
+    color     : $green;    // var(--green)
     font-weight: 700;
     font-size : 13px;
   }
@@ -354,7 +888,7 @@
   &--hpe  {
     background: none;
     padding   : 0;
-    color     : $red;      // #FF4D4D
+    color     : $red;      // var(--red)
     font-weight: 700;
     font-size : 13px;
   }
@@ -392,10 +926,10 @@
   line-height: 1.72;
 }
 
-// 搜尋結果 snippet（Figma: bg-[#f5f9ff] border-l-4 border-[#0f3f85] pl-[24px]）
+// 搜尋結果 snippet（Figma: bg-[var(--hover-tint)] border-l-4 border-[var(--primary)] pl-[24px]）
 .snippet-block {
-  background   : #F5F9FF;              // Figma: #f5f9ff
-  border-left  : 4px solid $primary;   // Figma: border-l-4 #0f3f85
+  background   : var(--hover-tint);              // Figma: var(--hover-tint)
+  border-left  : 4px solid $primary;   // Figma: border-l-4 var(--primary)
   border-radius: 4px;                  // Figma: rounded-[4px]
   padding      : 12px 20px 12px 24px;  // Figma: pl-[24px] pr-[20px] py-[12px]
   margin       : 12px 0;
@@ -414,7 +948,7 @@
   }
 
   mark {
-    background   : $hl;        // Figma: #fef08a
+    background   : $hl;        // Figma: var(--hl)
     color        : $tx-main;
     padding      : 0 2px;
     border-radius: 2px;
@@ -441,13 +975,13 @@
 
 .row-label { color: $tx-main; font-weight: 700; flex-shrink: 0; }
 
-// 附件 pill（Figma: bg-white border-[#cbcbcb] px-[16px] py-[8px] rounded-[5px]）
+// 附件 pill（Figma: bg-white border-[var(--case-card-bdr)] px-[16px] py-[8px] rounded-[5px]）
 .attach-pill {
   display      : inline-flex;
   align-items  : center;
   gap          : 8px;
   background   : $bg-white;
-  border       : 1px solid #CBCBCB;
+  border       : 1px solid var(--case-card-bdr);
   border-radius: 5px;
   padding      : 7px 14px;
   color        : $tx-main;
@@ -459,7 +993,7 @@
   .mi { flex-shrink: 0; }
 
   &:hover {
-    background  : #F5F9FF;
+    background  : var(--hover-tint);
     border-color: $primary;
     color       : $primary;
 
@@ -476,90 +1010,13 @@
 .attach-pill-no   { font-size: 12px; font-weight: 600; }
 .attach-pill-desc { font-size: 10.5px; color: $tx-light; font-weight: 400; transition: color $ease-fast; }
 
-// 詳細頁右欄「相關附件」卡片：標題列 + 批量下載
-.attach-card-hd {
-  display        : flex;
-  align-items    : center;
-  justify-content: space-between;
-  gap            : 8px;
-  margin-bottom  : 10px;
-
-  .doc-badge { margin-bottom: 0; }
-}
-
-.attach-bulk-btn {
-  display        : inline-flex;
-  align-items    : center;
-  justify-content: center;
-  gap            : 4px;
-  padding        : 8px 10px;
-  font-size      : 11px;
-  font-weight    : 600;
-  border         : 1px solid #CBCBCB;
-  border-radius  : 5px;
-  background     : $bg-white;
-  color          : $tx-mid;
-  cursor         : pointer;
-  white-space    : nowrap;
-  transition     : all $ease-fast;
-
-  .mi { font-size: 14px; flex-shrink: 0; }
-
-  &:hover { background: #F5F9FF; border-color: $primary; color: $primary; }
-}
-
-// 附件清單（逐一下載）
-.attach-list { display: flex; flex-direction: column; gap: 6px; }
-
-.attach-list-item {
-  display      : flex;
-  align-items  : center;
-  gap          : 8px;
-  padding      : 7px 8px;
-  border       : 1px solid #CBCBCB;
-  border-radius: 5px;
-  background   : $bg-white;
-  transition   : all $ease-fast;
-
-  &:hover { border-color: $primary; }
-
-  > .mi { flex-shrink: 0; color: $tx-mid; font-size: 18px; }
-}
-
-.attach-list-text {
-  flex          : 1;
-  min-width     : 0;
-  display       : flex;
-  flex-direction: column;
-  line-height   : 1.35;
-}
-
-.attach-dl-btn {
-  flex-shrink    : 0;
-  display        : flex;
-  align-items    : center;
-  justify-content: center;
-  width          : 28px;
-  height         : 28px;
-  border-radius  : 5px;
-  border         : 1px solid #CBCBCB;
-  background     : $bg-white;
-  color          : $tx-mid;
-  cursor         : pointer;
-  transition     : all $ease-fast;
-
-  .mi { font-size: 16px;justify-content: center; }
-
-  &:hover { background: $primary; border-color: $primary; color: white; }
-}
-
 // 關聯案例 pill：淡藍細框＋藍字的輕量按鈕，與引用用途的淺藍色框（如 .snippet-block）區隔
 .link-pill {
   display      : inline-flex;
   align-items  : center;
   gap          : 6px;
   background   : $bg-white;
-  border       : 1px solid #B9CCEA;
+  border       : 1px solid var(--raw-b9ccea);
   border-radius: $r-sm;
   padding      : 7px 16px;
   color        : $blue;
@@ -570,7 +1027,7 @@
 
   .mi { font-size: 14px; }
 
-  &:hover { background: #F0F5FC; border-color: $blue; }
+  &:hover { background: var(--raw-f0f5fc); border-color: $blue; }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -752,7 +1209,7 @@
 .modal-tabs {
   display      : flex;
   gap          : 0;
-  border       : 1.5px solid #CDD8E8;
+  border       : 1.5px solid var(--input-bdr);
   border-radius: $r-sm;
   overflow     : hidden;
   margin-bottom: 18px;
@@ -772,7 +1229,7 @@
   font-family    : inherit;
   color          : $tx-mid;
   transition     : all $ease-fast;
-  border-right   : 1px solid #CDD8E8;
+  border-right   : 1px solid var(--input-bdr);
 
   &:last-child { border-right: none; }
 
@@ -788,7 +1245,7 @@
   display      : flex;
   align-items  : center;
   gap          : 8px;
-  border       : 1.5px solid #CDD8E8;
+  border       : 1.5px solid var(--input-bdr);
   border-radius: $r-sm;
   padding      : 10px 14px;
   margin-bottom: 15px;
@@ -807,7 +1264,7 @@
     color     : $tx-main;
     flex      : 1;
 
-    &::placeholder { color: #B0BECA; }
+    &::placeholder { color: var(--placeholder); }
   }
 }
 
@@ -842,7 +1299,7 @@ input[type="date"].filter-select {
   display        : flex;
   align-items    : center;
   justify-content: space-between;
-  border         : 1.5px solid #CDD8E8;
+  border         : 1.5px solid var(--input-bdr);
   border-radius  : $r-sm;
   padding        : 8px 12px;
   cursor         : pointer;
@@ -868,12 +1325,12 @@ select.filter-select {
   font-family    : inherit;
   outline        : none;
 
-  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(15,63,133,0.08); }
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.08); }
 }
 
 // 涉及法規 tag 區域
 .tag-area {
-  border       : 1.5px solid #CDD8E8;
+  border       : 1.5px solid var(--input-bdr);
   border-radius: $r-sm;
   padding      : 8px 12px;
   min-height   : 42px;
@@ -882,7 +1339,7 @@ select.filter-select {
   gap          : 6px;
   align-items  : center;
   cursor       : pointer;
-  background   : #FAFBFD;
+  background   : var(--raw-fafbfd);
   transition   : border-color 0.13s ease;
 
   &:hover { border-color: $blue; }
@@ -965,8 +1422,8 @@ select.filter-select {
   cursor       : pointer;
   transition   : background 0.1s ease;
 
-  &:hover      { background: #F5F8FD; }
-  &.is-checked { background: #EBF2FF; }
+  &:hover      { background: var(--raw-f5f8fd); }
+  &.is-checked { background: var(--raw-ebf2ff); }
 
   label {
     font-size  : 12.5px;
@@ -1000,7 +1457,7 @@ select.filter-select {
   display        : flex;
   align-items    : center;
   justify-content: space-between;
-  background     : #F0F5FC;
+  background     : var(--raw-f0f5fc);
   border-radius  : $r-sm;
   padding        : 8px 14px;
   font-size      : 12.5px;
@@ -1036,7 +1493,7 @@ select.filter-select {
   align-items  : center;
   gap          : 8px;
   padding      : 9px 14px;
-  background   : #F4F7FC;
+  background   : var(--raw-f4f7fc);
   font-size    : 12.5px;
   font-weight  : 700;
   color        : $tx-main;
@@ -1045,7 +1502,7 @@ select.filter-select {
   user-select  : none;
   transition   : background $ease-fast;
 
-  &:hover { background: #EBF0F9; }
+  &:hover { background: var(--raw-ebf0f9); }
 
   .dl-group-label { flex: 1; }
 
@@ -1056,8 +1513,8 @@ select.filter-select {
     border-radius: 10px;
     white-space  : nowrap;
 
-    &--lt { background: #EDF7F6; color: $green; }
-    &--hv { background: #FFEAEA; color: $red; }
+    &--lt { background: var(--tag-new-bg); color: $green; }
+    &--hv { background: var(--tag-hv-bg); color: $red; }
   }
 
   .dl-count {
@@ -1102,7 +1559,7 @@ select.filter-select {
   padding    : 8px 14px 8px 32px;
   font-size  : 12.5px;
   color      : $tx-main;
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid var(--raw-f0f0f0);
   transition : background $ease-fast;
 
   &:last-child { border-bottom: none; }
@@ -1173,7 +1630,7 @@ select.filter-select {
   .step-date  { font-size: 14px; color: $tx-light; margin-top: 3px; }
 
   &.is-active {
-    background  : #EEF0FA;
+    background  : var(--raw-eef0fa);
     border-color: $primary;
     .step-label { color: $tx-main; }
     .step-date  { color:$tx-main; }
@@ -1196,8 +1653,7 @@ select.filter-select {
 .detail-body {
   flex      : 1;
   overflow-y: auto;
-  padding   : 0px 30px 28px;
-  background-color: #fff;
+  background-color: var(--bg-white);
 }
 
 .detail-title-row {
@@ -1287,7 +1743,7 @@ select.filter-select {
   &--customs  { background: $primary;   color: white; }
   &--response { background: $teal; color: white; }
   &--sent     { background: $teal;    color: white; }
-  &--reply    { background: #2A8060;  color: white; }
+  &--reply    { background: var(--raw-2a8060);  color: white; }
 }
 
 .doc-head {
@@ -1298,6 +1754,63 @@ select.filter-select {
 
   .doc-badge { margin-bottom: 0; }
   .doc-org   { margin-bottom: 0; }
+}
+
+// 案例詳細頁：處理流程／關聯案例移到左欄上方一列並排顯示
+.case-detail-top-row {
+  display  : flex;
+  flex-wrap: wrap;
+  gap      : 12px;
+}
+
+// 對應處理流程（可點擊進入流程唯讀檢視）
+.case-detail-flow-row {
+  display      : flex;
+  align-items  : center;
+  gap          : 6px;
+  padding      : 9px 12px;
+  border-radius: $r-sm;
+  background   : $bg-page;
+  color        : $tx-main;
+  font-size    : 12.5px;
+  cursor       : pointer;
+  transition   : background $ease-fast;
+
+  &:hover { background: var(--hover-tint); }
+
+  .mi:first-child { font-size: 16px; color: $primary; }
+}
+
+.case-detail-flow-arrow {
+  margin-left: 8px;
+  font-size  : 16px !important;
+  color      : $tx-light;
+}
+
+// 「案件資訊」整列可點擊收合／展開下方內容
+.case-info-hd {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  margin-bottom  : 10px;
+  cursor         : pointer;
+}
+
+.case-info-chevron {
+  font-size : 20px !important;
+  color     : $tx-light;
+  transform : rotate(90deg); // 預設展開狀態，箭頭朝下
+  transition: transform $ease-fast;
+
+  &.is-collapsed { transform: rotate(0deg); } // 收合時箭頭朝右，點擊可再向下展開
+}
+
+#case-info-body {
+  overflow: hidden;
+
+  &.is-collapsed {
+    display: none;
+  }
 }
 
 .doc-org {
@@ -1331,8 +1844,8 @@ select.filter-select {
 
 // Step 3 海關來文左欄（左＋上淺色底）
 #step-c-3 .doc-card:first-child {
-  background  : #E1E1E1;
-  border-color: #C2D5EE;
+  background  : var(--neutral-inactive);
+  border-color: var(--raw-c2d5ee);
 }
 
 .doc-section-hd {
@@ -1354,14 +1867,14 @@ select.filter-select {
 // ── Customs List Card ─────────────────────────────────────────
 .customs-card {
   background   : $bg-white;
-  border       : 1px solid #CBCBCB;
+  border       : 1px solid var(--case-card-bdr);
   border-radius: 5px;
   padding      : 18px 24px;
   margin-bottom: 12px;
   cursor       : pointer;
   transition   : box-shadow 0.17s ease, border-color 0.17s ease, background 0.3s ease;
 
-  &:hover { box-shadow: $sh2; border-color: #A0B5D8; }
+  &:hover { box-shadow: $sh2; border-color: var(--raw-a0b5d8); }
 }
 
 .cmeta {
@@ -1382,7 +1895,7 @@ select.filter-select {
 .ocr-block {
   display      : none;
   &.is-visible { display: block; }
-  background   : #F5F9FF;
+  background   : var(--hover-tint);
   border-left  : 3px solid $primary;
   border-radius: 4px;
   padding      : 10px 14px;
@@ -1438,12 +1951,12 @@ select.filter-select {
   align-items    : center;
   justify-content: center;
   gap            : 4px;
-  padding        : 8px 16px;
+  padding        : 6px 16px;
   font-size      : 12px;
   font-family    : inherit;
   font-weight    : 500;
-  color          : #566578;
-  border         : 1.5px solid #C8D0DC;
+  color          : var(--tx-mid);
+  border         : 1.5px solid var(--raw-c8d0dc);
   border-radius  : $r-sm;
   background     : $bg-white;
   cursor         : pointer;
@@ -1459,14 +1972,14 @@ select.filter-select {
     background  : $primary;
     color       : white;
     border-color: $primary;
-    &:hover { background: #082d63; border-color: #082d63; color: white; }
+    &:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: white; }
   }
 
   // 發佈按鈕：與 btn--gradient 同色，但尺寸與其他按鈕一致
   &--publish {
-    background  : #2C8086;
+    background  : var(--teal);
     color       : white;
-    border-color: #2C8086;
+    border-color: var(--teal);
     &:hover { opacity: 0.88; }
   }
 
@@ -1493,7 +2006,7 @@ select.filter-select {
   position     : relative;
   width        : 44px;
   height       : 24px;
-  background   : #CBD5E0;
+  background   : var(--raw-cbd5e0);
   border-radius: 24px;
   flex-shrink  : 0;
   cursor       : pointer;
@@ -1518,14 +2031,181 @@ select.filter-select {
   }
 }
 
-// ── Flow List ─────────────────────────────────────────────────
+// ── 處理流程總覽（處分案例）：左側樹狀導覽 + 右側表格 ─────────────
+// 左側導覽節點結構、計數、展開/收合、選取樣式，都與 CaseNav 共用 .case-nav-item／
+// .case-nav-group／.case-nav-child／.case-nav-item-chevron 既有互動樣式，不需另外定義。
+
+// 右側：流程總覽表格容器（比照 .cases-panel／.case-table）
+.flow-panel {
+  flex          : 1;
+  overflow-y    : auto;
+  padding       : 0;
+  background    : $bg-white;
+  display       : flex;
+  flex-direction: column;
+}
+
+.flow-table-wrap { overflow-x: auto; }
+
+.flow-table {
+  width          : 100%;
+  min-width      : 640px;
+  border-collapse: collapse;
+  font-size      : 13px;
+
+  th, td {
+    text-align   : left;
+    padding      : 12px 10px;
+    border-bottom: 1px solid $bdr;
+  }
+
+  th {
+    color      : $tx-mid;
+    font-weight: 700;
+    font-size  : 12px;
+    white-space: nowrap;
+    background : $bg-page;
+  }
+
+  td { color: $tx-main; }
+}
+
+.flow-th-expand,
+.flow-td-expand {
+  width        : 32px;
+  padding-left : 14px !important;
+  padding-right: 0 !important;
+}
+
+.flow-th-actions,
+.flow-td-actions {
+  text-align: right !important;
+  white-space: nowrap;
+  // 視窗太窄需要橫向捲動時，功能欄固定釘在最右側，捲動時仍可點擊，左緣加淡陰影提示已分離釘住
+  position  : sticky;
+  right     : 0;
+  z-index   : 2;
+  box-shadow: -8px 0 10px -6px rgba(0, 0, 0, 0.25);
+}
+
+.flow-th-actions {
+  background: $bg-page;
+  z-index   : 6; // 需高於表頭本身，捲動時才不會被同列其他表頭欄蓋住
+}
+
+.flow-td-actions {
+  background: $bg-white; // 預設（現行版本列）背景
+
+  .flow-row-main:hover & { background: $hover-tint; }
+  .flow-row-archive & { background: $bg-page; } // 舊版本列本身是灰底，跟著一致
+}
+
+.flow-td-name { font-weight: 600; color: $tx-main; }
+.flow-td-nowrap { white-space: nowrap; }
+
+.flow-row-chevron {
+  font-size  : 18px !important;
+  min-width  : 18px !important;
+  color      : $tx-light;
+  cursor     : pointer;
+  transition : transform $ease-fast;
+}
+
+.flow-row-main {
+  transition: background $ease-fast;
+
+  // 展開時，主要列（父層）本身變成白底＋藍色外框，與其下方純灰底的舊版本列做出區隔。
+  // 用 box-shadow（inset）而非 border：border-collapse 會讓相鄰列的 border 互搶邊界，
+  // 加粗也可能被判定輸掉顯示成灰色；box-shadow 畫在儲存格內側，不受相鄰列影響。
+  &.is-expanded {
+    background: $bg-white;
+    .flow-row-chevron { transform: rotate(90deg); color: $primary; }
+
+    td {
+      box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary;
+    }
+    td:first-child {
+      box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset 1.5px 0 0 0 $primary;
+    }
+    td:last-child {
+      box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset -1.5px 0 0 0 $primary;
+    }
+
+    // 「功能」欄本身是橫向捲動時釘住的欄位，另外有一個提示分離的淡陰影（見 .flow-td-actions），
+    // 這裡要跟藍框的 box-shadow 合併寫在同一個宣告，否則後宣告的會直接整個覆蓋掉前者
+    td.flow-td-actions {
+      box-shadow: inset 0 1.5px 0 0 $primary, inset 0 -1.5px 0 0 $primary, inset -1.5px 0 0 0 $primary,
+        -8px 0 10px -6px rgba(0, 0, 0, 0.25);
+    }
+  }
+}
+
+// 舊版本列：預設收合，點擊箭頭後顯示；欄位比照上方現行版本列，整列改為灰色文字做區分，
+// 不另外加「舊版本」標題文字。
+.flow-row-archive {
+  display: none;
+
+  &.is-open { display: table-row; }
+
+  background: $bg-page;
+
+  td,
+  .flow-td-name { color: $tx-light; }
+}
+
+.flow-toggle-wrap {
+  display    : inline-flex;
+  align-items: center;
+  gap        : 7px;
+  margin-left: 10px;
+}
+
+.flow-toggle-label { font-size: 12px; color: $tx-mid; }
+
+.flow-table-empty {
+  padding   : 40px 0;
+  text-align: center;
+  color     : $tx-light;
+  font-size : 13px;
+}
+
+// ── Flow List（海關答聯單：維持原本固定 3 組流程版型） ───────────
 .flow-list-hd {
   display        : flex;
   align-items    : center;
   justify-content: space-between;
+  gap            : 12px;
   margin-bottom  : 16px;
+  flex-wrap      : wrap;
 
-  h3 { font-size: 16px; font-weight: 700; color: $tx-main; }
+  h3 { font-size: 16px; font-weight: 700; color: $tx-main; margin-right: auto; }
+}
+
+.flow-list-filter {
+  display: flex;
+  gap    : 8px;
+}
+
+.flow-cat {
+  color      : $tx-mid;
+  font-size  : 12px;
+  white-space: nowrap;
+  background : $bg-page;
+  padding    : 3px 8px;
+  border-radius: $r-sm;
+}
+
+.flow-void-badge {
+  background: var(--raw-ffeaea);
+  color     : $red;
+  border    : 1px solid var(--tag-hv-bdr);
+}
+
+.flow-empty-hint {
+  padding      : 40px 0;
+  text-align   : center;
+  color        : $tx-light;
+  font-size    : 13px;
 }
 
 .flow-group {
@@ -1543,17 +2223,17 @@ select.filter-select {
   cursor     : pointer;
   transition : background $ease-fast;
 
-  &:hover:not(.flow-row--archive) { background: #F0F5FC; }
+  &:hover:not(.flow-row--archive) { background: var(--raw-f0f5fc); }
 
   &.is-selected {
-    background   : #EEF4FB;
+    background   : var(--raw-eef4fb);
     outline      : 2px solid $primary;
     outline-offset: -2px;
   }
 
-  &--active  { background: #EEF3FB; }
-  &--draft   { background: #FAFBFF; border-top: 1px solid $bdr; }
-  &--review  { background: #FFFBF2; border-top: 1px solid $bdr; }
+  &--active  { background: var(--raw-eef3fb); }
+  &--draft   { background: var(--raw-fafbff); border-top: 1px solid $bdr; }
+  &--review  { background: var(--raw-fffbf2); border-top: 1px solid $bdr; }
   &--archive { border-top: 1px solid $bdr; opacity: 0.7; cursor: default; }
 
   .flow-date    { color: $tx-light; white-space: nowrap; }
@@ -1566,20 +2246,26 @@ select.filter-select {
   font-weight  : 700;
   padding      : 2px 8px;
   border-radius: 4px;
-  background   : #FFF3E0;
+  background   : var(--raw-fff3e0);
   color        : $amber;
-  border       : 1px solid #FFE0B2;
+  border       : 1px solid var(--raw-ffe0b2);
   white-space  : nowrap;
 }
 
 // 待審核標籤：與草稿（橘）區分，採用藍色
 .flow-review-badge {
-  background: #E7F0FE;
+  background: var(--raw-e7f0fe);
   color     : $blue;
-  border    : 1px solid #C7DCFB;
+  border    : 1px solid var(--raw-c7dcfb);
 }
 
 // ── 待審表單詳情頁：依分類分組 + 表格式呈現（日期／流程名稱／提交人／版本／功能） ─────
+// .detail-body 本身沒有內距，其他頁面都是靠 .main-inner 或內容元件自帶內距撐開留白，
+// 這頁的內容是直接放在 .detail-body 下沒有中介容器，因此另外在這裡補上內距。
+#app-pending-review .detail-body {
+  padding: 20px 30px;
+}
+
 .pending-group {
   margin-bottom: 28px;
   &:last-child { margin-bottom: 0; }
@@ -1615,12 +2301,14 @@ select.filter-select {
 .pending-table { display: flex; flex-direction: column; }
 
 // 表頭與資料列共用同一組欄寬，確保兩者對齊
-// 功能欄目前只顯示「檢視」一顆按鈕（同意／退回暫時隱藏），欄寬縮小避免留下大片空白
-$pending-cols: 110px 1fr 100px 70px 110px;
+// 功能欄視情況會有「檢視」＋「簽核紀錄」兩顆按鈕，欄寬要留夠，避免被 .pending-table-card
+// 的 overflow:hidden 裁切
+$pending-cols: 100px 1fr 90px 70px 70px 210px;
 
 .pending-table-hd {
   display      : grid;
   grid-template-columns: $pending-cols;
+  align-items  : center;
   gap          : 12px;
   padding      : 12px 20px;
   font-size    : 12px;
@@ -1646,10 +2334,10 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   transition   : background $ease-fast;
 
   &:last-child { border-bottom: none; }
-  &:hover { background: #F5F8FD; }
+  &:hover { background: var(--raw-f5f8fd); }
 
   &.is-selected {
-    background    : #EEF4FB;
+    background    : var(--raw-eef4fb);
     outline       : 2px solid $primary;
     outline-offset: -2px;
   }
@@ -1666,13 +2354,53 @@ $pending-cols: 110px 1fr 100px 70px 110px;
 }
 .pending-submitter   { color: $tx-main; }
 .pending-version     { color: $primary; font-weight: 600; white-space: nowrap; }
+.pending-flow        { color: $tx-mid; }
 .pending-col-actions { white-space: nowrap; }
-.pending-actions     { display: flex; gap: 6px; flex-shrink: 0; }
+.pending-actions     { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
 
-// 暫時隱藏待審表單詳情頁的同意／退回按鈕，只保留檢視
-#app-pending-review .pending-actions .btn-edit-flow--reject,
-#app-pending-review .pending-actions .btn-edit-flow--approve {
-  display: none;
+// 狀態：待審（藍色系）／退回（淺紅底紅字），標籤在欄位中置中對齊
+.pending-status-pill {
+  display      : inline-block;
+  justify-self : center;
+  padding      : 2px 10px;
+  border-radius: $r-pill;
+  font-size    : 11px;
+  font-weight  : 700;
+  white-space  : nowrap;
+  background   : var(--raw-e7f0fe);
+  color        : $blue;
+
+  &--reject { background: var(--raw-ffeaea); color: $red; }
+}
+
+.pending-col-status { text-align: center; }
+
+// 「處分案例」審核：對應樣態／流程欄位需要的空間比海關答聯單的版本欄大，改用自己的欄寬
+.pending-table-hd--cases,
+.pending-group[data-group="cases"] .pending-row {
+  grid-template-columns: 90px 150px 80px 1fr 64px 220px;
+}
+
+// 退回後的簽核資訊：淺橘色色塊，點擊該筆「簽核紀錄」按鈕後向下展開，表格滿版（不留左右內距）
+.pending-signoff-block {
+  display      : none;
+  background   : var(--raw-fff3e0);
+  border-top   : 1px solid var(--raw-ffe0b2);
+  border-bottom: 1px solid $bdr;
+
+  &.is-open { display: block; }
+}
+
+// 展開表格改用橘色系與淺橘色底的色塊呼應，跟其他地方白底的簽核紀錄表做出區隔
+.pending-signoff-block .review-signoff-table {
+  background: transparent;
+
+  th, td { border-color: var(--raw-ffe0b2); }
+  th { background: var(--raw-ffe0b2); color: $amber; }
+  td { background: transparent; }
+
+  th:first-child, td:first-child { border-left: none; }
+  th:last-child,  td:last-child  { border-right: none; }
 }
 
 .pending-group-empty { background: $bg-white; }
@@ -1745,7 +2473,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
     position     : absolute;
     bottom       : calc(100% + 6px);
     right        : 0;
-    background   : #3A4A6B;
+    background   : var(--raw-3a4a6b);
     color        : white;
     font-size    : 11px;
     padding      : 4px 10px;
@@ -1762,7 +2490,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
       top             : 100%;
       right           : 14px;
       border          : 4px solid transparent;
-      border-top-color: #3A4A6B;
+      border-top-color: var(--raw-3a4a6b);
     }
   }
 
@@ -1798,6 +2526,61 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   }
 }
 
+// 處分案例：新增流程分類欄位（出口/進口＋第二層＋複製來源）
+.flow-classify-row {
+  display      : flex;
+  gap          : 14px;
+  padding-bottom: 14px;
+  flex-wrap    : wrap;
+
+  .nc-field { flex: 1; min-width: 180px; }
+}
+
+// 處分案例：編輯既有流程時的唯讀分類標籤
+.flow-meta-readonly {
+  display      : flex;
+  gap          : 10px;
+  flex-wrap    : wrap;
+  padding-bottom: 14px;
+}
+
+.flow-meta-chip {
+  font-size    : 12px;
+  color        : $tx-mid;
+  background   : $bg-page;
+  border       : 1px solid $bdr;
+  border-radius: $r-pill;
+  padding      : 5px 12px;
+
+  strong { color: $tx-main; font-weight: 700; }
+}
+
+// 審核簽核紀錄表（案例審核／流程審核共用的樣式）：序號／簽核者／意見／簽核時間
+.review-signoff-table {
+  width          : 100%;
+  border-collapse: collapse;
+  font-size      : 12.5px;
+
+  th, td {
+    text-align: left;
+    padding   : 8px 10px;
+    border    : 1px solid $bdr;
+  }
+
+  th {
+    background : $bg-page;
+    color      : $tx-mid;
+    font-weight: 700;
+  }
+
+  td { color: $tx-main; line-height: 1.5; }
+
+  // 序號／簽核者／簽核時間給固定寬度，剩下空間留給「意見」，避免文字被擠成一字一行
+  th:nth-child(1), td:nth-child(1) { width: 50px; }
+  th:nth-child(2), td:nth-child(2) { width: 90px; }
+  th:nth-child(4), td:nth-child(4) { width: 130px; white-space: nowrap; }
+}
+
 // 外層捲動容器：步驟+編輯器區與附件區一起捲動，附件區才能真正「獨立於流程之外」顯示在下方
 .flow-edit-scroll {
   flex          : 1;
@@ -1812,7 +2595,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   min-height : 480px;
   overflow   : hidden;
   gap        : 0px;
-  background-color: #fff;
+  background-color: var(--bg-white);
   padding: 0 30px;
 }
 
@@ -1820,7 +2603,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
 .flow-steps-panel {
   width         : 240px;
   flex-shrink   : 0;
-  background    : #fff;
+  background    : var(--bg-white);
   border-right  : 2px solid $bdr;
   display       : flex;
   flex-direction: column;
@@ -1860,8 +2643,8 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   transition   : all $ease-fast;
 
   &:hover     { border-color: $blue; }
-  &.is-active { border-color: $primary; background: #EEF3FB; }
-  &.drag-over { border-color: $teal; background: #EDF7F6; transform: scale(1.02); }
+  &.is-active { border-color: $primary; background: var(--raw-eef3fb); }
+  &.drag-over { border-color: $teal; background: var(--tag-new-bg); transform: scale(1.02); }
 }
 
 .step-drag {
@@ -1924,13 +2707,13 @@ $pending-cols: 110px 1fr 100px 70px 110px;
 .step-card--new {
   border-color : $teal;
   border-style : dashed;
-  background   : #F0FAF9;
+  background   : var(--raw-f0faf9);
 
   .step-num { color: $teal; }
 
   &.is-active {
     border-color : $teal;
-    background   : #E6F6F5;
+    background   : var(--raw-e6f6f5);
   }
 }
 
@@ -1940,8 +2723,8 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   display        : flex;
   flex-direction : column;
   overflow       : hidden;
-  background     : #F5FBF9;
-  border         : 1px solid #E1E1E1;
+  background     : var(--raw-f5fbf9);
+  border         : 1px solid var(--neutral-inactive);
   margin-left    : 0;
   padding-left   : 0;
   width: 100%;
@@ -1972,7 +2755,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
     color        : $tx-main;
     outline      : none;
 
-    &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(15,63,133,0.08); }
+    &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.08); }
   }
 }
 
@@ -2046,7 +2829,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
   padding    : 6px 14px;
   border-bottom: 1px solid $bdr;
   flex-wrap  : wrap;
-  background : #F8FAFD;
+  background : var(--raw-f8fafd);
 
   button {
     width        : 28px;
@@ -2063,7 +2846,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
     font-family  : inherit;
     padding      : 0;
 
-    &:hover { background: #E5EDF6; color: $tx-main; }
+    &:hover { background: var(--raw-e5edf6); color: $tx-main; }
   }
 
   .tb-sep { width: 1px; height: 18px; background: $bdr; margin: 0 3px; }
@@ -2080,7 +2863,7 @@ $pending-cols: 110px 1fr 100px 70px 110px;
 
   &:empty::before {
     content: '在此輸入步驟說明內容…';
-    color  : #B0BECA;
+    color  : var(--placeholder);
   }
 
   p { margin-bottom: 10px; }
@@ -2311,8 +3094,8 @@ select.filter-select { font-size: 16px; }
   width        : 100%;
   box-sizing   : border-box;
 
-  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(36,87,167,0.12); }
-  &::placeholder { color: #B0BECA; }
+  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(var(--blue-rgb),0.12); }
+  &::placeholder { color: var(--placeholder); }
 }
 
 // 市話／分機並排輸入（提高特異性蓋過 .nc-input 的 width:100%，避免兩欄寬度互相搶位）
@@ -2361,8 +3144,8 @@ select.filter-select { font-size: 16px; }
   line-height : 1.72;
   transition  : border-color $ease-fast;
 
-  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(36,87,167,0.12); }
-  &::placeholder { color: #B0BECA; }
+  &:focus        { border-color: $blue; outline: none; box-shadow: 0 0 0 3px rgba(var(--blue-rgb),0.12); }
+  &::placeholder { color: var(--placeholder); }
 }
 
 // ── 編輯器 ──────────────────────────────────────────────────
@@ -2374,7 +3157,7 @@ select.filter-select { font-size: 16px; }
 
   &:focus-within { border-color: $blue; }
 
-  .rich-toolbar { background: #F8FAFD; border-bottom: 1px solid $bdr; }
+  .rich-toolbar { background: var(--raw-f8fafd); border-bottom: 1px solid $bdr; }
   .rich-body    { min-height: 180px; padding: 16px 18px; }
 }
 
@@ -2393,7 +3176,7 @@ select.filter-select { font-size: 16px; }
   text-align     : center;
   background     : $bg-page;
 
-  &:hover { border-color: $blue; background: #EFF3FB; }
+  &:hover { border-color: $blue; background: var(--raw-eff3fb); }
 }
 
 .nc-upload-icon { font-size: 28px; color: $tx-light; }
@@ -2458,6 +3241,87 @@ select.filter-select { font-size: 16px; }
 
 // ── 關聯案例 modal ──────────────────────────────────────────
 .nc-related-item {
-  &.is-checked { background: #EBF2FF; }
+  &.is-checked { background: var(--raw-ebf2ff); }
   label        { cursor: pointer; }
+}
+
+// ── 配色主題切換器 ──────────────────────────────────────────
+.theme-switcher {
+  position: relative;
+}
+
+.theme-switcher-btn {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 36px;
+  height         : 36px;
+  border-radius  : 50%;
+  border         : 1.5px solid $bdr;
+  background     : $bg-white;
+  color          : $primary;
+  cursor         : pointer;
+  transition     : border-color $ease-fast, background $ease-fast;
+
+  .mi { min-width: auto; min-height: auto; font-size: 18px; }
+
+  &:hover { border-color: $primary; background: $hover-tint; }
+}
+
+.theme-menu {
+  display       : none;
+  position      : absolute;
+  top           : calc(100% + 8px);
+  right         : 0;
+  z-index       : 60;
+  min-width     : 176px;
+  background    : $bg-white;
+  border        : 1px solid $bdr;
+  border-radius : $r-md;
+  box-shadow    : $sh3;
+  padding       : 6px;
+  flex-direction: column;
+  gap           : 2px;
+
+  &.is-open { display: flex; }
+}
+
+.theme-swatch-btn {
+  display        : flex;
+  align-items    : center;
+  gap            : 8px;
+  width          : 100%;
+  padding        : 8px 10px;
+  border         : none;
+  background     : none;
+  border-radius  : $r-sm;
+  cursor         : pointer;
+  font-size      : 13px;
+  color          : $tx-main;
+  text-align     : left;
+  transition     : background $ease-fast;
+
+  &:hover { background: $bg-page; }
+
+  .theme-swatch-check { font-size: 15px; color: $primary; visibility: hidden; margin-left: auto; }
+
+  &.is-active {
+    font-weight: 700;
+    .theme-swatch-check { visibility: visible; }
+  }
+}
+
+.theme-swatch-dots {
+  display      : flex;
+  flex-shrink  : 0;
+}
+
+.theme-swatch-dot {
+  width        : 14px;
+  height       : 14px;
+  border-radius: 50%;
+  border       : 1.5px solid $bg-white;
+  box-shadow   : 0 0 0 1px $bdr;
+
+  & + & { margin-left: -5px; }
 }
