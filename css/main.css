@@ -1189,6 +1189,7 @@ a[href],
   padding: 0 12px 0 14px;
   cursor: text;
   height: 50px;
+  border: 1px solid var(--bdr);
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
   box-sizing: border-box;
 }
