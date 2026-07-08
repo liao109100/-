@@ -18,15 +18,23 @@
   height         : calc(100vh - #{$footer-h});
   min-height     : 0;
 
-  // 背景圖以獨立偽元素鋪滿，往下延伸蓋住 body 為固定 footer 保留的高度，避免底部露出頁面底色（滿版）
+  // 背景以純 CSS 漸層＋模糊霧化重現 bgimg.png 的柔霧感（多層 radial-gradient 疊出光暈色塊＋對角基底色，
+  // 再用 filter:blur() 讓交界融合），改用純 CSS 可省去一張 1.8MB 點陣圖、且能隨主題色調整；
+  // 以獨立偽元素鋪滿，往下延伸蓋住 body 為固定 footer 保留的高度，避免底部露出頁面底色（滿版）
   &::before {
     content   : '';
     position  : absolute;
-    top       : 0;
-    left      : 0;
-    right     : 0;
-    bottom    : -#{$footer-h};
-    background: url('../img/home/bgimg.png') center / cover no-repeat;
+    top       : -5%;
+    left      : -5%;
+    right     : -5%;
+    bottom    : calc(-#{$footer-h} - 5%);
+    background:
+      radial-gradient(ellipse 55% 45% at 78% 12%, rgba(150, 220, 190, 0.55), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 98% 92%, rgba(110, 195, 235, 0.55), transparent 65%),
+      radial-gradient(circle at 12% 96%, rgba(255, 255, 255, 0.7), transparent 38%),
+      radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.35), transparent 30%),
+      linear-gradient(150deg, #dceef7 0%, #eaf6f0 35%, #dcedf2 65%, #bfe6f7 100%);
+    filter    : blur(40px);
     z-index   : -1;
   }
 }
@@ -153,11 +161,42 @@
 }
 
 .home-notif-hd {
+  position     : relative;
   font-size    : 16px;
   font-weight  : 700;
   color        : white;
   text-align   : center;
   margin-bottom: 14px;
+}
+
+// more 文字連結：卡片列標題與通知面板標題共用同一款「更多 ›」純文字連結（非按鈕外框）
+.home-more-btn {
+  display      : flex;
+  align-items  : center;
+  gap          : 2px;
+  padding      : 0;
+  border       : none;
+  background   : none;
+  color        : $tx-mid;
+  font-size    : 13px;
+  font-family  : inherit;
+  cursor       : pointer;
+  transition   : color $ease-fast;
+
+  .mi { font-size: 16px; }
+
+  &:hover { color: $primary; }
+
+  // 通知下拉面板標題右側，深色底改用淺色文字，並絕對定位保留標題置中
+  &--dark {
+    position : absolute;
+    right    : 0;
+    top      : 50%;
+    transform: translateY(-50%);
+    color    : rgba(255, 255, 255, 0.75);
+
+    &:hover { color: white; }
+  }
 }
 
 .home-notif-list {
@@ -312,7 +351,6 @@
   gap          : 22px;
   width        : 100%;
   min-width    : 1200px;
-  margin-bottom: 28px;
 }
 
 .card {
@@ -403,6 +441,21 @@
     .card-arrow-default { opacity: 0; }
     .card-arrow-hover   { opacity: 1; }
   }
+}
+
+// ── 標題＋「更多」列：一般文件流排列（非絕對定位），儘量壓低列高 ──────
+.home-more-row {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  width          : 100%;
+  margin         : 10px 0;
+}
+
+.home-more-row-title {
+  font-size  : 14px;
+  font-weight: 700;
+  color      : $tx-main;
 }
 
 // ── 公告／宣導：三欄並排於卡片下方 ──────────────────────────

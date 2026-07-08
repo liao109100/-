@@ -63,7 +63,6 @@ const CardFocus = {
 // ─────────────────────────────────────────────────────────
 const THEME_LIST = [
   { id: 'ocean',  label: '海洋藍（預設）', swatch: ['#0F3F85', '#2C8086'] },
-  { id: 'violet', label: '靛紫',          swatch: ['#40268C', '#6B4FA8'] },
   { id: 'slate',  label: '石墨藍',        swatch: ['#24344F', '#4A7A75'] },
 ];
 const THEME_STORAGE_KEY = 'km-theme';

@@ -75,6 +75,7 @@
  <div class="home-topbar">
     <img class="home-logo" src="img/logo.png" alt="經濟部國際貿易署">
     <div class="home-topbar-right">
+      <div class="theme-switcher" id="theme-switcher-home"></div>
       <!-- 卡片顯示切換：4（第一期上線）／8（完整卡片，含未上線項目供比對） -->
       <div class="home-card-toggle" id="home-card-toggle">
         <button type="button" class="home-card-toggle-btn is-active" data-mode="4" onclick="KM.setHomeCardMode('4')">4</button>
@@ -90,7 +91,12 @@
           <img id="home-notif-icon" src="img/home/news_1.png" alt="通知">
         </button>
         <div class="home-notif-dropdown" id="home-notif-dropdown" style="display:none">
-          <div class="home-notif-hd">最新異動</div>
+          <div class="home-notif-hd">
+            最新異動
+            <button class="home-more-btn home-more-btn--dark" onclick="KM.toast('查看更多異動')">
+              更多<span class="mi">chevron_right</span>
+            </button>
+          </div>
           <div class="home-notif-list" id="home-notif-list"></div>
         </div>
       </div>
@@ -134,6 +140,14 @@
 
     <!-- 功能卡片：僅顯示第一期上線的 4 張，單列並排（內容由 js/data.js 的 HOME_CARDS 動態產生） -->
     <div class="home-grid" id="home-grid"></div><!-- /.home-grid -->
+
+    <!-- 標題＋「更多」文字連結：一般文件流排列（非絕對定位），儘量壓低列高 -->
+    <div class="home-more-row">
+      <span class="home-more-row-title">最新發佈訊息</span>
+      <button class="home-more-btn" onclick="KM.toast('查看更多公告')">
+        更多<span class="mi">chevron_right</span>
+      </button>
+    </div>
 
     <!-- 公告／宣導（內容由 js/data.js 的 BULLETIN_ITEMS 動態產生），三欄並排於卡片下方 -->
     <div class="home-bulletin-row" id="bulletin-list"></div>

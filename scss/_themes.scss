@@ -10,24 +10,7 @@
 //  切換方式：JS 將 <html data-theme="..."> 設為下列其中一個值。
 // ============================================================
 
-// ── 主題 2：靛紫 Indigo Violet ──────────────────────────────
-:root[data-theme='violet'] {
-  --primary        : #40268C;
-  --primary-rgb     : 64, 38, 140;
-  --primary-hover  : #2E1A66;
-  --blue           : #5B3FA6;
-  --blue-rgb        : 91, 63, 166;
-  --navy           : #2A1F52;
-  --teal           : #6B4FA8;
-  --teal-rgb        : 107, 79, 168;
-  --grad-start     : #6B4FA8;
-  --grad-end       : #2E1A66;
-  --grad-diag-start: #F1EEFA;
-  --grad-diag-end  : #E9E3F6;
-  --bdr-focus      : #5B3FA6;
-}
-
-// ── 主題 3：石墨藍 Slate Blue ────────────────────────────────
+// ── 主題 2：石墨藍 Slate Blue ────────────────────────────────
 :root[data-theme='slate'] {
   --primary        : #24344F;
   --primary-rgb     : 36, 52, 79;
